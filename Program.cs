@@ -47,7 +47,7 @@ try
                     var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.(\w+)");
                     foreach (Match blobMatch in blobsInTree)
                     {
-                        Console.WriteLine($"\t\t-> blob {blobMatch.Groups[1]} {blobMatch.Groups[2]} ");
+                        Console.WriteLine($"\t\t-> blob {blobMatch.Groups[1]} {blobMatch.Groups[2]}");
                     }
                 }
                 else
