@@ -28,6 +28,7 @@ try
 
             if (fileType.Contains("blob"))
             {
+                //Nothing to do here
             }
             else if (fileType.Contains("tree"))
             {
@@ -43,13 +44,11 @@ try
                     Console.WriteLine($"\t-> tree {match.Groups[1].Value}");
                     // Get the details of the Blobs in this Tree
                     string tree = GetContents(match.Groups[1].Value);
-                    var blobsInTree = Regex.Match(tree, "blob ([0-9a-f]{4})");
-                    foreach (Group blob in blobsInTree.Groups)
+                    var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.(\w+)");
+                    foreach (Match blobMatch in blobsInTree)
                     {
-                        if (blob.Length == 4)
-                            Console.WriteLine($"\t\t-> blob {blob.Value}");
+                        Console.WriteLine($"\t\t-> blob {blobMatch.Groups[1]} {blobMatch.Groups[2]} ");
                     }
-
                 }
                 else
                 {
