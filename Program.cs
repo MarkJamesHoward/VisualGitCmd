@@ -20,33 +20,20 @@ try
 
         foreach (string file in files)
         {
-
             string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-
 
             HashCodeFilenames.Add(hashCode);
 
             string fileType = GetFileType(hashCode);
 
-
-            if (fileType.Contains("blob"))
-            {
-                //Nothing to do here
-            }
-            else if (fileType.Contains("tree"))
-            {
-                //Nothing to do here
-            }
-            else if (fileType.Contains("commit"))
+            if (fileType.Contains("commit"))
             {
                 Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
-
 
                 string commitContents = GetContents(hashCode);
                 var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
                 var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
                 var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
-                
 
                 if (match.Success)
                 {
@@ -75,11 +62,12 @@ try
                     foreach (Match blobMatch in blobsInTree)
                     {
                         string blobHash = blobMatch.Groups[1].Value;
+                        string blobContents = GetContents(blobHash);
 
                         Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
                         if (!DoesNodeExistAlready(blobHash, "blob"))
                         {
-                            AddToNeo(blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, "blob");
+                            AddBlobToNeo(blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                         }
                         CreateLinkNeo(match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                     }
@@ -90,13 +78,14 @@ try
                 }
             }
         }
-   
+
     }
     // Add the Branches
-     foreach(var file in branchFiles) {
+    foreach (var file in branchFiles)
+    {
         var branchHash = await File.ReadAllTextAsync(file);
         AddBranchToNeo(Path.GetFileName(file), branchHash);
-        CreateBranchLinkNeo(Path.GetFileName(file), branchHash.Substring(0,4));
+        CreateBranchLinkNeo(Path.GetFileName(file), branchHash.Substring(0, 4));
     }
 
     AddCommitParentLinks();
@@ -138,8 +127,9 @@ static void AddCommitParentLinks()
     }
 }
 
-static void ClearExistingNodesInNeo() {
-     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
+static void ClearExistingNodesInNeo()
+{
+    IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
     using var session = _driver.Session();
     var greeting = session.ExecuteWrite(
@@ -147,13 +137,14 @@ static void ClearExistingNodesInNeo() {
     {
         var result = tx.Run(
             $"MATCH (n) DETACH DELETE n",
-            new {});
+            new { });
 
         return result;
     });
 }
 
-static void CreateLinkNeo(string parent, string child, string parentType, string childType) {
+static void CreateLinkNeo(string parent, string child, string parentType, string childType)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
@@ -163,13 +154,14 @@ static void CreateLinkNeo(string parent, string child, string parentType, string
     {
         var result = tx.Run(
             $"MATCH (t:tree), (b:blob) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:blob]->(b) RETURN type(r)",
-            new {});
+            new { });
 
         return result;
     });
 }
 
-static bool CreateCommitTOCommitLinkNeo(string parent, string child) {
+static bool CreateCommitTOCommitLinkNeo(string parent, string child)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
@@ -179,7 +171,7 @@ static bool CreateCommitTOCommitLinkNeo(string parent, string child) {
     {
         var result = tx.Run(
             $"MATCH (t:commit), (b:commit) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:parent]->(b) RETURN type(r)",
-            new {});
+            new { });
 
         return result.Count();
     });
@@ -187,7 +179,8 @@ static bool CreateCommitTOCommitLinkNeo(string parent, string child) {
     return greeting > 0 ? true : false;
 }
 
-static bool CreateCommitLinkNeo(string parent, string child, string parentType, string childType) {
+static bool CreateCommitLinkNeo(string parent, string child, string parentType, string childType)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
@@ -197,7 +190,7 @@ static bool CreateCommitLinkNeo(string parent, string child, string parentType, 
     {
         var result = tx.Run(
             $"MATCH (t:commit), (b:tree) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:tree]->(b) RETURN type(r)",
-            new {});
+            new { });
 
         return result.Count();
     });
@@ -205,7 +198,8 @@ static bool CreateCommitLinkNeo(string parent, string child, string parentType, 
     return greeting > 0 ? true : false;
 }
 
-static bool CreateBranchLinkNeo(string parent, string child) {
+static bool CreateBranchLinkNeo(string parent, string child)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
@@ -215,7 +209,7 @@ static bool CreateBranchLinkNeo(string parent, string child) {
     {
         var result = tx.Run(
             $"MATCH (t:branch), (b:commit) WHERE t.name ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:branch]->(b) RETURN type(r)",
-            new {});
+            new { });
 
         return result.Count();
     });
@@ -223,7 +217,8 @@ static bool CreateBranchLinkNeo(string parent, string child) {
     return greeting > 0 ? true : false;
 }
 
-static bool DoesNodeExistAlready(string hash, string type) {
+static bool DoesNodeExistAlready(string hash, string type)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
@@ -233,7 +228,7 @@ static bool DoesNodeExistAlready(string hash, string type) {
     {
         var result = tx.Run(
             $"MATCH (a:{type}) WHERE a.hash = '{hash}' RETURN a.name + ', from node ' + id(a)",
-            new {});
+            new { });
 
         return result.Count() > 0 ? true : false;
     });
@@ -241,7 +236,8 @@ static bool DoesNodeExistAlready(string hash, string type) {
     return greeting;
 }
 
-static void AddCommitToNeo(string comment, string hash) {
+static void AddCommitToNeo(string comment, string hash)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
     string name = "commit " + hash + " " + comment;
@@ -256,13 +252,14 @@ static void AddCommitToNeo(string comment, string hash) {
             "SET a.comment = $comment " +
             "SET a.hash = $hash " +
             "RETURN a.name + ', from node ' + id(a)",
-            new {comment, hash, name});
+            new { comment, hash, name });
 
         return "created node";
     });
 }
 
-static void AddBranchToNeo(string name, string hash) {
+static void AddBranchToNeo(string name, string hash)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
@@ -275,16 +272,40 @@ static void AddBranchToNeo(string name, string hash) {
             "SET a.name = $name " +
             "SET a.hash = $hash " +
             "RETURN a.name + ', from node ' + id(a)",
-            new {name, hash});
+            new { name, hash });
 
         return "created node";
     });
 }
 
-static void AddToNeo(string filename, string hash, string type) {
+static void AddBlobToNeo(string filename, string hash, string contents)
+{
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
-    string filenameplushash =  filename + " " + hash;
+    string filenameplushash = filename + " " + hash;
+
+    using var session = _driver.Session();
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            "CREATE (a:blob) " +
+            "SET a.filenameplushash = $filenameplushash " +
+            "SET a.hash = $hash " +
+            "SET a.filename = $filename " +
+            "SET a.contents = $contents " +
+            "RETURN a.name + ', from node ' + id(a)",
+            new { filenameplushash, hash, filename, contents });
+
+        return "created node";
+    });
+}
+
+static void AddToNeo(string filename, string hash, string type)
+{
+
+    IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
+    string filenameplushash = filename + " " + hash;
 
     using var session = _driver.Session();
     var greeting = session.ExecuteWrite(
@@ -296,7 +317,7 @@ static void AddToNeo(string filename, string hash, string type) {
             "SET a.hash = $hash " +
             "SET a.filename = $filename " +
             "RETURN a.name + ', from node ' + id(a)",
-            new {filenameplushash, hash, filename});
+            new { filenameplushash, hash, filename });
 
         return "created node";
     });
