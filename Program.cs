@@ -41,19 +41,26 @@ try
             {
                 Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
 
-                AddToNeo("commit", hashCode, "commit");
 
                 string commitContents = GetContents(hashCode);
                 var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
                 var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
+                var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
+                
 
                 if (match.Success)
                 {
+                    // Get details of the tree,parent and comment in this commit
                     string treeHash = match.Groups[1].Value;
                     Console.WriteLine($"\t-> tree {treeHash}");
 
                     string parentHash = commitParent.Groups[1].Value;
                     Console.WriteLine($"\t-> parent commit {commitParent}");
+
+                    string comment = commitComment.Groups[1].Value;
+                    comment = comment.Trim();
+
+                    AddCommitToNeo(comment, hashCode);
 
                     if (!DoesNodeExistAlready(treeHash, "tree"))
                     {
@@ -155,7 +162,7 @@ static void CreateLinkNeo(string parent, string child, string parentType, string
     tx =>
     {
         var result = tx.Run(
-            $"MATCH (t:tree), (b:blob) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:CHILD]->(b) RETURN type(r)",
+            $"MATCH (t:tree), (b:blob) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:blob]->(b) RETURN type(r)",
             new {});
 
         return result;
@@ -171,7 +178,7 @@ static bool CreateCommitTOCommitLinkNeo(string parent, string child) {
     tx =>
     {
         var result = tx.Run(
-            $"MATCH (t:commit), (b:commit) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:CHILD]->(b) RETURN type(r)",
+            $"MATCH (t:commit), (b:commit) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:parent]->(b) RETURN type(r)",
             new {});
 
         return result.Count();
@@ -189,7 +196,7 @@ static bool CreateCommitLinkNeo(string parent, string child, string parentType, 
     tx =>
     {
         var result = tx.Run(
-            $"MATCH (t:commit), (b:tree) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:CHILD]->(b) RETURN type(r)",
+            $"MATCH (t:commit), (b:tree) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:tree]->(b) RETURN type(r)",
             new {});
 
         return result.Count();
@@ -207,7 +214,7 @@ static bool CreateBranchLinkNeo(string parent, string child) {
     tx =>
     {
         var result = tx.Run(
-            $"MATCH (t:branch), (b:commit) WHERE t.name ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:CHILD]->(b) RETURN type(r)",
+            $"MATCH (t:branch), (b:commit) WHERE t.name ='{parent}' AND b.hash ='{child}' CREATE (t)-[r:branch]->(b) RETURN type(r)",
             new {});
 
         return result.Count();
@@ -232,6 +239,27 @@ static bool DoesNodeExistAlready(string hash, string type) {
     });
 
     return greeting;
+}
+
+static void AddCommitToNeo(string comment, string hash) {
+
+    IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
+    string name = "commit " + hash + " " + comment;
+
+    using var session = _driver.Session();
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            "CREATE (a:commit) " +
+            "SET a.name = $name " +
+            "SET a.comment = $comment " +
+            "SET a.hash = $hash " +
+            "RETURN a.name + ', from node ' + id(a)",
+            new {comment, hash, name});
+
+        return "created node";
+    });
 }
 
 static void AddBranchToNeo(string name, string hash) {
