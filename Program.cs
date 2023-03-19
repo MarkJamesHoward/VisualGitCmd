@@ -62,7 +62,7 @@ try
 
                     // Get the details of the Blobs in this Tree
                     string tree = GetContents(match.Groups[1].Value);
-                    var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.(\w+)");
+                    var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
 
                     foreach (Match blobMatch in blobsInTree)
                     {
@@ -365,7 +365,7 @@ static void AddCommitToNeo(string comment, string hash, string contents)
 {
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
-    string name = "commit " + hash + " " + comment;
+    string name = $"commit #{hash} {comment}";
 
     using var session = _driver.Session();
     var greeting = session.ExecuteWrite(
@@ -408,7 +408,7 @@ static void AddBlobToNeo(string filename, string hash, string contents)
 {
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
-    string filenameplushash = filename + " " + hash;
+    string filenameplushash = $"{filename} #{hash}";
 
     using var session = _driver.Session();
     var greeting = session.ExecuteWrite(
@@ -432,16 +432,18 @@ static void AddTreeToNeo(string hash, string contents)
 
     IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
 
+    string name = $"tree #{hash}";
     using var session = _driver.Session();
     var greeting = session.ExecuteWrite(
     tx =>
     {
         var result = tx.Run(
             "CREATE (a:tree) " +
+            "SET a.name = $name " +
             "SET a.hash = $hash " +
             "SET a.contents = $contents " +
             "RETURN a.name + ', from node ' + id(a)",
-            new { hash, contents });
+            new { hash, contents, name });
 
         return "created node";
     });
