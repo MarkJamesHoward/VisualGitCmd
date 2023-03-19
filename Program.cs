@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Neo4j.Driver;
 
+string head = @".git\";
 string path = @".git\objects\";
 string branchPath = @".git\refs\heads";
 
@@ -97,11 +98,40 @@ try
 
     AddCommitParentLinks(path);
     AddOrphanBlobs(branchPath, path);
+    GetHEAD(head);
 }
 catch (Exception e)
 {
     Console.WriteLine($"Error while getting files in {path} {e.Message}");
 }
+
+static void GetHEAD(string path) 
+{
+    string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
+
+    // Is the HEAD detached in which case it contains a Commit Hash
+    Match match = Regex.Match(HeadContents, "[0-9a-f]{40}");
+    if (match.Success) {
+        string HEADHash = match.Value.Substring(0, 4);
+        //Create the HEAD Node
+        AddHeadToNeo(HEADHash, HeadContents);
+        //Create Link to Commit
+        CreateHEADTOCommitLinkNeo(HEADHash);
+    }
+
+    match = Regex.Match(HeadContents, @"ref: refs/heads/(\w+)");
+    if (match.Success) {
+        Console.WriteLine("HEAD Branch extract: " + match.Groups[1]?.Value);
+        string branch = match.Groups[1].Value;
+         //Create the HEAD Node
+        AddHeadToNeo(branch, HeadContents);
+        //Create Link to Commit
+        CreateHEADTOBranchLinkNeo(branch);
+    }
+
+
+}
+
 
 
 static bool DoesTreeToBlobLinkExist(string treeHash, string blobHash)
@@ -216,6 +246,46 @@ static void CreateLinkNeo(string parent, string child, string parentType, string
 
         return result;
     });
+}
+
+static bool CreateHEADTOBranchLinkNeo(string branchName)
+{
+
+    IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
+
+    using var session = _driver.Session();
+    Console.WriteLine("HEAD -> " + branchName);
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            $"MATCH (t:HEAD), (b:branch) WHERE t.name ='HEAD' AND b.name ='{branchName}' CREATE (t)-[head_link:HEAD]->(b) RETURN type(head_link)",
+            new { });
+
+        return result.Count();
+    });
+
+    return greeting > 0 ? true : false;
+}
+
+static bool CreateHEADTOCommitLinkNeo(string childCommit)
+{
+
+    IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
+
+    using var session = _driver.Session();
+    Console.WriteLine("HEAD -> " + childCommit);
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            $"MATCH (t:HEAD), (b:commit) WHERE t.name ='HEAD' AND b.hash ='{childCommit}' CREATE (t)-[head_link:HEAD]->(b) RETURN type(head_link)",
+            new { });
+
+        return result.Count();
+    });
+
+    return greeting > 0 ? true : false;
 }
 
 static bool CreateCommitTOCommitLinkNeo(string parent, string child)
@@ -368,6 +438,27 @@ static void AddTreeToNeo(string hash, string contents)
     {
         var result = tx.Run(
             "CREATE (a:tree) " +
+            "SET a.hash = $hash " +
+            "SET a.contents = $contents " +
+            "RETURN a.name + ', from node ' + id(a)",
+            new { hash, contents });
+
+        return "created node";
+    });
+}
+
+static void AddHeadToNeo(string hash, string contents)
+{
+
+    IDriver _driver = GraphDatabase.Driver("bolt://localhost:7687", AuthTokens.Basic("neo4j", "password"));
+
+    using var session = _driver.Session();
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            "CREATE (a:HEAD) " +
+            "SET a.name = 'HEAD' " +
             "SET a.hash = $hash " +
             "SET a.contents = $contents " +
             "RETURN a.name + ', from node ' + id(a)",
