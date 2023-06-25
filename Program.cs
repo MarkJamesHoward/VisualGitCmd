@@ -3,15 +3,13 @@ using System.Text.RegularExpressions;
 using Neo4j.Driver;
 using Microsoft.Extensions.Configuration;
 
-string testPath = @"C:\dev\test3\";
-//string testPath = @"dot";
-
+//string testPath = @"C:\dev\test3\";
+string testPath = @"dot";
 
 string head = Path.Combine(testPath, @".git\");
 string path = Path.Combine(testPath, @".git\objects\");
 string branchPath = Path.Combine(testPath, @".git\refs\heads");
 string remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
-
 
 string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
 string MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
@@ -24,8 +22,6 @@ var builder = new ConfigurationBuilder()
 string password = builder.Build().GetSection("docker").GetSection("password").Value;
 string uri = builder.Build().GetSection("docker").GetSection("url").Value;
 string username = builder.Build().GetSection("docker").GetSection("username").Value;
-
-
 
 List<string> HashCodeFilenames = new List<string>();
 
@@ -136,8 +132,8 @@ try
     foreach (var file in remoteBranchFiles)
     {
         var branchHash = await File.ReadAllTextAsync(file);
-        AddBranchToNeo(Path.GetFileName(file), branchHash);
-        CreateBranchLinkNeo(Path.GetFileName(file), branchHash.Substring(0, 4));
+        AddBranchToNeo(session, Path.GetFileName(file), branchHash);
+        CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
     }
     AddCommitParentLinks(session, path);
     AddOrphanBlobs(session, branchPath, path);
