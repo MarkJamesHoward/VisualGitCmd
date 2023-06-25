@@ -2,16 +2,35 @@
 using System.Text.RegularExpressions;
 using Neo4j.Driver;
 
-string head = @".git\";
-string path = @".git\objects\";
-string branchPath = @".git\refs\heads";
+string testPath = @"C:\dev\test3\";
+//string testPath = @"dot";
+
+
+string head = Path.Combine(testPath, @".git\");
+string path = Path.Combine(testPath, @".git\objects\");
+string branchPath = Path.Combine(testPath, @".git\refs\heads");
+string remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
+
 
 List<string> HashCodeFilenames = new List<string>();
 
 // Get all the files in the .git/objects folder
 try
 {
+    List<string> remoteBranchFiles = new List<string>();
+
     List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
+    if (Directory.Exists(remoteBranchPath))
+    {
+        List<string> RemoteDirs = Directory.GetDirectories(remoteBranchPath).ToList();
+        foreach (string remoteDir in RemoteDirs)
+        {
+            foreach (string file in Directory.GetFiles(remoteDir).ToList())
+            {
+                remoteBranchFiles.Add(Path.Combine(Path.GetDirectoryName(remoteDir), file));
+            }
+        }
+    }
     List<string> directories = Directory.GetDirectories(path).ToList();
     List<string> files = new List<string>();
 
@@ -96,6 +115,14 @@ try
         CreateBranchLinkNeo(Path.GetFileName(file), branchHash.Substring(0, 4));
     }
 
+    // Add the Remote Branches
+    foreach (var file in remoteBranchFiles)
+    {
+        var branchHash = await File.ReadAllTextAsync(file);
+        AddBranchToNeo(Path.GetFileName(file), branchHash);
+        CreateBranchLinkNeo(Path.GetFileName(file), branchHash.Substring(0, 4));
+    }
+
     AddCommitParentLinks(path);
     AddOrphanBlobs(branchPath, path);
     GetHEAD(head);
@@ -105,13 +132,14 @@ catch (Exception e)
     Console.WriteLine($"Error while getting files in {path} {e.Message}");
 }
 
-static void GetHEAD(string path) 
+static void GetHEAD(string path)
 {
     string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
 
     // Is the HEAD detached in which case it contains a Commit Hash
     Match match = Regex.Match(HeadContents, "[0-9a-f]{40}");
-    if (match.Success) {
+    if (match.Success)
+    {
         string HEADHash = match.Value.Substring(0, 4);
         //Create the HEAD Node
         AddHeadToNeo(HEADHash, HeadContents);
@@ -120,10 +148,11 @@ static void GetHEAD(string path)
     }
 
     match = Regex.Match(HeadContents, @"ref: refs/heads/(\w+)");
-    if (match.Success) {
+    if (match.Success)
+    {
         Console.WriteLine("HEAD Branch extract: " + match.Groups[1]?.Value);
         string branch = match.Groups[1].Value;
-         //Create the HEAD Node
+        //Create the HEAD Node
         AddHeadToNeo(branch, HeadContents);
         //Create Link to Commit
         CreateHEADTOBranchLinkNeo(branch);
