@@ -3,8 +3,8 @@ using System.Text.RegularExpressions;
 using Neo4j.Driver;
 using Microsoft.Extensions.Configuration;
 
-//string testPath = @"C:\dev\test3\";
-string testPath = @"dot";
+//string testPath = @"C:\dev\test\";
+string testPath = "";
 
 string head = Path.Combine(testPath, @".git\");
 string path = Path.Combine(testPath, @".git\objects\");
@@ -38,7 +38,8 @@ try
         {
             foreach (string file in Directory.GetFiles(remoteDir).ToList())
             {
-                remoteBranchFiles.Add(Path.Combine(Path.GetDirectoryName(remoteDir), file));
+                var DirName = new DirectoryInfo(Path.GetDirectoryName(remoteDir + "\\"));
+                remoteBranchFiles.Add(file);
             }
         }
     }
@@ -132,8 +133,8 @@ try
     foreach (var file in remoteBranchFiles)
     {
         var branchHash = await File.ReadAllTextAsync(file);
-        AddBranchToNeo(session, Path.GetFileName(file), branchHash);
-        CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
+        AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
+        CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
     }
     AddCommitParentLinks(session, path);
     AddOrphanBlobs(session, branchPath, path);
@@ -345,6 +346,23 @@ static bool CreateCommitLinkNeo(ISession session, string parent, string child, s
     return greeting > 0 ? true : false;
 }
 
+static bool CreateRemoteBranchLinkNeo(ISession session, string parent, string child)
+{
+    Console.WriteLine($"Create Remote Branch link {parent} {child}");
+
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            $"MATCH (t:remotebranch), (b:commit) WHERE t.name ='{parent}' AND b.hash ='{child}' CREATE (t)-[remotebranch_link:branch]->(b) RETURN type(remotebranch_link)",
+            new { });
+
+        return result.Count();
+    });
+
+    return greeting > 0 ? true : false;
+}
+
 static bool CreateBranchLinkNeo(ISession session, string parent, string child)
 {
     var greeting = session.ExecuteWrite(
@@ -402,6 +420,24 @@ static void AddBranchToNeo(ISession session, string name, string hash)
     {
         var result = tx.Run(
             "CREATE (a:branch) " +
+            "SET a.name = $name " +
+            "SET a.hash = $hash " +
+            "RETURN a.name + ', from node ' + id(a)",
+            new { name, hash });
+
+        return "created node";
+    });
+}
+
+static void AddRemoteBranchToNeo(ISession session, string name, string hash)
+{
+    name = $"remote{name}";
+
+    var greeting = session.ExecuteWrite(
+    tx =>
+    {
+        var result = tx.Run(
+            "CREATE (a:remotebranch) " +
             "SET a.name = $name " +
             "SET a.hash = $hash " +
             "RETURN a.name + ', from node ' + id(a)",
@@ -485,6 +521,7 @@ static string GetFileType(string file)
 
 static string GetContents(string file)
 {
+    int count = 0;
     Process p = new Process();
     p.StartInfo = new ProcessStartInfo("git.exe", $"cat-file {file} -p");
     p.StartInfo.RedirectStandardOutput = true;
@@ -493,6 +530,10 @@ static string GetContents(string file)
     while (!p.HasExited)
     {
         System.Threading.Thread.Sleep(100);
+        count++;
+        if (count > 10) {
+            throw new Exception("Cat File did not return withing a second");
+        } 
     }
     string contents = p.StandardOutput.ReadToEnd();
     return contents;
