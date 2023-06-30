@@ -11,6 +11,16 @@ string path = Path.Combine(testPath, @".git\objects\");
 string branchPath = Path.Combine(testPath, @".git\refs\heads");
 string remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
 
+Console.WriteLine(args[0]);
+
+if (args[0] == "--bare") 
+{
+    head = Path.Combine(testPath, @".\");
+    path = Path.Combine(testPath, @".\objects\");
+    branchPath = Path.Combine(testPath, @".\refs\heads");
+    remoteBranchPath = Path.Combine(testPath, @".\refs\remotes");
+}
+
 string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
 string MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
 MyExeFolder = MyExeFolder.Replace(@"file:\", "");
