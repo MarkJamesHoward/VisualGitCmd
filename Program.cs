@@ -9,9 +9,9 @@ bool EmitJsonOnly = true;
 
 //string testPath = @"C:\dev\rep1\";
 string testPath = "";
-string CommitNodesJsonFile = @"C:\dev\Json\CommitGitInJson.json";
-string TreeNodesJsonFile = @"C:\dev\Json\TreeGitInJson.json";
-string BlobNodesJsonFile = @"C:\dev\Json\BlobGitInJson.json";
+string CommitNodesJsonFile = @"C:\github\GitGraph\CommitGitInJson.json";
+string TreeNodesJsonFile = @"C:\github\GitGraph\TreeGitInJson.json";
+string BlobNodesJsonFile = @"C:\github\GitGraph\BlobGitInJson.json";
 
 
 
@@ -108,6 +108,7 @@ async Task<bool> main()
     List<CommitNode> CommitNodes = new List<CommitNode>();
     List<TreeNode> TreeNodes = new List<TreeNode>();
     List<Blob> blobs = new List<Blob>();
+    
 
     // Get all the files in the .git/objects folder
     try
@@ -216,6 +217,8 @@ async Task<bool> main()
                                 if (!EmitJsonOnly)
                                     CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                             }
+
+                            CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value, TreeNodes);
                         }
                     }
                     else
@@ -273,15 +276,20 @@ async Task<bool> main()
         n.parent = parentCommitHash;
         n.tree = treeHash;
 
-        CommitNodes.Add(n);
+        if (!CommitNodes.Exists(i => i.hash == n.hash))
+            CommitNodes.Add(n);
     }
 
     static void CreateTreeJson(string treeHash, string contents, List<TreeNode> TreeNodes) 
     {
         TreeNode tn = new TreeNode();
         tn.hash = treeHash;
+        tn.blobs = new List<string>();
 
-        TreeNodes.Add(tn);
+        if (!TreeNodes.Exists(i => i.hash == tn.hash))
+        {
+            TreeNodes.Add(tn);
+        }
     }
 
     static void OutputNodesJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath) 
@@ -417,6 +425,12 @@ async Task<bool> main()
 
             return result;
         });
+    }
+
+    static void CreateTreeToBlobLinkJson(string parent, string child, List<TreeNode> treeNodes) 
+    {
+        var treeNode = treeNodes?.Find(i => i.hash == parent);
+        treeNode?.blobs?.Add(child);
     }
 
     static void CreateLinkNeo(ISession session, string parent, string child, string parentType, string childType)
@@ -621,7 +635,9 @@ async Task<bool> main()
         b.filename = filename;
         b.hash = hash;
         b.tree = treeHash;
-        Blobs.Add(b);
+
+        if (!Blobs.Exists(i => i.hash == b.hash))
+            Blobs.Add(b);
     }
 
     static void AddTreeToNeo(ISession session, string hash, string contents)
