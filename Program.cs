@@ -7,7 +7,8 @@ using System.Text.Json.Serialization;
 using System.Timers;
 bool EmitJsonOnly = true;
 
-System.Timers.Timer processTimer = null;
+
+bool BatchingUpFileChanges = false;
 
 //string testPath = @"C:\dev\rep1\";
 string testPath = "";
@@ -67,7 +68,7 @@ List<string> HashCodeFilenames = new List<string>();
 // Make one run to start with before waiting for files to change
 await main();
 
-//Console.WriteLine($"Watching for changes... ");
+
 
 using var watcher = new FileSystemWatcher("./");
 {
@@ -80,17 +81,16 @@ using var watcher = new FileSystemWatcher("./");
                             | NotifyFilters.Security
                             | NotifyFilters.Size;
 
-    //watcher.Changed += OnChanged;
+    watcher.Changed += OnChanged;
     watcher.Created += OnChanged;
-    //watcher.Deleted += OnChanged;
-    //watcher.Renamed += OnChanged;
+    watcher.Deleted += OnChanged;
+    watcher.Renamed += OnChanged;
     //watcher.Error += OnError;
 
     watcher.Filter = "*.*";
     watcher.IncludeSubdirectories = true;
     watcher.EnableRaisingEvents = true;
 
-    //Console.WriteLine("Press enter to exit.");
     Console.ReadLine();
 }
 
@@ -99,30 +99,26 @@ async void OnChanged(object sender, FileSystemEventArgs e)
     if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
      e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))
     {
-        Console.WriteLine("Ignoring " + e.Name + e.ChangeType.ToString());
         return;
     }
     
-    if (processTimer == null)
+    if (!BatchingUpFileChanges)
     {
-        // First file, start timer.
-        await main();
-        Console.WriteLine($"Changed: {e.FullPath}");
-        processTimer = new System.Timers.Timer(2000);
-        processTimer.Elapsed += OnEventExecution;
-        processTimer.Start();
+        BatchingUpFileChanges = true;
+        var t = Task.Run(async delegate
+        {
+            Console.WriteLine("PAUSING: Processing File Changes.....");
+            await Task.Delay(TimeSpan.FromSeconds(0.1));
+            Console.WriteLine("STARTING: Processing File Changes.....");
+            await main();
+            Console.WriteLine("COMPLETED: Processing File Changes.....");
+
+            BatchingUpFileChanges = false;
+        });
     }
-    else {
-        Console.WriteLine("Considered part of batch");
-    }
-    
 }
 
-void OnEventExecution(Object source, ElapsedEventArgs e)
-{
-    processTimer.Stop();
-    processTimer = null;
-}
+
 
 async Task<bool> main()
 {
