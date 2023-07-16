@@ -8,6 +8,11 @@ public class CommitNode{
 
 }
 
+public class HEAD
+{
+    public string? hash { get; set; }
+}
+
 public class TreeNode 
 {
     public string? hash { get; set; }
@@ -21,4 +26,9 @@ public class Blob
     public string? filename { get; set; }
     public string? hash { get; set; }
     public string? tree { get; set; }
+}
+public class Branch 
+{
+    public string? hash { get; set; }
+    public string? name { get; set; }
 }
