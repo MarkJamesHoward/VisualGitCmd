@@ -56,4 +56,26 @@ public static class FileType {
         }
         return p.StandardOutput.ReadToEnd();
     }
+    public static string GetIndexFiles()
+    {
+        //run the git cat-file command to determine the file type
+        Process p = new Process();
+        p.StartInfo = new ProcessStartInfo("git.exe", $"ls-files");
+        p.StartInfo.RedirectStandardOutput = true;
+        p.Start();
+
+        while (!p.HasExited)
+        {
+            System.Threading.Thread.Sleep(100);
+        }
+        return p.StandardOutput.ReadToEnd();
+    }
+
+     public static List<string> GetWorkingFiles(string dir)
+    {
+        //run the git cat-file command to determine the file type
+        List<string> files = Directory.GetFiles(dir).ToList();
+        Console.WriteLine($"Folder we checking {dir}");
+        return files;
+    }
 }

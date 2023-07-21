@@ -8,6 +8,11 @@ public class CommitNode{
 
 }
 
+public class IndexFile
+{
+    public string? filename { get; set; }
+}
+
 public class HEAD
 {
     public string? hash { get; set; }

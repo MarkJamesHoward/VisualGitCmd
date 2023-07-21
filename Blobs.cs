@@ -47,8 +47,8 @@ public static class BlobCode
                 {
                     string blobContents = FileType.GetContents(hashCode);
 
-                    //Console.WriteLine($"blob {hashCode}");
-                    AddBlobToJson("", hashCode, hashCode, blobContents, blobs);
+                    Console.WriteLine($"blob {hashCode}");
+                    AddBlobToJson("", "", hashCode, blobContents, blobs);
                     
                 }
             }
@@ -92,6 +92,21 @@ public static class BlobCode
         b.tree = treeHash;
 
         if (!Blobs.Exists(i => i.hash == b.hash))
+        {
+            //Console.WriteLine($"Adding blob {b.hash}");
             Blobs.Add(b);
+        }
+        else
+        {
+            //Console.WriteLine($"Skipping blob {b.hash}");
+            // If filename is different then it has the same contents 
+            // Combine the names so they are both displayed
+            var existingBlob = Blobs.Find(i => i.hash == b.hash);
+            if (!existingBlob.filename.Contains(b.filename))
+            {
+                existingBlob.filename = existingBlob.filename + " " + b.filename;
+            }
+
+        }
     }
 }

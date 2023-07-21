@@ -17,8 +17,13 @@ string TreeNodesJsonFile = @"C:\github\GitGraph\Json\TreeGitInJson.json";
 string BlobNodesJsonFile = @"C:\github\GitGraph\Json\BlobGitInJson.json";
 string HeadNodesJsonFile = @"C:\github\GitGraph\Json\HeadGitInJson.json";
 string BranchNodesJsonFile = @"C:\github\GitGraph\Json\BranchGitInJson.json";
+string IndexFilesJsonFile = @"C:\github\GitGraph\Json\IndexfilesGitInJson.json";
+string WorkingFilesJsonFile = @"C:\github\GitGraph\Json\WorkingfilesGitInJson.json";
 
 
+
+
+string workingArea = Path.Combine(testPath, @".\");
 string head = Path.Combine(testPath, @".git\");
 string path = Path.Combine(testPath, @".git\objects\");
 string branchPath = Path.Combine(testPath, @".git\refs\heads");
@@ -67,8 +72,6 @@ List<string> HashCodeFilenames = new List<string>();
 
 // Make one run to start with before waiting for files to change
 await main();
-
-
 
 using var watcher = new FileSystemWatcher("./");
 {
@@ -160,7 +163,7 @@ async Task<bool> main()
             session = _driver.Session();
         }
 
-        if(!EmitJsonOnly)
+        if (!EmitJsonOnly)
             ClearExistingNodesInNeo(session);
 
         foreach (string dir in directories)
@@ -230,6 +233,7 @@ async Task<bool> main()
                                 if (!EmitJsonOnly)
                                     BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                             }
+                            Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
                             BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
 
                             if (!EmitJsonOnly && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
@@ -278,17 +282,17 @@ async Task<bool> main()
             GetHEAD(session, head);
         }
 
-        if (EmitJsonOnly){
-            BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs);
-        }
 
         if (EmitJsonOnly)
         {
-            OutputNodesJson(CommitNodes, TreeNodes, blobs, CommitNodesJsonFile);
-            OutputNodesJson(TreeNodes, TreeNodes, blobs, TreeNodesJsonFile);
-            OutputNodesJson(blobs, TreeNodes, blobs, BlobNodesJsonFile);
+            BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs);
+            OutputNodesJson(CommitNodes, CommitNodesJsonFile);
+            OutputNodesJson(TreeNodes, TreeNodesJsonFile);
+            OutputNodesJson(blobs, BlobNodesJsonFile);
             OutputHEADJson(HEAD, HeadNodesJsonFile, head);
             OutputBranchJson(branches, TreeNodes, blobs, BranchNodesJsonFile);
+            OutputIndexFilesJson(IndexFilesJsonFile);
+            OutputWorkingFilesJson(workingArea, WorkingFilesJsonFile);
         }
     }
     catch (Exception e)
@@ -297,7 +301,7 @@ async Task<bool> main()
     }
 
     static void CreateCommitJson(string parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
-     {
+    {
         CommitNode n = new CommitNode();
         n.text = comment;
         n.hash = hash;
@@ -308,7 +312,7 @@ async Task<bool> main()
             CommitNodes.Add(n);
     }
 
-    static void CreateTreeJson(string treeHash, string contents, List<TreeNode> TreeNodes) 
+    static void CreateTreeJson(string treeHash, string contents, List<TreeNode> TreeNodes)
     {
         TreeNode tn = new TreeNode();
         tn.hash = treeHash;
@@ -320,7 +324,7 @@ async Task<bool> main()
         }
     }
 
-    static void OutputHEADJson(HEAD head, string JsonPath, string path) 
+    static void OutputHEADJson(HEAD head, string JsonPath, string path)
     {
         string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
         //Console.WriteLine("Outputting JSON HEAD");
@@ -352,8 +356,8 @@ async Task<bool> main()
         File.WriteAllText(JsonPath, Json);
     }
 
-    
-    static void OutputBranchJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath) 
+
+    static void OutputBranchJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath)
     {
         var Json = string.Empty;
 
@@ -363,7 +367,39 @@ async Task<bool> main()
         File.WriteAllText(JsonPath, Json);
     }
 
-    static void OutputNodesJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath) 
+    static void OutputWorkingFilesJson(string workingFolder, string JsonPath) {
+        var Json = string.Empty;
+        List<IndexFile> IndexFilesList = new List<IndexFile>();
+
+        List<string> files = FileType.GetWorkingFiles(workingFolder);
+        
+        Json = JsonSerializer.Serialize(files);
+        File.WriteAllText(JsonPath, Json);
+    }
+
+    static void OutputIndexFilesJson(string JsonPath)
+    {
+        var Json = string.Empty;
+        List<IndexFile> IndexFilesList = new List<IndexFile>();
+
+        string files = FileType.GetIndexFiles();
+        Console.WriteLine(files);
+        List<string> fileList = files.Split("\n").ToList();
+
+        foreach (string file in fileList)
+        {
+            IndexFile FileObj = new IndexFile();
+            FileObj.filename = file;
+            IndexFilesList.Add(FileObj);
+        }
+
+        Json = JsonSerializer.Serialize(IndexFilesList);
+
+        //Console.WriteLine(Json);
+        File.WriteAllText(JsonPath, Json);
+    }
+
+    static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
     {
         var Json = string.Empty;
 
@@ -372,7 +408,7 @@ async Task<bool> main()
         //Console.WriteLine(Json);
         File.WriteAllText(JsonPath, Json);
     }
-   
+
 
     static void GetHEAD(ISession session, string path)
     {
@@ -418,7 +454,7 @@ async Task<bool> main()
         return false;
     }
 
- 
+
 
 
     static void AddCommitParentLinks(ISession session, string path)
@@ -471,7 +507,7 @@ async Task<bool> main()
         });
     }
 
-    static void CreateTreeToBlobLinkJson(string parent, string child, List<TreeNode> treeNodes) 
+    static void CreateTreeToBlobLinkJson(string parent, string child, List<TreeNode> treeNodes)
     {
         var treeNode = treeNodes?.Find(i => i.hash == parent);
         treeNode?.blobs?.Add(child);
@@ -586,7 +622,7 @@ async Task<bool> main()
         return greeting > 0 ? true : false;
     }
 
-   
+
 
     static void AddCommitToNeo(ISession session, string comment, string hash, string contents)
     {
@@ -610,12 +646,16 @@ async Task<bool> main()
 
     static void AddBranchToJson(string name, string hash, List<Branch> branches)
     {
-       Branch b = new Branch();
+        Branch b = new Branch();
         b.hash = hash;
         b.name = name;
 
-        if (!branches.Exists(i => i.hash == b.hash))
+        if (!branches.Exists(i => i.name == b.name))
+        {
+            //Console.WriteLine($"Adding branch {b.name} {b.hash}");
             branches.Add(b);
+        }
+        
     }
 
     static void AddBranchToNeo(ISession session, string name, string hash)
