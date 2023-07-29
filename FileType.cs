@@ -74,8 +74,14 @@ public static class FileType {
      public static List<string> GetWorkingFiles(string dir)
     {
         //run the git cat-file command to determine the file type
+        List<string> StrippedFiles = new List<string>();
+
         List<string> files = Directory.GetFiles(dir).ToList();
-        Console.WriteLine($"Folder we checking {dir}");
-        return files;
+        files.ForEach(i =>
+        {
+            StrippedFiles.Add(Path.GetFileName(i));
+        });
+        //Console.WriteLine($"Folder we checking {dir}");
+        return StrippedFiles;
     }
 }
