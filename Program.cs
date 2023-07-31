@@ -8,6 +8,7 @@ using System.Timers;
 using System.Text;
 using RandomNameGeneratorLibrary;
 
+bool firstRun = true;
 int dataID = 1;
 var personGenerator = new PlaceNameGenerator();
 var name = personGenerator.GenerateRandomPlaceName();
@@ -102,7 +103,7 @@ using var watcher = new FileSystemWatcher("./");
 
 async void OnChanged(object sender, FileSystemEventArgs e)
 {
-    Console.WriteLine(e.Name);
+    //Console.WriteLine(e.Name);
 
     if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
      e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))
@@ -236,7 +237,7 @@ async Task<bool> main()
                                 if (!EmitJsonOnly)
                                     BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                             }
-                            Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
+                            //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
                             BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
 
                             if (!EmitJsonOnly && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
@@ -302,10 +303,19 @@ async Task<bool> main()
         {
             OutputNodesJsonToAPI(name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(), WorkingFilesNodes(workingArea), HEADNodes(head));
         }
+
+        // Only run this on the first run
+        if (firstRun)
+        {
+            firstRun = false;
+            Process.Start(new ProcessStartInfo($"https://lustrous-creponne-e68ef8.netlify.app?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
+        }
+
+        //System.Diagnostics.Process.Start($"http://https://lustrous-creponne-e68ef8.netlify.app?data={name}/1");
     }
     catch (Exception e)
     {
-        //Console.WriteLine($"Error while getting files in {path} {e.Message}");
+        Console.WriteLine($"Error while getting files in {path} {e.Message}");
     }
 
     static void CreateCommitJson(string parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
@@ -403,19 +413,35 @@ async Task<bool> main()
         File.WriteAllText(JsonPath, Json);
     }
 
-     static List<string> WorkingFilesNodes(string workingFolder) {
+     static List<WorkingFile> WorkingFilesNodes(string workingFolder) {
         
         List<string> files = FileType.GetWorkingFiles(workingFolder);
-        return files;
+        List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
+
+
+        foreach (string file in files)
+        {
+            WorkingFile FileObj = new WorkingFile();
+            FileObj.filename = file;
+            WorkingFilesList.Add(FileObj);
+        }
+        return WorkingFilesList;
     }
 
     static void OutputWorkingFilesJson(string workingFolder, string JsonPath) {
         var Json = string.Empty;
-        List<IndexFile> IndexFilesList = new List<IndexFile>();
+        List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
 
         List<string> files = FileType.GetWorkingFiles(workingFolder);
+
+        foreach (string file in files)
+        {
+            WorkingFile FileObj = new WorkingFile();
+            FileObj.filename = file;
+            WorkingFilesList.Add(FileObj);
+        }
         
-        Json = JsonSerializer.Serialize(files);
+        Json = JsonSerializer.Serialize(WorkingFilesList);
         File.WriteAllText(JsonPath, Json);
     }
 
@@ -425,7 +451,7 @@ async Task<bool> main()
         List<IndexFile> IndexFilesList = new List<IndexFile>();
 
         string files = FileType.GetIndexFiles();
-        Console.WriteLine(files);
+       // Console.WriteLine(files);
         List<string> fileList = files.Split("\n").ToList();
 
         foreach (string file in fileList)
@@ -445,7 +471,7 @@ async Task<bool> main()
         List<IndexFile> IndexFilesList = new List<IndexFile>();
 
         string files = FileType.GetIndexFiles();
-        Console.WriteLine(files);
+        //Console.WriteLine(files);
         List<string> fileList = files.Split("\n").ToList();
 
         foreach (string file in fileList)
@@ -486,14 +512,14 @@ async Task<bool> main()
             "GitInternals",
             jsonContent);
 
-            Console.WriteLine(response.EnsureSuccessStatusCode());
+           // Console.WriteLine(response.EnsureSuccessStatusCode());
 
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"{jsonResponse}\n");
+        //Console.WriteLine($"{jsonResponse}\n");
     }
     
-    static async void OutputNodesJsonToAPI(string name, int dataID, List<CommitNode> CommitNodes, List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<IndexFile> IndexFilesNodes, List<string> WorkingFilesNodes, HEAD HEADNodes)
+    static async void OutputNodesJsonToAPI(string name, int dataID, List<CommitNode> CommitNodes, List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
     {
         var Json = string.Empty;
 
@@ -518,8 +544,8 @@ async Task<bool> main()
 
         Json = JsonSerializer.Serialize(Nodes);
 
-        Console.WriteLine(Json);
-        Console.WriteLine(JsonPath);
+        //Console.WriteLine(Json);
+        //Console.WriteLine(JsonPath);
         File.WriteAllText(JsonPath, Json);
     }
 
