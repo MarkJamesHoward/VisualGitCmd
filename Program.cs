@@ -315,7 +315,13 @@ async Task<bool> main()
     }
     catch (Exception e)
     {
-        Console.WriteLine($"Error while getting files in {path} {e.Message}");
+        if (e.Message.Contains("Could not find a part of the path")) {
+            Console.WriteLine("Waiting for Git to be initiased in this folder...");
+        }
+        else
+        {
+            Console.WriteLine($"Error while getting files in {path} {e.Message} {e}");
+        }
     }
 
     static void CreateCommitJson(string parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
