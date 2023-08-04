@@ -56,7 +56,11 @@ if (args?.Length > 0 || debug)
     }
 }
 
-string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+
+string MyExePath = Environment.CurrentDirectory;
+//string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+
+// Cant use this in single file publish ;
 string MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
 MyExeFolder = MyExeFolder.Replace(@"file:\", "");
 
