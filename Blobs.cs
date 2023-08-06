@@ -47,7 +47,7 @@ public static class BlobCode
                 {
                     string blobContents = FileType.GetContents(hashCode);
 
-                    Console.WriteLine($"blob {hashCode}");
+                    //Console.WriteLine($"blob {hashCode}");
                     AddBlobToJson("", "", hashCode, blobContents, blobs);
                     
                 }

@@ -13,7 +13,9 @@ int dataID = 1;
 var personGenerator = new PlaceNameGenerator();
 var name = personGenerator.GenerateRandomPlaceName();
 
-bool EmitJsonOnly = true;
+bool EmitJsonOnly = false; ;
+bool EmitWeb = false; ;
+bool EmitNeo = false;
 bool BatchingUpFileChanges = false;
 
 string testPath = "";
@@ -51,7 +53,19 @@ if (args?.Length > 0 || debug)
         if (args?[0] == "--json")
         {
             EmitJsonOnly = true;
-            //Console.WriteLine("Emitting Json only");
+            Console.WriteLine("Emitting Json");
+        }
+
+         if (args?[0] == "--web")
+        {
+            EmitWeb = true;
+            Console.WriteLine("Emitting to Website");
+        }
+
+        if (args?[0] == "--neo")
+        {
+            EmitNeo = true;
+            Console.WriteLine("Emitting to Website");
         }
     }
 }
@@ -64,13 +78,18 @@ string MyExePath = Environment.CurrentDirectory;
 string MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
 MyExeFolder = MyExeFolder.Replace(@"file:\", "");
 
-var builder = new ConfigurationBuilder()
-                               .SetBasePath(MyExeFolder)
-                               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
-string password = builder.Build().GetSection("docker").GetSection("password").Value;
-string uri = builder.Build().GetSection("docker").GetSection("url").Value;
-string username = builder.Build().GetSection("docker").GetSection("username").Value;
+// var builder = new ConfigurationBuilder()
+//                                .SetBasePath(MyExeFolder)
+//                                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+string password = "";
+string uri = "";
+string username = ""; 
+
+// string password = builder.Build().GetSection("docker").GetSection("password").Value;
+// string uri = builder.Build().GetSection("docker").GetSection("url").Value;
+// string username = builder.Build().GetSection("docker").GetSection("username").Value;
 
 // string password = builder.Build().GetSection("cloud").GetSection("password").Value;
 // string uri = builder.Build().GetSection("cloud").GetSection("url").Value;
@@ -120,9 +139,9 @@ async void OnChanged(object sender, FileSystemEventArgs e)
         BatchingUpFileChanges = true;
         var t = Task.Run(async delegate
         {
-            Console.WriteLine("PAUSING: Processing File Changes.....");
+            //Console.WriteLine("PAUSING: Processing File Changes.....");
             await Task.Delay(TimeSpan.FromSeconds(0.1));
-            Console.WriteLine("STARTING: Processing File Changes.....");
+            //Console.WriteLine("STARTING: Processing File Changes.....");
             await main();
             Console.WriteLine("COMPLETED: Processing File Changes.....");
 
@@ -165,14 +184,13 @@ async Task<bool> main()
         IDriver _driver;
         ISession session = null;
 
-        if (!EmitJsonOnly)
+        if (EmitNeo)
         {
             _driver = GetDriver(uri, username, password);
             session = _driver.Session();
+            ClearExistingNodesInNeo(session);
         }
 
-        if (!EmitJsonOnly)
-            ClearExistingNodesInNeo(session);
 
         foreach (string dir in directories)
         {
@@ -207,21 +225,21 @@ async Task<bool> main()
                         string comment = commitComment.Groups[1].Value;
                         comment = comment.Trim();
 
-                        if (!EmitJsonOnly)
+                        if (EmitNeo)
                         {
                             AddCommitToNeo(session, comment, hashCode, commitContents);
                         }
 
-                        if (!EmitJsonOnly && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
+                        if (EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
                         {
-                            if (!EmitJsonOnly)
+                            if (EmitNeo)
                                 AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash));
                         }
 
                         CreateTreeJson(treeHash, FileType.GetContents(treeHash), TreeNodes);
                         CreateCommitJson(parentHash, comment, hashCode, treeHash, commitContents, CommitNodes);
 
-                        if (!EmitJsonOnly)
+                        if (EmitNeo)
                         {
                             CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
                         }
@@ -236,17 +254,17 @@ async Task<bool> main()
                             string blobContents = FileType.GetContents(blobHash);
 
                             //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
-                            if (!EmitJsonOnly && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
+                            if (EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
                             {
-                                if (!EmitJsonOnly)
+                                if (EmitNeo)
                                     BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                             }
                             //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
                             BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
 
-                            if (!EmitJsonOnly && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
+                            if (EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
                             {
-                                if (!EmitJsonOnly)
+                                if (EmitNeo)
                                     CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                             }
 
@@ -265,7 +283,7 @@ async Task<bool> main()
         foreach (var file in branchFiles)
         {
             var branchHash = await File.ReadAllTextAsync(file);
-            if (!EmitJsonOnly)
+            if (EmitNeo)
             {
                 AddBranchToNeo(session, Path.GetFileName(file), branchHash);
                 CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
@@ -277,13 +295,13 @@ async Task<bool> main()
         foreach (var file in remoteBranchFiles)
         {
             var branchHash = await File.ReadAllTextAsync(file);
-            if (!EmitJsonOnly)
+            if (EmitNeo)
             {
                 AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
                 CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
             }
         }
-        if (!EmitJsonOnly)
+        if (EmitNeo)
         {
             AddCommitParentLinks(session, path);
             BlobCode.AddOrphanBlobs(session, branchPath, path, blobs);
@@ -303,8 +321,9 @@ async Task<bool> main()
             OutputWorkingFilesJson(workingArea, WorkingFilesJsonFile);
         }
 
-        if (EmitJsonOnly)
+        if (EmitWeb)
         {
+            BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs);
             OutputNodesJsonToAPI(name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(), WorkingFilesNodes(workingArea), HEADNodes(head));
         }
 
@@ -312,14 +331,14 @@ async Task<bool> main()
         if (firstRun)
         {
             firstRun = false;
-            Process.Start(new ProcessStartInfo($"https://lustrous-creponne-e68ef8.netlify.app?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo($"https://lustrous-creponne-e68ef8.netlify.app/visualize?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
         }
 
         //System.Diagnostics.Process.Start($"http://https://lustrous-creponne-e68ef8.netlify.app?data={name}/1");
     }
     catch (Exception e)
     {
-        if (e.Message.Contains("Could not find a part of the path")) {
+        if (e.Message.Contains($"Could not find a part of the path {workingArea}")) {
             Console.WriteLine("Waiting for Git to be initiased in this folder...");
         }
         else
@@ -500,20 +519,20 @@ async Task<bool> main()
 
     static async Task PostAsync(string name, int dataID,HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
-        Console.WriteLine(name); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
+        Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
 
         using StringContent jsonContent = new(
             JsonSerializer.Serialize(new
                     {
                         userId = $"{name.Replace(' ', 'x')}",
                         id = $"{dataID++}",
-                        commitNodes = commitjson,
-                        blobNodes = blobjson,
-                        treeNodes = treejson,
-                        branchNodes = branchjson,
-                        headNodes = HEADjson,
-                        indexFilesNodes = indexfilesjson,
-                        workingFilesNodes = workingfilesjson
+                        commitNodes = commitjson ?? "",
+                        blobNodes = blobjson ?? "",
+                        treeNodes = treejson ?? "",
+                        branchNodes = branchjson ?? "",
+                        headNodes = HEADjson ?? "",
+                        indexFilesNodes = indexfilesjson ?? "",
+                        workingFilesNodes = workingfilesjson ?? ""
                     }),
                 Encoding.UTF8,
                 "application/json");
