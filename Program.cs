@@ -331,7 +331,7 @@ async Task<bool> main()
         if (firstRun)
         {
             firstRun = false;
-            Process.Start(new ProcessStartInfo($"https://lustrous-creponne-e68ef8.netlify.app/visualize?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
         }
 
         //System.Diagnostics.Process.Start($"http://https://lustrous-creponne-e68ef8.netlify.app?data={name}/1");

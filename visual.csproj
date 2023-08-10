@@ -9,6 +9,7 @@
 
   <PropertyGroup>
     <DebugType>embedded</DebugType>
+    <PublishReadyToRunShowWarning>true</PublishReadyToRunShowWarning>
     <!-- <PublishTrimmed>true</PublishTrimmed> -->
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
