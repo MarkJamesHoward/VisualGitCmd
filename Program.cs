@@ -338,7 +338,7 @@ async Task<bool> main()
     }
     catch (Exception e)
     {
-        if (e.Message.Contains($"Could not find a part of the path {workingArea}")) {
+        if (e.Message.Contains($"Could not find a part of the path")) {
             Console.WriteLine("Waiting for Git to be initiased in this folder...");
         }
         else
