@@ -7,8 +7,10 @@ using System.Text.Json.Serialization;
 using System.Timers;
 using System.Text;
 using RandomNameGeneratorLibrary;
+using System.ComponentModel.Design.Serialization;
 
 bool firstRun = true;
+int batch = 1;
 int dataID = 1;
 var personGenerator = new PlaceNameGenerator();
 var name = personGenerator.GenerateRandomPlaceName();
@@ -139,14 +141,18 @@ async void OnChanged(object sender, FileSystemEventArgs e)
         BatchingUpFileChanges = true;
         var t = Task.Run(async delegate
         {
-            //Console.WriteLine("PAUSING: Processing File Changes.....");
-            await Task.Delay(TimeSpan.FromSeconds(0.1));
-            //Console.WriteLine("STARTING: Processing File Changes.....");
-            await main();
-            Console.WriteLine("COMPLETED: Processing File Changes.....");
-
+            batch++;
+            Console.WriteLine($"Batch {batch} Waiting for file changes to complete.....");
+            await Task.Delay(TimeSpan.FromSeconds(2));
             BatchingUpFileChanges = false;
+
+            Console.WriteLine($"Batch {batch} Processing.....");
+            await main();
+            Console.WriteLine($"Batch {batch} Completed.....");
         });
+    }
+    else {
+        Console.WriteLine($"Batch {batch} batching " + e.Name);
     }
 }
 
@@ -324,7 +330,7 @@ async Task<bool> main()
         if (EmitWeb)
         {
             BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs);
-            OutputNodesJsonToAPI(name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(), WorkingFilesNodes(workingArea), HEADNodes(head));
+            OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(), WorkingFilesNodes(workingArea), HEADNodes(head));
         }
 
         // Only run this on the first run
@@ -517,8 +523,9 @@ async Task<bool> main()
     }
 
 
-    static async Task PostAsync(string name, int dataID,HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
+    static async Task PostAsync(bool firstrun, string name, int dataID,HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
+        if (firstrun)
         Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
 
         using StringContent jsonContent = new(
@@ -541,14 +548,17 @@ async Task<bool> main()
             "GitInternals",
             jsonContent);
 
-           // Console.WriteLine(response.EnsureSuccessStatusCode());
-
-
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-        //Console.WriteLine($"{jsonResponse}\n");
+            try {
+                response.EnsureSuccessStatusCode();
+                 var jsonResponse = await response.Content.ReadAsStringAsync();
+            }
+            catch(Exception ex) {
+                Console.WriteLine(ex.Message);
+            Console.WriteLine("Please restart VisualGit...");
+            }
     }
     
-    static async void OutputNodesJsonToAPI(string name, int dataID, List<CommitNode> CommitNodes, List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
+    static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes, List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
     {
         var Json = string.Empty;
 
@@ -564,7 +574,7 @@ async Task<bool> main()
         {
             BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
         };
-        await PostAsync(name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+        await PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
     }
 
     static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
