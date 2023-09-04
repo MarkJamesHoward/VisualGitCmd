@@ -14,13 +14,20 @@ int batch = 1;
 int dataID = 1;
 var personGenerator = new PlaceNameGenerator();
 var name = personGenerator.GenerateRandomPlaceName();
+object balanceLock = new object();
 
 bool EmitJsonOnly = false; ;
 bool EmitWeb = false; ;
 bool EmitNeo = false;
 bool BatchingUpFileChanges = false;
 
-string testPath = "";
+bool debug = false;
+
+string testPath = @"";
+
+if (debug) {
+    testPath = @"C:\dev\test";
+}
 //string UserProfileFolder = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 string UserProfileFolder = @"C:\github\gitgraph\src";
 string CommitNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "CommitGitInJson.json");
@@ -36,10 +43,30 @@ string head = Path.Combine(testPath, @".git\");
 string path = Path.Combine(testPath, @".git\objects\");
 string branchPath = Path.Combine(testPath, @".git\refs\heads");
 string remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
-bool debug = false;
+
+if (debug)
+{
+     workingArea = testPath;
+     head = Path.Combine(testPath, @".git\");
+     path = Path.Combine(testPath, @".git\objects\");
+     branchPath = Path.Combine(testPath, @".git\refs\heads");
+     remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
+}
+else
+{
+     workingArea = Path.Combine(testPath, @".\");
+     head = Path.Combine(testPath, @".git\");
+     path = Path.Combine(testPath, @".git\objects\");
+     branchPath = Path.Combine(testPath, @".git\refs\heads");
+     remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
+}
 
 if (args?.Length > 0 || debug)
 {
+    if (debug) {
+            EmitWeb = true;
+            Console.WriteLine("Emitting to Website");
+    }
     if (!debug)
     {
         //Console.WriteLine(args?[0] ?? "No Args");
@@ -77,8 +104,19 @@ string MyExePath = Environment.CurrentDirectory;
 //string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
 
 // Cant use this in single file publish ;
-string MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
-MyExeFolder = MyExeFolder.Replace(@"file:\", "");
+string MyExeFolder;
+
+if (!debug) {
+    MyExePath = Environment.CurrentDirectory;
+    MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
+    MyExeFolder = MyExeFolder.Replace(@"file:\", "");
+}
+else {
+    MyExePath = @"C:\dev\test";
+    MyExeFolder = MyExePath;
+    Console.WriteLine($"Debug: Using {MyExeFolder}");
+}
+
 
 
 // var builder = new ConfigurationBuilder()
@@ -102,7 +140,7 @@ List<string> HashCodeFilenames = new List<string>();
 // Make one run to start with before waiting for files to change
 await main();
 
-using var watcher = new FileSystemWatcher("./");
+using var watcher = new FileSystemWatcher(MyExeFolder);
 {
     watcher.NotifyFilter = NotifyFilters.Attributes
                             | NotifyFilters.CreationTime
@@ -139,17 +177,21 @@ async void OnChanged(object sender, FileSystemEventArgs e)
     if (!BatchingUpFileChanges)
     {
         BatchingUpFileChanges = true;
-        var t = Task.Run(async delegate
-        {
-            batch++;
-            Console.WriteLine($"Batch {batch} Waiting for file changes to complete.....");
-            await Task.Delay(TimeSpan.FromSeconds(2));
-            BatchingUpFileChanges = false;
+    
+            var t = Task.Run(async delegate
+            {
+                batch++;
+                
+                Console.WriteLine($"Batch {batch} Waiting for file changes to complete.....");
+                await Task.Delay(TimeSpan.FromSeconds(2));
+                BatchingUpFileChanges = false;
 
-            Console.WriteLine($"Batch {batch} Processing.....");
-            await main();
-            Console.WriteLine($"Batch {batch} Completed.....");
-        });
+                Console.WriteLine($"Batch {batch} Processing.....");
+                await main();
+                Console.WriteLine($"Batch {batch} Completed.....");
+                
+            });
+        
     }
     else {
         Console.WriteLine($"Batch {batch} batching " + e.Name);
@@ -166,192 +208,197 @@ async Task<bool> main()
     List<Branch> branches = new List<Branch>();
 
     HEAD HEAD = new HEAD();
-    // Get all the files in the .git/objects folder
-    try
-    {
-        List<string> remoteBranchFiles = new List<string>();
-
-        List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
-        if (Directory.Exists(remoteBranchPath))
+   
+        // Get all the files in the .git/objects folder
+        try
         {
-            List<string> RemoteDirs = Directory.GetDirectories(remoteBranchPath).ToList();
-            foreach (string remoteDir in RemoteDirs)
+            List<string> remoteBranchFiles = new List<string>();
+
+            List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
+            if (Directory.Exists(remoteBranchPath))
             {
-                foreach (string file in Directory.GetFiles(remoteDir).ToList())
+                List<string> RemoteDirs = Directory.GetDirectories(remoteBranchPath).ToList();
+                foreach (string remoteDir in RemoteDirs)
                 {
-                    var DirName = new DirectoryInfo(Path.GetDirectoryName(remoteDir + "\\"));
-                    remoteBranchFiles.Add(file);
+                    foreach (string file in Directory.GetFiles(remoteDir).ToList())
+                    {
+                        var DirName = new DirectoryInfo(Path.GetDirectoryName(remoteDir + "\\"));
+                        remoteBranchFiles.Add(file);
+                    }
                 }
             }
-        }
-        List<string> directories = Directory.GetDirectories(path).ToList();
-        List<string> files = new List<string>();
+            List<string> directories = Directory.GetDirectories(path).ToList();
+            List<string> files = new List<string>();
 
-        IDriver _driver;
-        ISession session = null;
+            IDriver _driver;
+            ISession session = null;
 
-        if (EmitNeo)
-        {
-            _driver = GetDriver(uri, username, password);
-            session = _driver.Session();
-            ClearExistingNodesInNeo(session);
-        }
-
-
-        foreach (string dir in directories)
-        {
-            files = Directory.GetFiles(dir).ToList();
-
-            foreach (string file in files)
+            if (EmitNeo)
             {
-                string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
+                _driver = GetDriver(uri, username, password);
+                session = _driver.Session();
+                ClearExistingNodesInNeo(session);
+            }
 
-                HashCodeFilenames.Add(hashCode);
 
-                string fileType = FileType.GetFileType(hashCode);
+            foreach (string dir in directories)
+            {
+                files = Directory.GetFiles(dir).ToList();
 
-                if (fileType.Contains("commit"))
+                foreach (string file in files)
                 {
-                    ////Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
+                    string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
 
-                    string commitContents = FileType.GetContents(hashCode);
-                    var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
-                    var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
-                    var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
+                    HashCodeFilenames.Add(hashCode);
 
-                    if (match.Success)
+                    string fileType = FileType.GetFileType(hashCode, workingArea);
+
+                    if (fileType.Contains("commit"))
                     {
-                        // Get details of the tree,parent and comment in this commit
-                        string treeHash = match.Groups[1].Value;
-                        //Console.WriteLine($"\t-> tree {treeHash}");
+                        ////Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
 
-                        string parentHash = commitParent.Groups[1].Value;
-                        //Console.WriteLine($"\t-> parent commit {commitParent}");
+                        string commitContents = FileType.GetContents(hashCode, workingArea);
+                        var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
+                        var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
+                        var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
 
-                        string comment = commitComment.Groups[1].Value;
-                        comment = comment.Trim();
-
-                        if (EmitNeo)
+                        if (match.Success)
                         {
-                            AddCommitToNeo(session, comment, hashCode, commitContents);
-                        }
+                            // Get details of the tree,parent and comment in this commit
+                            string treeHash = match.Groups[1].Value;
+                            //Console.WriteLine($"\t-> tree {treeHash}");
 
-                        if (EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
-                        {
+                            string parentHash = commitParent.Groups[1].Value;
+                            //Console.WriteLine($"\t-> parent commit {commitParent}");
+
+                            string comment = commitComment.Groups[1].Value;
+                            comment = comment.Trim();
+
                             if (EmitNeo)
-                                AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash));
-                        }
-
-                        CreateTreeJson(treeHash, FileType.GetContents(treeHash), TreeNodes);
-                        CreateCommitJson(parentHash, comment, hashCode, treeHash, commitContents, CommitNodes);
-
-                        if (EmitNeo)
-                        {
-                            CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
-                        }
-
-                        // Get the details of the Blobs in this Tree
-                        string tree = FileType.GetContents(match.Groups[1].Value);
-                        var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
-
-                        foreach (Match blobMatch in blobsInTree)
-                        {
-                            string blobHash = blobMatch.Groups[1].Value;
-                            string blobContents = FileType.GetContents(blobHash);
-
-                            //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
-                            if (EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
                             {
-                                if (EmitNeo)
-                                    BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
-                            }
-                            //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
-                            BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
-
-                            if (EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
-                            {
-                                if (EmitNeo)
-                                    CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
+                                AddCommitToNeo(session, comment, hashCode, commitContents);
                             }
 
-                            CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value, TreeNodes);
+                            if (EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
+                            {
+                                if (EmitNeo)
+                                    AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash, workingArea));
+                            }
+
+                            CreateTreeJson(treeHash, FileType.GetContents(treeHash, workingArea), TreeNodes);
+                            CreateCommitJson(parentHash, comment, hashCode, treeHash, commitContents, CommitNodes);
+
+                            if (EmitNeo)
+                            {
+                                CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
+                            }
+
+                            // Get the details of the Blobs in this Tree
+                            string tree = FileType.GetContents(match.Groups[1].Value, workingArea);
+                            var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
+
+                            foreach (Match blobMatch in blobsInTree)
+                            {
+                                string blobHash = blobMatch.Groups[1].Value;
+                                string blobContents = FileType.GetContents(blobHash, workingArea);
+
+                                //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
+                                if (EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
+                                {
+                                    if (EmitNeo)
+                                        BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+                                }
+                                //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
+                                BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
+
+                                if (EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
+                                {
+                                    if (EmitNeo)
+                                        CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
+                                }
+
+                                CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value, TreeNodes);
+                            }
                         }
-                    }
-                    else
-                    {
-                        //Console.WriteLine("No Tree found in Commit");
+                        else
+                        {
+                            //Console.WriteLine("No Tree found in Commit");
+                        }
                     }
                 }
+
+            }
+            // Add the Branches
+            foreach (var file in branchFiles)
+            {
+                var branchHash = await File.ReadAllTextAsync(file);
+                if (EmitNeo)
+                {
+                    AddBranchToNeo(session, Path.GetFileName(file), branchHash);
+                    CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
+                }
+                AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), branches);
             }
 
-        }
-        // Add the Branches
-        foreach (var file in branchFiles)
-        {
-            var branchHash = await File.ReadAllTextAsync(file);
+            // Add the Remote Branches
+            foreach (var file in remoteBranchFiles)
+            {
+                var branchHash = await File.ReadAllTextAsync(file);
+                if (EmitNeo)
+                {
+                    AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
+                    CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
+                }
+            }
             if (EmitNeo)
             {
-                AddBranchToNeo(session, Path.GetFileName(file), branchHash);
-                CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
+                AddCommitParentLinks(session, path, workingArea);
+                BlobCode.AddOrphanBlobs(session, branchPath, path, blobs, workingArea);
+                GetHEAD(session, head);
             }
-            AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), branches);
-        }
 
-        // Add the Remote Branches
-        foreach (var file in remoteBranchFiles)
-        {
-            var branchHash = await File.ReadAllTextAsync(file);
-            if (EmitNeo)
+
+            if (EmitJsonOnly)
             {
-                AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
-                CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
+                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea);
+                OutputNodesJson(CommitNodes, CommitNodesJsonFile);
+                OutputNodesJson(TreeNodes, TreeNodesJsonFile);
+                OutputNodesJson(blobs, BlobNodesJsonFile);
+                OutputHEADJson(HEAD, HeadNodesJsonFile, head);
+                OutputBranchJson(branches, TreeNodes, blobs, BranchNodesJsonFile);
+                OutputIndexFilesJson(IndexFilesJsonFile);
+                OutputWorkingFilesJson(workingArea, WorkingFilesJsonFile);
+            }
+
+            if (EmitWeb)
+            {
+                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea);
+                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea), HEADNodes(head));
+            }
+
+            // Only run this on the first run
+            if (firstRun)
+            {
+                firstRun = false;
+                Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
             }
         }
-        if (EmitNeo)
+        catch (Exception e)
         {
-            AddCommitParentLinks(session, path);
-            BlobCode.AddOrphanBlobs(session, branchPath, path, blobs);
-            GetHEAD(session, head);
+            if (e.Message.Contains($"Could not find a part of the path"))
+            {
+                Console.WriteLine("Waiting for Git to be initiased in this folder...");
+            }
+            else
+            {
+                Console.WriteLine($"Error while getting files in {path} {e.Message} {e}");
+            }
         }
-
-
-        if (EmitJsonOnly)
-        {
-            BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs);
-            OutputNodesJson(CommitNodes, CommitNodesJsonFile);
-            OutputNodesJson(TreeNodes, TreeNodesJsonFile);
-            OutputNodesJson(blobs, BlobNodesJsonFile);
-            OutputHEADJson(HEAD, HeadNodesJsonFile, head);
-            OutputBranchJson(branches, TreeNodes, blobs, BranchNodesJsonFile);
-            OutputIndexFilesJson(IndexFilesJsonFile);
-            OutputWorkingFilesJson(workingArea, WorkingFilesJsonFile);
-        }
-
-        if (EmitWeb)
-        {
-            BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs);
-            OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(), WorkingFilesNodes(workingArea), HEADNodes(head));
-        }
-
-        // Only run this on the first run
-        if (firstRun)
-        {
-            firstRun = false;
-            Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
-        }
-
-        //System.Diagnostics.Process.Start($"http://https://lustrous-creponne-e68ef8.netlify.app?data={name}/1");
-    }
-    catch (Exception e)
-    {
-        if (e.Message.Contains($"Could not find a part of the path")) {
-            Console.WriteLine("Waiting for Git to be initiased in this folder...");
-        }
-        else
-        {
-            Console.WriteLine($"Error while getting files in {path} {e.Message} {e}");
-        }
-    }
+    
+    return true;
+}
+    
+    
 
     static void CreateCommitJson(string parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
     {
@@ -480,12 +527,12 @@ async Task<bool> main()
         File.WriteAllText(JsonPath, Json);
     }
 
-    static List<IndexFile> IndexFilesJsonNodes()
+    static List<IndexFile> IndexFilesJsonNodes(string workingArea)
     {
         var Json = string.Empty;
         List<IndexFile> IndexFilesList = new List<IndexFile>();
 
-        string files = FileType.GetIndexFiles();
+        string files = FileType.GetIndexFiles(workingArea);
        // Console.WriteLine(files);
         List<string> fileList = files.Split("\n").ToList();
 
@@ -505,7 +552,7 @@ async Task<bool> main()
         var Json = string.Empty;
         List<IndexFile> IndexFilesList = new List<IndexFile>();
 
-        string files = FileType.GetIndexFiles();
+        string files = FileType.GetIndexFiles("");
         //Console.WriteLine(files);
         List<string> fileList = files.Split("\n").ToList();
 
@@ -636,7 +683,7 @@ async Task<bool> main()
 
 
 
-    static void AddCommitParentLinks(ISession session, string path)
+    static void AddCommitParentLinks(ISession session, string path, string workingArea)
     {
         List<string> directories = Directory.GetDirectories(path).ToList();
 
@@ -648,11 +695,11 @@ async Task<bool> main()
             {
 
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode);
+                string fileType = FileType.GetFileType(hashCode, workingArea);
 
                 if (fileType.Contains("commit"))
                 {
-                    string commitContents = FileType.GetContents(hashCode);
+                    string commitContents = FileType.GetContents(hashCode, workingArea);
                     var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
 
                     if (commitParent.Success)
@@ -914,5 +961,4 @@ async Task<bool> main()
  
 
    
-    return true;
-}
+

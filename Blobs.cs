@@ -26,7 +26,7 @@ public static class BlobCode
             return "created node";
         });
     }
-     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs)
+     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs, string workingArea)
     {
         //Console.WriteLine("Adding orphan blobs to json");
 
@@ -41,11 +41,11 @@ public static class BlobCode
             foreach (string file in files)
             {
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode);
+                string fileType = FileType.GetFileType(hashCode, workingArea);
 
                 if (fileType.Contains("blob"))
                 {
-                    string blobContents = FileType.GetContents(hashCode);
+                    string blobContents = FileType.GetContents(hashCode, workingArea);
 
                     //Console.WriteLine($"blob {hashCode}");
                     AddBlobToJson("", "", hashCode, blobContents, blobs);
@@ -55,7 +55,7 @@ public static class BlobCode
         }
     }
 
-    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs)
+    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs, string workingArea)
     {
 
         List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
@@ -69,11 +69,11 @@ public static class BlobCode
             foreach (string file in files)
             {
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode);
+                string fileType = FileType.GetFileType(hashCode, workingArea);
 
                 if (fileType.Contains("blob"))
                 {
-                    string blobContents = FileType.GetContents(hashCode);
+                    string blobContents = FileType.GetContents(hashCode, workingArea);
 
                     Console.WriteLine($"blob {hashCode}");
                     if (!FileType.DoesNodeExistAlready(session, hashCode, "blob"))
