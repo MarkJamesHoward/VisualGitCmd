@@ -71,7 +71,7 @@ public static class FileType {
         int count = 0;
         //run the git cat-file command to determine the file type
         Process p = new Process();
-        p.StartInfo = new ProcessStartInfo("git.exe", $"ls-files");
+        p.StartInfo = new ProcessStartInfo("git.exe", $"ls-files -s");
         p.StartInfo.RedirectStandardOutput = true;
         p.StartInfo.WorkingDirectory = workingArea;
         p.Start();
