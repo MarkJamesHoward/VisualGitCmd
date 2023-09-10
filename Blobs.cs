@@ -90,6 +90,7 @@ public static class BlobCode
         b.filename = filename;
         b.hash = hash;
         b.tree = treeHash;
+        b.contents = contents;
 
         if (!Blobs.Exists(i => i.hash == b.hash))
         {

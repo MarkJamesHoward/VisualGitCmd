@@ -36,6 +36,8 @@ public class Blob
     public string? filename { get; set; }
     public string? hash { get; set; }
     public string? tree { get; set; }
+
+    public string? contents { get; set; }
 }
 public class Branch 
 {
