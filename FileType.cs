@@ -99,4 +99,11 @@ public static class FileType {
         //Console.WriteLine($"Folder we checking {dir}");
         return StrippedFiles;
     }
+
+    public static string GetFileContents(string filename) {
+
+        string contents = File.ReadAllText(filename);
+        Console.WriteLine("Reading File contents " + filename);
+        return contents;
+    }
 }

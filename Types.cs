@@ -16,6 +16,7 @@ public class IndexFile
 public class WorkingFile
 {
     public string? filename { get; set; }
+    public string? contents { get; set; }
 }
 
 public class HEAD

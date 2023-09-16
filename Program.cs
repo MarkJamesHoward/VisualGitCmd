@@ -505,6 +505,7 @@ async Task<bool> main()
         {
             WorkingFile FileObj = new WorkingFile();
             FileObj.filename = file;
+            FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             WorkingFilesList.Add(FileObj);
         }
         return WorkingFilesList;
@@ -520,6 +521,7 @@ async Task<bool> main()
         {
             WorkingFile FileObj = new WorkingFile();
             FileObj.filename = file;
+            FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             WorkingFilesList.Add(FileObj);
         }
         
