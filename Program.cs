@@ -9,6 +9,7 @@ using System.Text;
 using RandomNameGeneratorLibrary;
 using System.ComponentModel.Design.Serialization;
 
+object MainLockObj = new Object();
 bool firstRun = true;
 int batch = 1;
 int dataID = 1;
@@ -138,7 +139,7 @@ string username = "";
 List<string> HashCodeFilenames = new List<string>();
 
 // Make one run to start with before waiting for files to change
-await main();
+main();
 
 using var watcher = new FileSystemWatcher(MyExeFolder);
 {
@@ -178,17 +179,20 @@ async void OnChanged(object sender, FileSystemEventArgs e)
     {
         BatchingUpFileChanges = true;
     
-            var t = Task.Run(async delegate
+            var t = Task.Run(delegate
             {
-                batch++;
-                
-                Console.WriteLine($"Batch {batch} Waiting for file changes to complete.....");
-                await Task.Delay(TimeSpan.FromSeconds(2));
-                BatchingUpFileChanges = false;
+                lock (MainLockObj)
+                {
+                    batch++;
 
-                Console.WriteLine($"Batch {batch} Processing.....");
-                await main();
-                Console.WriteLine($"Batch {batch} Completed.....");
+                    Console.WriteLine($"Batch {batch} Waiting for file changes to complete.....");
+                    Thread.Sleep(2000);
+                    BatchingUpFileChanges = false;
+
+                    Console.WriteLine($"Batch {batch} Processing.....");
+                    main();
+                    Console.WriteLine($"Batch {batch} Completed.....");
+                }
                 
             });
         
@@ -199,16 +203,19 @@ async void OnChanged(object sender, FileSystemEventArgs e)
 }
 
 
-
-async Task<bool> main()
+void main()
 {
-    List<CommitNode> CommitNodes = new List<CommitNode>();
-    List<TreeNode> TreeNodes = new List<TreeNode>();
-    List<Blob> blobs = new List<Blob>();
-    List<Branch> branches = new List<Branch>();
-
-    HEAD HEAD = new HEAD();
    
+
+        List<CommitNode> CommitNodes = new List<CommitNode>();
+        List<TreeNode> TreeNodes = new List<TreeNode>();
+        List<Blob> blobs = new List<Blob>();
+        List<Branch> branches = new List<Branch>();
+        List<Branch> remoteBranches = new List<Branch>();
+
+
+        HEAD HEAD = new HEAD();
+
         // Get all the files in the .git/objects folder
         try
         {
@@ -331,7 +338,7 @@ async Task<bool> main()
             // Add the Branches
             foreach (var file in branchFiles)
             {
-                var branchHash = await File.ReadAllTextAsync(file);
+                var branchHash = File.ReadAllText(file);
                 if (EmitNeo)
                 {
                     AddBranchToNeo(session, Path.GetFileName(file), branchHash);
@@ -343,12 +350,14 @@ async Task<bool> main()
             // Add the Remote Branches
             foreach (var file in remoteBranchFiles)
             {
-                var branchHash = await File.ReadAllTextAsync(file);
+                var branchHash = File.ReadAllText(file);
                 if (EmitNeo)
                 {
                     AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
                     CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
                 }
+                AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), remoteBranches);
+
             }
             if (EmitNeo)
             {
@@ -373,7 +382,7 @@ async Task<bool> main()
             if (EmitWeb)
             {
                 BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea);
-                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea), HEADNodes(head));
+                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea), HEADNodes(head));
             }
 
             // Only run this on the first run
@@ -394,8 +403,8 @@ async Task<bool> main()
                 Console.WriteLine($"Error while getting files in {path} {e.Message} {e}");
             }
         }
+
     
-    return true;
 }
     
     
@@ -572,7 +581,7 @@ async Task<bool> main()
     }
 
 
-    static async Task PostAsync(bool firstrun, string name, int dataID,HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
+    static async Task PostAsync(bool firstrun, string name, int dataID,HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
         if (firstrun)
         Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
@@ -586,6 +595,7 @@ async Task<bool> main()
                         blobNodes = blobjson ?? "",
                         treeNodes = treejson ?? "",
                         branchNodes = branchjson ?? "",
+                        remoteBranchNodes = remotebranchjson ?? "",
                         headNodes = HEADjson ?? "",
                         indexFilesNodes = indexfilesjson ?? "",
                         workingFilesNodes = workingfilesjson ?? ""
@@ -607,7 +617,9 @@ async Task<bool> main()
             }
     }
     
-    static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes, List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
+    static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes,
+     List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
+     List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
     {
         var Json = string.Empty;
 
@@ -615,6 +627,7 @@ async Task<bool> main()
         var BlobJson = JsonSerializer.Serialize(BlobNodes);
         var TreeJson = JsonSerializer.Serialize(TreeNodes);
         var BranchJson = JsonSerializer.Serialize(BranchNodes);
+        var RemoteBranchJson = JsonSerializer.Serialize(RemoteBranchNodes);
         var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
         var WorkingFilesJson = JsonSerializer.Serialize(WorkingFilesNodes);
         var HEADJson = JsonSerializer.Serialize(HEADNodes);
@@ -623,7 +636,7 @@ async Task<bool> main()
         {
             BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
         };
-        await PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+        await PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
     }
 
     static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
