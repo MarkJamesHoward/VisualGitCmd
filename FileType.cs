@@ -58,7 +58,7 @@ public static class FileType {
         while (!p.HasExited && !exit)
         {
             System.Threading.Thread.Sleep(100);
-            Console.WriteLine($"Running git cat-file {file} -t");
+           // Console.WriteLine($"Running git cat-file {file} -t");
             if (tries++ > 10) {
                 exit = true;
                 throw new Exception("Cat File did not return within a second");
@@ -103,7 +103,7 @@ public static class FileType {
     public static string GetFileContents(string filename) {
 
         string contents = File.ReadAllText(filename);
-        Console.WriteLine("Reading File contents " + filename);
+        //Console.WriteLine("Reading File contents " + filename);
         return contents;
     }
 }

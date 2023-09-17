@@ -27,7 +27,7 @@ bool debug = false;
 string testPath = @"";
 
 if (debug) {
-    testPath = @"C:\dev\test";
+    testPath = @"C:\dev\remote";
 }
 //string UserProfileFolder = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 string UserProfileFolder = @"C:\github\gitgraph\src";
