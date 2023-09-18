@@ -8,6 +8,8 @@ using System.Timers;
 using System.Text;
 using RandomNameGeneratorLibrary;
 using System.ComponentModel.Design.Serialization;
+using CommandLine;
+using Yargs;
 
 object MainLockObj = new Object();
 bool firstRun = true;
@@ -17,8 +19,8 @@ var personGenerator = new PlaceNameGenerator();
 var name = personGenerator.GenerateRandomPlaceName();
 object balanceLock = new object();
 
-bool EmitJsonOnly = false; ;
-bool EmitWeb = false; ;
+bool EmitJsonOnly = false; 
+bool EmitWeb = false; 
 bool EmitNeo = false;
 bool BatchingUpFileChanges = false;
 
@@ -27,7 +29,7 @@ bool debug = false;
 string testPath = @"";
 
 if (debug) {
-    testPath = @"C:\dev\remote";
+    testPath = @"C:\dev\remote1";
 }
 //string UserProfileFolder = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 string UserProfileFolder = @"C:\github\gitgraph\src";
@@ -62,17 +64,33 @@ else
      remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
 }
 
-if (args?.Length > 0 || debug)
-{
-    if (debug) {
-            EmitWeb = true;
-            Console.WriteLine("Emitting to Website");
-    }
-    if (!debug)
-    {
-        //Console.WriteLine(args?[0] ?? "No Args");
+string MyExePath = Environment.CurrentDirectory;
+//string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
 
-        if (args?[0] == "--bare")
+// Cant use this in single file publish ;
+string MyExeFolder = "";
+
+
+ Parser.Default.ParseArguments<Options>(args)
+.WithParsed<Options>(o =>
+{
+    if (o.Verbose)
+    {
+        Console.WriteLine($"Verbose output enabled. Current Arguments: -v {o.Verbose}");
+    }
+
+    if (o.Web)
+    {
+        Console.WriteLine($"Web emission enabled. Current Arguments: -w {o.Web}");
+    }
+
+     if (o.Debug) {
+            EmitWeb = true;
+    }
+
+    if (!o.Debug)
+    {
+        if (o.Bare)
         {
             head = Path.Combine(testPath, @".\");
             path = Path.Combine(testPath, @".\objects\");
@@ -80,43 +98,40 @@ if (args?.Length > 0 || debug)
             remoteBranchPath = Path.Combine(testPath, @".\refs\remotes");
         }
 
-        if (args?[0] == "--json")
+        if (o.Json)
         {
             EmitJsonOnly = true;
-            Console.WriteLine("Emitting Json");
         }
 
-         if (args?[0] == "--web")
+        if (o.Web)
         {
             EmitWeb = true;
-            Console.WriteLine("Emitting to Website");
         }
 
-        if (args?[0] == "--neo")
+        if (o.Neo)
         {
             EmitNeo = true;
-            Console.WriteLine("Emitting to Website");
         }
     }
-}
+    
+    if (!o.Debug) 
+    {
+        MyExePath = Environment.CurrentDirectory;
+        MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
+        MyExeFolder = MyExeFolder.Replace(@"file:\", "");
+    }
+    else 
+    {
+        MyExePath = @"C:\dev\test";
+        MyExeFolder = MyExePath;
+        Console.WriteLine($"Debug: Using {MyExeFolder}");
+    }
+});
+    
 
 
-string MyExePath = Environment.CurrentDirectory;
-//string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
 
-// Cant use this in single file publish ;
-string MyExeFolder;
 
-if (!debug) {
-    MyExePath = Environment.CurrentDirectory;
-    MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
-    MyExeFolder = MyExeFolder.Replace(@"file:\", "");
-}
-else {
-    MyExePath = @"C:\dev\test";
-    MyExeFolder = MyExePath;
-    Console.WriteLine($"Debug: Using {MyExeFolder}");
-}
 
 
 
@@ -165,7 +180,7 @@ using var watcher = new FileSystemWatcher(MyExeFolder);
     Console.ReadLine();
 }
 
-async void OnChanged(object sender, FileSystemEventArgs e)
+void OnChanged(object sender, FileSystemEventArgs e)
 {
     //Console.WriteLine(e.Name);
 
