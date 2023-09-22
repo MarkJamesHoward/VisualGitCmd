@@ -22,6 +22,9 @@ namespace Yargs
 
         [Option('j', "json", Required = false, HelpText = "Send Output to JSON")]
         public bool Json { get; set; }
+
+        [Option('u', "ui", Required = false, HelpText = "No UI")]
+        public bool UI { get; set; }
     }
 }
     
