@@ -10,6 +10,7 @@ using RandomNameGeneratorLibrary;
 using System.ComponentModel.Design.Serialization;
 using CommandLine;
 using Yargs;
+using System.Runtime.CompilerServices;
 
 object MainLockObj = new Object();
 bool firstRun = true;
@@ -24,12 +25,12 @@ bool EmitWeb = false;
 bool EmitNeo = false;
 bool BatchingUpFileChanges = false;
 
-bool debug = false;
+bool debug = true;
 
 string testPath = @"";
 
 if (debug) {
-    testPath = @"C:\dev\remote1";
+    testPath = @"C:\dev\test";
 }
 //string UserProfileFolder = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 string UserProfileFolder = @"C:\github\gitgraph\src";
@@ -275,13 +276,15 @@ void main()
 
                     string fileType = FileType.GetFileType(hashCode, workingArea);
 
+                    Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
+
+
                     if (fileType.Contains("commit"))
                     {
-                        ////Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
 
                         string commitContents = FileType.GetContents(hashCode, workingArea);
                         var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
-                        var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
+                        var commitParents = Regex.Matches(commitContents, "parent ([0-9a-f]{4})");
                         var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
 
                         if (match.Success)
@@ -290,8 +293,14 @@ void main()
                             string treeHash = match.Groups[1].Value;
                             //Console.WriteLine($"\t-> tree {treeHash}");
 
-                            string parentHash = commitParent.Groups[1].Value;
-                            //Console.WriteLine($"\t-> parent commit {commitParent}");
+                            List<string> commitParentHashes = new List<string>();
+                       
+                            foreach (Match commitParentMatch in commitParents)
+                            {
+                                //string parentHash = commitParent.Groups[1].Value;
+                                commitParentHashes.Add(commitParentMatch.Groups[1].Value);
+                                Console.WriteLine($"\t-> hashCode parent commit {commitParentMatch.Groups[1].Value}");
+                            }
 
                             string comment = commitComment.Groups[1].Value;
                             comment = comment.Trim();
@@ -308,7 +317,7 @@ void main()
                             }
 
                             CreateTreeJson(treeHash, FileType.GetContents(treeHash, workingArea), TreeNodes);
-                            CreateCommitJson(parentHash, comment, hashCode, treeHash, commitContents, CommitNodes);
+                            CreateCommitJson(commitParentHashes, comment, hashCode, treeHash, commitContents, CommitNodes);
 
                             if (EmitNeo)
                             {
@@ -424,7 +433,7 @@ void main()
     
     
 
-    static void CreateCommitJson(string parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
+    static void CreateCommitJson(List<string> parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
     {
         CommitNode n = new CommitNode();
         n.text = comment;
@@ -734,10 +743,15 @@ void main()
 
                     if (commitParent.Success)
                     {
-                        string parentHash = commitParent.Groups[1].Value;
-                        //Console.WriteLine($"\t-> parent commit {commitParent}");
+                        foreach (var item in commitParent.Groups.Values)
+                        {
+                            // string parentHash = commitParent.Groups[1].Value;
+                            string parentHash = item.Value;
+                            //Console.WriteLine($"\t-> parent commit {commitParent}");
 
-                        CreateCommitTOCommitLinkNeo(session, hashCode, parentHash);
+                            CreateCommitTOCommitLinkNeo(session, hashCode, parentHash);
+                        }
+                        
                     }
                 }
             }

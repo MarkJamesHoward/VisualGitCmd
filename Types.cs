@@ -1,6 +1,6 @@
 public class CommitNode{
     public string? hash { get; set; }
-    public string? parent { get; set; }
+    public List<string>? parent { get; set; }
 
     public string? tree { get; set; }
 
