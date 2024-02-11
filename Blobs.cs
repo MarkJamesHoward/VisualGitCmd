@@ -26,7 +26,7 @@ public static class BlobCode
             return "created node";
         });
     }
-     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs, string workingArea)
+     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs, string workingArea, bool NoExtract)
     {
         //Console.WriteLine("Adding orphan blobs to json");
 
@@ -44,8 +44,14 @@ public static class BlobCode
                 string fileType = FileType.GetFileType(hashCode, workingArea);
 
                 if (fileType.Contains("blob"))
-                {
-                    string blobContents = FileType.GetContents(hashCode, workingArea);
+                {;
+
+                    string blobContents = String.Empty;
+
+                    if (!NoExtract)
+                    {
+                        blobContents = FileType.GetContents(hashCode, workingArea);
+                    }
 
                     //Console.WriteLine($"blob {hashCode}");
                     AddBlobToJson("", "", hashCode, blobContents, blobs);
@@ -55,7 +61,7 @@ public static class BlobCode
         }
     }
 
-    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs, string workingArea)
+    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs, string workingArea, bool NoExtract)
     {
 
         List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
@@ -73,7 +79,12 @@ public static class BlobCode
 
                 if (fileType.Contains("blob"))
                 {
-                    string blobContents = FileType.GetContents(hashCode, workingArea);
+                    string blobContents = string.Empty;
+
+                    if (!NoExtract)
+                    {
+                        FileType.GetContents(hashCode, workingArea);
+                    }
 
                     Console.WriteLine($"blob {hashCode}");
                     if (!FileType.DoesNodeExistAlready(session, hashCode, "blob"))

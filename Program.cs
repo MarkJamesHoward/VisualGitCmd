@@ -12,6 +12,7 @@ using CommandLine;
 using Yargs;
 using System.Runtime.CompilerServices;
 
+string version = "0.0.14";
 object MainLockObj = new Object();
 bool firstRun = true;
 int batch = 1;
@@ -23,15 +24,16 @@ object balanceLock = new object();
 bool EmitJsonOnly = false; 
 bool EmitWeb = false; 
 bool EmitNeo = false;
+bool NoExtract = false;
 bool BatchingUpFileChanges = false;
 
-bool debug = true;
+bool debug = false;
 
-string testPath = @"";
+//string RepoPath = @"";
+string RepoPath = Environment.CurrentDirectory;
+//Console.WriteLine($"Current folder is {RepoPath}");
 
-if (debug) {
-    testPath = @"C:\dev\test";
-}
+
 //string UserProfileFolder = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
 string UserProfileFolder = @"C:\github\gitgraph\src";
 string CommitNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "CommitGitInJson.json");
@@ -42,100 +44,94 @@ string BranchNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "BranchGitIn
 string IndexFilesJsonFile = Path.Combine(UserProfileFolder,"Json", "IndexfilesGitInJson.json");
 string WorkingFilesJsonFile = Path.Combine(UserProfileFolder,"Json", "WorkingfilesGitInJson.json");
 
-string workingArea = Path.Combine(testPath, @".\");
-string head = Path.Combine(testPath, @".git\");
-string path = Path.Combine(testPath, @".git\objects\");
-string branchPath = Path.Combine(testPath, @".git\refs\heads");
-string remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
+string workingArea = Path.Combine(RepoPath, @".\");
+string head = Path.Combine(RepoPath, @".git\");
+string path = Path.Combine(RepoPath, @".git\objects\");
+string branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+string remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
 
-if (debug)
-{
-     workingArea = testPath;
-     head = Path.Combine(testPath, @".git\");
-     path = Path.Combine(testPath, @".git\objects\");
-     branchPath = Path.Combine(testPath, @".git\refs\heads");
-     remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
-}
-else
-{
-     workingArea = Path.Combine(testPath, @".\");
-     head = Path.Combine(testPath, @".git\");
-     path = Path.Combine(testPath, @".git\objects\");
-     branchPath = Path.Combine(testPath, @".git\refs\heads");
-     remoteBranchPath = Path.Combine(testPath, @".git\refs\remotes");
-}
-
-string MyExePath = Environment.CurrentDirectory;
-//string MyExePath = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
 
 // Cant use this in single file publish ;
-string MyExeFolder = "";
+//string MyExeFolder = "";
 
+//Display version so can compare with Website
+Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
 
  Parser.Default.ParseArguments<Options>(args)
 .WithParsed<Options>(o =>
 {
-    if (o.Verbose)
-    {
-        Console.WriteLine($"Verbose output enabled. Current Arguments: -v {o.Verbose}");
-    }
-
     if (o.Web)
     {
-        Console.WriteLine($"Web emission enabled. Current Arguments: -w {o.Web}");
+        EmitWeb = true;
+        Console.WriteLine($"Web emission enabled");
     }
-
-     if (o.Debug) {
-            EmitWeb = true;
-    }
-
-    if (!o.Debug)
+   
+    if (o.Bare)
     {
-        if (o.Bare)
-        {
-            head = Path.Combine(testPath, @".\");
-            path = Path.Combine(testPath, @".\objects\");
-            branchPath = Path.Combine(testPath, @".\refs\heads");
-            remoteBranchPath = Path.Combine(testPath, @".\refs\remotes");
-        }
+        head = Path.Combine(RepoPath, @".\");
+        path = Path.Combine(RepoPath, @".\objects\");
+        branchPath = Path.Combine(RepoPath, @".\refs\heads");
+        remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
+    }
 
-        if (o.Json)
-        {
-            EmitJsonOnly = true;
-        }
+    if (o.Json)
+    {
+        EmitJsonOnly = true;
+    }
 
-        if (o.Web)
-        {
-            EmitWeb = true;
-        }
+    if (o.Neo)
+    {
+        EmitNeo = true;
+    }
 
-        if (o.Neo)
-        {
-            EmitNeo = true;
-        }
+    if(o.NoExtract) {
+        NoExtract = true;
+        Console.WriteLine($"No extract of file contents will take place");
+    }
+
+    if (o.Debug)
+    {
+        debug = true;
+        Console.WriteLine($"Debug mode enabled");
     }
     
-    if (!o.Debug) 
+    if (!debug) 
     {
-        MyExePath = Environment.CurrentDirectory;
-        MyExeFolder = System.IO.Path.GetDirectoryName(MyExePath);
-        MyExeFolder = MyExeFolder.Replace(@"file:\", "");
+        RepoPath =Environment.CurrentDirectory;
+
+        // Check if the path to examine the repo of is provided on the command line
+        if (o.RepoPath != null) {
+            RepoPath = o.RepoPath;
+            //Console.WriteLine($"Using user provided repo location - {o.RepoPath}");
+        }
+        Console.WriteLine($"Repo to examine: {RepoPath}");
     }
     else 
     {
-        MyExePath = @"C:\dev\test";
-        MyExeFolder = MyExePath;
-        Console.WriteLine($"Debug: Using {MyExeFolder}");
+        RepoPath = @"C:\dev\test";
+        Console.WriteLine($"Debug: Using {RepoPath}");
     }
+
+    
+    if (debug)
+    {
+        workingArea = RepoPath;
+        head = Path.Combine(RepoPath, @".git\");
+        path = Path.Combine(RepoPath, @".git\objects\");
+        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+    }
+    else
+    {
+        workingArea = Path.Combine(RepoPath, @".\");
+        head = Path.Combine(RepoPath, @".git\");
+        path = Path.Combine(RepoPath, @".git\objects\");
+        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+    }
+
 });
     
-
-
-
-
-
-
-
 // var builder = new ConfigurationBuilder()
 //                                .SetBasePath(MyExeFolder)
 //                                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -157,7 +153,7 @@ List<string> HashCodeFilenames = new List<string>();
 // Make one run to start with before waiting for files to change
 main();
 
-using var watcher = new FileSystemWatcher(MyExeFolder);
+using var watcher = new FileSystemWatcher(RepoPath);
 {
     watcher.NotifyFilter = NotifyFilters.Attributes
                             | NotifyFilters.CreationTime
@@ -221,7 +217,8 @@ void OnChanged(object sender, FileSystemEventArgs e)
 
 void main()
 {
-   
+
+
 
         List<CommitNode> CommitNodes = new List<CommitNode>();
         List<TreeNode> TreeNodes = new List<TreeNode>();
@@ -250,6 +247,8 @@ void main()
                     }
                 }
             }
+            //Console.WriteLine($"Checking Directories {path}");
+
             List<string> directories = Directory.GetDirectories(path).ToList();
             List<string> files = new List<string>();
 
@@ -276,7 +275,7 @@ void main()
 
                     string fileType = FileType.GetFileType(hashCode, workingArea);
 
-                    Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
+                    //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
 
 
                     if (fileType.Contains("commit"))
@@ -299,7 +298,7 @@ void main()
                             {
                                 //string parentHash = commitParent.Groups[1].Value;
                                 commitParentHashes.Add(commitParentMatch.Groups[1].Value);
-                                Console.WriteLine($"\t-> hashCode parent commit {commitParentMatch.Groups[1].Value}");
+                                //Console.WriteLine($"\t-> hashCode parent commit {commitParentMatch.Groups[1].Value}");
                             }
 
                             string comment = commitComment.Groups[1].Value;
@@ -331,7 +330,12 @@ void main()
                             foreach (Match blobMatch in blobsInTree)
                             {
                                 string blobHash = blobMatch.Groups[1].Value;
-                                string blobContents = FileType.GetContents(blobHash, workingArea);
+                                string blobContents = string.Empty;
+
+                                if (!NoExtract)
+                                {
+                                    FileType.GetContents(blobHash, workingArea);
+                                }
 
                                 //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
                                 if (EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
@@ -340,6 +344,7 @@ void main()
                                         BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                                 }
                                 //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
+
                                 BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
 
                                 if (EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
@@ -386,14 +391,14 @@ void main()
             if (EmitNeo)
             {
                 AddCommitParentLinks(session, path, workingArea);
-                BlobCode.AddOrphanBlobs(session, branchPath, path, blobs, workingArea);
+                BlobCode.AddOrphanBlobs(session, branchPath, path, blobs, workingArea, NoExtract);
                 GetHEAD(session, head);
             }
 
 
             if (EmitJsonOnly)
             {
-                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea);
+                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, NoExtract);
                 OutputNodesJson(CommitNodes, CommitNodesJsonFile);
                 OutputNodesJson(TreeNodes, TreeNodesJsonFile);
                 OutputNodesJson(blobs, BlobNodesJsonFile);
@@ -405,8 +410,8 @@ void main()
 
             if (EmitWeb)
             {
-                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea);
-                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea), HEADNodes(head));
+                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, NoExtract);
+                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea, NoExtract), HEADNodes(head));
             }
 
             // Only run this on the first run
@@ -528,7 +533,7 @@ void main()
         File.WriteAllText(JsonPath, Json);
     }
 
-     static List<WorkingFile> WorkingFilesNodes(string workingFolder) {
+     static List<WorkingFile> WorkingFilesNodes(string workingFolder, bool NoExtract) {
         
         List<string> files = FileType.GetWorkingFiles(workingFolder);
         List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
@@ -538,7 +543,10 @@ void main()
         {
             WorkingFile FileObj = new WorkingFile();
             FileObj.filename = file;
-            FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
+            if (!NoExtract)
+            {
+                FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
+            }
             WorkingFilesList.Add(FileObj);
         }
         return WorkingFilesList;
