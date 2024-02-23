@@ -30,14 +30,14 @@ class Program
     static  string uri = "";
     static  string username = "";
 
-        static string UserProfileFolder = @"C:\github\gitgraph\src";
-        static string CommitNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "CommitGitInJson.json");
-        static string TreeNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "TreeGitInJson.json");
-        static string BlobNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BlobGitInJson.json");
-        static string HeadNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "HeadGitInJson.json");
-        static string BranchNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BranchGitInJson.json");
-        static string IndexFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "IndexfilesGitInJson.json");
-        static string WorkingFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "WorkingfilesGitInJson.json");
+    static string UserProfileFolder = @"C:\github\gitgraph\src";
+    static string CommitNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "CommitGitInJson.json");
+    static string TreeNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "TreeGitInJson.json");
+    static string BlobNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BlobGitInJson.json");
+    static string HeadNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "HeadGitInJson.json");
+    static string BranchNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BranchGitInJson.json");
+    static string IndexFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "IndexfilesGitInJson.json");
+    static string WorkingFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "WorkingfilesGitInJson.json");
 
     static string workingArea;
     static string head;
