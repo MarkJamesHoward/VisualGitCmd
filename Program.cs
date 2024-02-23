@@ -12,185 +12,208 @@ using CommandLine;
 using Yargs;
 using System.Runtime.CompilerServices;
 
-string version = "0.0.14";
-object MainLockObj = new Object();
-bool firstRun = true;
-int batch = 1;
-int dataID = 1;
-var personGenerator = new PlaceNameGenerator();
-var name = personGenerator.GenerateRandomPlaceName();
-object balanceLock = new object();
+namespace MyProject;
 
-bool EmitJsonOnly = false; 
-bool EmitWeb = false; 
-bool EmitNeo = false;
-bool NoExtract = false;
-bool BatchingUpFileChanges = false;
-
-bool debug = false;
-
-//string RepoPath = @"";
-string RepoPath = Environment.CurrentDirectory;
-//Console.WriteLine($"Current folder is {RepoPath}");
-
-
-//string UserProfileFolder = Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
-string UserProfileFolder = @"C:\github\gitgraph\src";
-string CommitNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "CommitGitInJson.json");
-string TreeNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "TreeGitInJson.json");
-string BlobNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "BlobGitInJson.json");
-string HeadNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "HeadGitInJson.json");
-string BranchNodesJsonFile = Path.Combine(UserProfileFolder,"Json", "BranchGitInJson.json");
-string IndexFilesJsonFile = Path.Combine(UserProfileFolder,"Json", "IndexfilesGitInJson.json");
-string WorkingFilesJsonFile = Path.Combine(UserProfileFolder,"Json", "WorkingfilesGitInJson.json");
-
-string workingArea = Path.Combine(RepoPath, @".\");
-string head = Path.Combine(RepoPath, @".git\");
-string path = Path.Combine(RepoPath, @".git\objects\");
-string branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-string remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
-
-
-// Cant use this in single file publish ;
-//string MyExeFolder = "";
-
-//Display version so can compare with Website
-Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
-
- Parser.Default.ParseArguments<Options>(args)
-.WithParsed<Options>(o =>
+class Program
 {
-    if (o.Web)
-    {
-        EmitWeb = true;
-        Console.WriteLine($"Web emission enabled");
-    }
-   
-    if (o.Bare)
-    {
-        head = Path.Combine(RepoPath, @".\");
-        path = Path.Combine(RepoPath, @".\objects\");
-        branchPath = Path.Combine(RepoPath, @".\refs\heads");
-        remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
-    }
+    static bool BatchingUpFileChanges = false;
+    static string version = "0.0.14";
+    static object MainLockObj = new Object();
+    static bool firstRun = true;
+    static int batch = 1;
+    static int dataID = 1;
+    static bool EmitJsonOnly = false;
+    static  bool EmitWeb = false;
+    static bool EmitNeo = false;
+    static  bool NoExtract = false;
+    static string password = "";
+    static  string uri = "";
+    static  string username = "";
 
-    if (o.Json)
-    {
-        EmitJsonOnly = true;
-    }
+        static string UserProfileFolder = @"C:\github\gitgraph\src";
+        static string CommitNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "CommitGitInJson.json");
+        static string TreeNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "TreeGitInJson.json");
+        static string BlobNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BlobGitInJson.json");
+        static string HeadNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "HeadGitInJson.json");
+        static string BranchNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BranchGitInJson.json");
+        static string IndexFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "IndexfilesGitInJson.json");
+        static string WorkingFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "WorkingfilesGitInJson.json");
 
-    if (o.Neo)
-    {
-        EmitNeo = true;
-    }
+    static string workingArea;
+    static string head;
+    static string path;
+    static string branchPath;
+    static string remoteBranchPath;
 
-    if(o.NoExtract) {
-        NoExtract = true;
-        Console.WriteLine($"No extract of file contents will take place");
-    }
+    static List<string> HashCodeFilenames = new List<string>();
 
-    if (o.Debug)
-    {
-        debug = true;
-        Console.WriteLine($"Debug mode enabled");
-    }
-    
-    if (!debug) 
-    {
-        RepoPath =Environment.CurrentDirectory;
+    static PlaceNameGenerator personGenerator = new PlaceNameGenerator();
+    static string name = personGenerator.GenerateRandomPlaceName();
+    static object balanceLock = new object();
 
-        // Check if the path to examine the repo of is provided on the command line
-        if (o.RepoPath != null) {
-            RepoPath = o.RepoPath;
-            //Console.WriteLine($"Using user provided repo location - {o.RepoPath}");
+    static bool debug = false;
+
+
+    static void Main(string[] args)
+    {
+        //string RepoPath = @"";
+        string RepoPath = Environment.CurrentDirectory;
+        string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        Console.WriteLine($"Exe Path {exePath}");
+
+        //Console.WriteLine($"Current folder is {RepoPath}");
+         workingArea = Path.Combine(RepoPath, @".\");
+         head = Path.Combine(RepoPath, @".git\");
+         path = Path.Combine(RepoPath, @".git\objects\");
+         branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+         remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+
+        // Cant use this in single file publish ;
+        //string MyExeFolder = "";
+
+        //Display version so can compare with Website
+        Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
+
+        Parser.Default.ParseArguments<Options>(args)
+        .WithParsed<Options>(o =>
+        {
+            if (o.Web)
+            {
+                EmitWeb = true;
+                Console.WriteLine($"Web emission enabled");
+            }
+
+            if (o.Bare)
+            {
+                head = Path.Combine(RepoPath, @".\");
+                path = Path.Combine(RepoPath, @".\objects\");
+                branchPath = Path.Combine(RepoPath, @".\refs\heads");
+                remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
+            }
+
+            if (o.Json)
+            {
+                EmitJsonOnly = true;
+            }
+
+            if (o.Neo)
+            {
+                EmitNeo = true;
+            }
+
+            if (o.NoExtract)
+            {
+                NoExtract = true;
+                Console.WriteLine($"No extract of file contents will take place");
+            }
+
+            if (o.Debug)
+            {
+                debug = true;
+                Console.WriteLine($"Debug mode enabled");
+            }
+
+            if (!debug)
+            {
+                RepoPath = Environment.CurrentDirectory;
+
+                // Check if the path to examine the repo of is provided on the command line
+                if (o.RepoPath != null)
+                {
+                    RepoPath = o.RepoPath;
+                    //Console.WriteLine($"Using user provided repo location - {o.RepoPath}");
+                }
+                Console.WriteLine($"Repo to examine: {RepoPath}");
+            }
+            else
+            {
+                RepoPath = @"C:\dev\test";
+                Console.WriteLine($"Debug: Using {RepoPath}");
+            }
+
+
+            if (debug)
+            {
+                workingArea = RepoPath;
+                head = Path.Combine(RepoPath, @".git\");
+                path = Path.Combine(RepoPath, @".git\objects\");
+                branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+                remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+            }
+            else
+            {
+                workingArea = Path.Combine(RepoPath, @".\");
+                head = Path.Combine(RepoPath, @".git\");
+                path = Path.Combine(RepoPath, @".git\objects\");
+                branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+                remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+            }
+
+        });
+
+        if (exePath == RepoPath)
+        {
+            Console.WriteLine("VisualGit cannot be run in the same folder as the Repository to be examined");
+            Console.WriteLine("Option1: Place Visual.exe into another folder and run with --p pointing to this folder");
+            Console.WriteLine("Option2: Place the Visual.exe application into a folder on your PATH. Then just run Visual from within the Repository as you just did");
+            return;
         }
-        Console.WriteLine($"Repo to examine: {RepoPath}");
+
+        Console.WriteLine("Hello, World!");
+
+       
+
+        // string password = builder.Build().GetSection("docker").GetSection("password").Value;
+        // string uri = builder.Build().GetSection("docker").GetSection("url").Value;
+        // string username = builder.Build().GetSection("docker").GetSection("username").Value;
+
+        // string password = builder.Build().GetSection("cloud").GetSection("password").Value;
+        // string uri = builder.Build().GetSection("cloud").GetSection("url").Value;
+        // string username = builder.Build().GetSection("cloud").GetSection("username").Value;
+
+
+        using var watcher = new FileSystemWatcher(RepoPath);
+        {
+            watcher.NotifyFilter = NotifyFilters.Attributes
+                                    | NotifyFilters.CreationTime
+                                    | NotifyFilters.DirectoryName
+                                    | NotifyFilters.FileName
+                                    | NotifyFilters.LastAccess
+                                    | NotifyFilters.LastWrite
+                                    | NotifyFilters.Security
+                                    | NotifyFilters.Size;
+
+            watcher.Changed += OnChanged;
+            watcher.Created += OnChanged;
+            watcher.Deleted += OnChanged;
+            watcher.Renamed += OnChanged;
+            //watcher.Error += OnError;
+
+            watcher.Filter = "*.*";
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+
+            Console.ReadLine();
+        }
+
+
     }
-    else 
+
+
+    static void OnChanged(object sender, FileSystemEventArgs e)
     {
-        RepoPath = @"C:\dev\test";
-        Console.WriteLine($"Debug: Using {RepoPath}");
-    }
+        //Console.WriteLine(e.Name);
 
-    
-    if (debug)
-    {
-        workingArea = RepoPath;
-        head = Path.Combine(RepoPath, @".git\");
-        path = Path.Combine(RepoPath, @".git\objects\");
-        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
-    }
-    else
-    {
-        workingArea = Path.Combine(RepoPath, @".\");
-        head = Path.Combine(RepoPath, @".git\");
-        path = Path.Combine(RepoPath, @".git\objects\");
-        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
-    }
+        if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
+        e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))
+        {
+            return;
+        }
 
-});
-    
-// var builder = new ConfigurationBuilder()
-//                                .SetBasePath(MyExeFolder)
-//                                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+        if (!BatchingUpFileChanges)
+        {
+            BatchingUpFileChanges = true;
 
-string password = "";
-string uri = "";
-string username = ""; 
-
-// string password = builder.Build().GetSection("docker").GetSection("password").Value;
-// string uri = builder.Build().GetSection("docker").GetSection("url").Value;
-// string username = builder.Build().GetSection("docker").GetSection("username").Value;
-
-// string password = builder.Build().GetSection("cloud").GetSection("password").Value;
-// string uri = builder.Build().GetSection("cloud").GetSection("url").Value;
-// string username = builder.Build().GetSection("cloud").GetSection("username").Value;
-
-List<string> HashCodeFilenames = new List<string>();
-
-// Make one run to start with before waiting for files to change
-main();
-
-using var watcher = new FileSystemWatcher(RepoPath);
-{
-    watcher.NotifyFilter = NotifyFilters.Attributes
-                            | NotifyFilters.CreationTime
-                            | NotifyFilters.DirectoryName
-                            | NotifyFilters.FileName
-                            | NotifyFilters.LastAccess
-                            | NotifyFilters.LastWrite
-                            | NotifyFilters.Security
-                            | NotifyFilters.Size;
-
-    watcher.Changed += OnChanged;
-    watcher.Created += OnChanged;
-    watcher.Deleted += OnChanged;
-    watcher.Renamed += OnChanged;
-    //watcher.Error += OnError;
-
-    watcher.Filter = "*.*";
-    watcher.IncludeSubdirectories = true;
-    watcher.EnableRaisingEvents = true;
-
-    Console.ReadLine();
-}
-
-void OnChanged(object sender, FileSystemEventArgs e)
-{
-    //Console.WriteLine(e.Name);
-
-    if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
-     e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))
-    {
-        return;
-    }
-    
-    if (!BatchingUpFileChanges)
-    {
-        BatchingUpFileChanges = true;
-    
             var t = Task.Run(delegate
             {
                 lock (MainLockObj)
@@ -202,21 +225,25 @@ void OnChanged(object sender, FileSystemEventArgs e)
                     BatchingUpFileChanges = false;
 
                     Console.WriteLine($"Batch {batch} Processing.....");
-                    main();
+                    Run();
                     Console.WriteLine($"Batch {batch} Completed.....");
                 }
-                
+
             });
-        
-    }
-    else {
-        Console.WriteLine($"Batch {batch} batching " + e.Name);
-    }
-}
 
+        }
+        else
+        {
+            //Console.WriteLine($"Batch {batch} batching " + e.Name);
+        }
+    }
 
-void main()
-{
+    // var builder = new ConfigurationBuilder()
+    //                                .SetBasePath(MyExeFolder)
+    //                                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+    static void Run()
+    {
 
 
 
@@ -293,7 +320,7 @@ void main()
                             //Console.WriteLine($"\t-> tree {treeHash}");
 
                             List<string> commitParentHashes = new List<string>();
-                       
+
                             foreach (Match commitParentMatch in commitParents)
                             {
                                 //string parentHash = commitParent.Groups[1].Value;
@@ -433,10 +460,10 @@ void main()
             }
         }
 
-    
-}
-    
-    
+
+    }
+
+
 
     static void CreateCommitJson(List<string> parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
     {
@@ -533,8 +560,9 @@ void main()
         File.WriteAllText(JsonPath, Json);
     }
 
-     static List<WorkingFile> WorkingFilesNodes(string workingFolder, bool NoExtract) {
-        
+    static List<WorkingFile> WorkingFilesNodes(string workingFolder, bool NoExtract)
+    {
+
         List<string> files = FileType.GetWorkingFiles(workingFolder);
         List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
 
@@ -552,7 +580,8 @@ void main()
         return WorkingFilesList;
     }
 
-    static void OutputWorkingFilesJson(string workingFolder, string JsonPath) {
+    static void OutputWorkingFilesJson(string workingFolder, string JsonPath)
+    {
         var Json = string.Empty;
         List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
 
@@ -565,7 +594,7 @@ void main()
             FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             WorkingFilesList.Add(FileObj);
         }
-        
+
         Json = JsonSerializer.Serialize(WorkingFilesList);
         File.WriteAllText(JsonPath, Json);
     }
@@ -576,7 +605,7 @@ void main()
         List<IndexFile> IndexFilesList = new List<IndexFile>();
 
         string files = FileType.GetIndexFiles(workingArea);
-       // Console.WriteLine(files);
+        // Console.WriteLine(files);
         List<string> fileList = files.Split("\n").ToList();
 
         foreach (string file in fileList)
@@ -613,25 +642,25 @@ void main()
     }
 
 
-    static async Task PostAsync(bool firstrun, string name, int dataID,HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
+    static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
         if (firstrun)
-        Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
+            Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
 
         using StringContent jsonContent = new(
             JsonSerializer.Serialize(new
-                    {
-                        userId = $"{name.Replace(' ', 'x')}",
-                        id = $"{dataID++}",
-                        commitNodes = commitjson ?? "",
-                        blobNodes = blobjson ?? "",
-                        treeNodes = treejson ?? "",
-                        branchNodes = branchjson ?? "",
-                        remoteBranchNodes = remotebranchjson ?? "",
-                        headNodes = HEADjson ?? "",
-                        indexFilesNodes = indexfilesjson ?? "",
-                        workingFilesNodes = workingfilesjson ?? ""
-                    }),
+            {
+                userId = $"{name.Replace(' ', 'x')}",
+                id = $"{dataID++}",
+                commitNodes = commitjson ?? "",
+                blobNodes = blobjson ?? "",
+                treeNodes = treejson ?? "",
+                branchNodes = branchjson ?? "",
+                remoteBranchNodes = remotebranchjson ?? "",
+                headNodes = HEADjson ?? "",
+                indexFilesNodes = indexfilesjson ?? "",
+                workingFilesNodes = workingfilesjson ?? ""
+            }),
                 Encoding.UTF8,
                 "application/json");
 
@@ -639,16 +668,18 @@ void main()
             "GitInternals",
             jsonContent);
 
-            try {
-                response.EnsureSuccessStatusCode();
-                 var jsonResponse = await response.Content.ReadAsStringAsync();
-            }
-            catch(Exception ex) {
-                Console.WriteLine(ex.Message);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
             Console.WriteLine("Please restart VisualGit...");
-            }
+        }
     }
-    
+
     static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes,
      List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
      List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
@@ -664,7 +695,7 @@ void main()
         var WorkingFilesJson = JsonSerializer.Serialize(WorkingFilesNodes);
         var HEADJson = JsonSerializer.Serialize(HEADNodes);
 
-         HttpClient sharedClient = new()
+        HttpClient sharedClient = new()
         {
             BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
         };
@@ -759,7 +790,7 @@ void main()
 
                             CreateCommitTOCommitLinkNeo(session, hashCode, parentHash);
                         }
-                        
+
                     }
                 }
             }
@@ -933,7 +964,7 @@ void main()
             //Console.WriteLine($"Adding branch {b.name} {b.hash}");
             branches.Add(b);
         }
-        
+
     }
 
     static void AddBranchToNeo(ISession session, string name, string hash)
@@ -970,8 +1001,8 @@ void main()
         });
     }
 
-   
-  
+
+
 
     static void AddTreeToNeo(ISession session, string hash, string contents)
     {
@@ -1010,7 +1041,7 @@ void main()
     }
 
 
- 
+}
 
    
 
