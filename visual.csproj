@@ -5,16 +5,39 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;Release Self Contained EXE;Release Self Contained EXE (MacOS)</Configurations>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- <DebugType>embedded</DebugType> -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self Contained EXE|AnyCPU'"><!-- <DebugType>embedded</DebugType> -->
     <!-- <PublishReadyToRunShowWarning>true</PublishReadyToRunShowWarning> -->
     <!-- <PublishTrimmed>true</PublishTrimmed> -->
     <!-- <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained> -->
     <!-- <RuntimeIdentifier>win-x64</RuntimeIdentifier> -->
+  
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self Contained EXE|x64'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self Contained EXE|ARM64'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self Contained EXE (MacOS)|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self Contained EXE (MacOS)|x64'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self Contained EXE (MacOS)|ARM64'">
+    <Optimize>True</Optimize>
   </PropertyGroup>
 
 

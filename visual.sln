@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "visual", "visual.csproj", "{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Release as DLL (Any Platform)|Any CPU = Release as DLL (Any Platform)|Any CPU
+		Release as DLL (Any Platform)|ARM64 = Release as DLL (Any Platform)|ARM64
+		Release as DLL (Any Platform)|x64 = Release as DLL (Any Platform)|x64
+		Release Self Contained EXE (MacOS)|Any CPU = Release Self Contained EXE (MacOS)|Any CPU
+		Release Self Contained EXE (MacOS)|ARM64 = Release Self Contained EXE (MacOS)|ARM64
+		Release Self Contained EXE (MacOS)|x64 = Release Self Contained EXE (MacOS)|x64
+		Release Self Contained EXE (Windows)|Any CPU = Release Self Contained EXE (Windows)|Any CPU
+		Release Self Contained EXE (Windows)|ARM64 = Release Self Contained EXE (Windows)|ARM64
+		Release Self Contained EXE (Windows)|x64 = Release Self Contained EXE (Windows)|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Debug|ARM64.ActiveCfg = Release Self Contained EXE|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Debug|ARM64.Build.0 = Release Self Contained EXE|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Debug|x64.ActiveCfg = Release Self Contained EXE|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Debug|x64.Build.0 = Release Self Contained EXE|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release as DLL (Any Platform)|Any CPU.ActiveCfg = Release|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release as DLL (Any Platform)|Any CPU.Build.0 = Release|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release as DLL (Any Platform)|ARM64.ActiveCfg = Release Self Contained EXE (MacOS)|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release as DLL (Any Platform)|ARM64.Build.0 = Release Self Contained EXE (MacOS)|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release as DLL (Any Platform)|x64.ActiveCfg = Release Self Contained EXE (MacOS)|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release as DLL (Any Platform)|x64.Build.0 = Release Self Contained EXE (MacOS)|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (MacOS)|Any CPU.ActiveCfg = Release Self Contained EXE (MacOS)|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (MacOS)|Any CPU.Build.0 = Release Self Contained EXE (MacOS)|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (MacOS)|ARM64.ActiveCfg = Release Self Contained EXE (MacOS)|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (MacOS)|ARM64.Build.0 = Release Self Contained EXE (MacOS)|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (MacOS)|x64.ActiveCfg = Release Self Contained EXE (MacOS)|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (MacOS)|x64.Build.0 = Release Self Contained EXE (MacOS)|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (Windows)|Any CPU.ActiveCfg = Release Self Contained EXE|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (Windows)|Any CPU.Build.0 = Release Self Contained EXE|Any CPU
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (Windows)|ARM64.ActiveCfg = Release Self Contained EXE (MacOS)|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (Windows)|ARM64.Build.0 = Release Self Contained EXE (MacOS)|ARM64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (Windows)|x64.ActiveCfg = Release Self Contained EXE (MacOS)|x64
+		{2B2BB13C-2B08-47DE-A3BD-1D6730FB3F69}.Release Self Contained EXE (Windows)|x64.Build.0 = Release Self Contained EXE (MacOS)|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AB097636-5CE1-49C6-BE90-A905E0748241}
+	EndGlobalSection
+EndGlobal
