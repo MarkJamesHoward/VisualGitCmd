@@ -154,6 +154,7 @@ class Program
             if (o.UnpackRefs)
             {
                 UnPackRefs = true;
+                Console.WriteLine($"PACK files will be UnPacked");
             }
 
         });
@@ -267,24 +268,32 @@ class Program
 
         MatchCollection matches = regex.Matches(packedRefsText);
 
-        Console.WriteLine("Looking for packed_refs matches");
+        Console.WriteLine("Unpacking packed-refs file");
         foreach(Match match in matches)
         {
-            Console.WriteLine($"Found match {match.Value}");
 
             if (match.Success)
             {
+                Console.WriteLine($"Extracting Branch {match.Groups[3]}");
                 string fileName = $"{pathToRefsHeadsFolder}{match.Groups[3]}";
                 string contents = $"{match.Groups[1]}";
                 File.WriteAllText(fileName, contents);
             }
+        }
+
+        Console.WriteLine("Deleting packed-refs file");
+        var PackedRefsFile = new DirectoryInfo($"{RepoPath}\\.git\\").GetFiles("packed-refs");
+        foreach (FileInfo fi in PackedRefsFile)
+        {
+            fi.IsReadOnly = false;
+            fi.Delete();
         }
     }
 
 
     static void OnChanged(object sender, FileSystemEventArgs e)
     {
-        Console.WriteLine(e.Name);
+        //Console.WriteLine(e.Name);
 
         if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
         e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))

@@ -29,7 +29,7 @@ namespace Yargs
          [Option('e', "extract", Required = false, Default = false, HelpText = "Extraction from the file contents will take place.")]
         public bool Extract { get; set; }
 
-        [Option('r', "unpackrefs", Required = false, HelpText = "Unpack Refs")]
+        [Option('r', "unpackrefs", Required = false, Default = false, HelpText = "Unpack Refs")]
         public bool UnpackRefs { get; set; }
     }
 }
