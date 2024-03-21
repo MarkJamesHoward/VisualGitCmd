@@ -26,7 +26,7 @@ public static class BlobCode
             return "created node";
         });
     }
-     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs, string workingArea, bool NoExtract)
+     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs, string workingArea, bool PerformTextExtraction)
     {
         //Console.WriteLine("Adding orphan blobs to json");
 
@@ -36,6 +36,11 @@ public static class BlobCode
 
         foreach (string dir in directories)
         {
+            if (dir.Contains("info") || dir.Contains("pack"))
+            {
+                break;
+            }
+
             files = Directory.GetFiles(dir).ToList();
 
             foreach (string file in files)
@@ -48,7 +53,7 @@ public static class BlobCode
 
                     string blobContents = String.Empty;
 
-                    if (!NoExtract)
+                    if (PerformTextExtraction)
                     {
                         blobContents = FileType.GetContents(hashCode, workingArea);
                     }
@@ -61,7 +66,7 @@ public static class BlobCode
         }
     }
 
-    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs, string workingArea, bool NoExtract)
+    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs, string workingArea, bool PerformTextExtraction)
     {
 
         List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
@@ -81,7 +86,7 @@ public static class BlobCode
                 {
                     string blobContents = string.Empty;
 
-                    if (!NoExtract)
+                    if (PerformTextExtraction)
                     {
                         FileType.GetContents(hashCode, workingArea);
                     }

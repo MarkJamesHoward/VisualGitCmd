@@ -24,8 +24,9 @@ class Program
     static int dataID = 1;
     static bool EmitJsonOnly = false;
     static  bool EmitWeb = false;
+    static bool UnPackRefs = false;
     static bool EmitNeo = false;
-    static  bool NoExtract = false;
+    static  bool PerformTextExtraction = false;
     static string password = "";
     static  string uri = "";
     static  string username = "";
@@ -77,6 +78,7 @@ class Program
         Parser.Default.ParseArguments<Options>(args)
         .WithParsed<Options>(o =>
         {
+           
             if (o.Web)
             {
                 EmitWeb = true;
@@ -101,10 +103,10 @@ class Program
                 EmitNeo = true;
             }
 
-            if (o.NoExtract)
+            if (o.Extract)
             {
-                NoExtract = true;
-                Console.WriteLine($"No extract of file contents will take place");
+                PerformTextExtraction = true;
+                Console.WriteLine($"Extraction of file contents will take place");
             }
 
             if (o.Debug)
@@ -127,7 +129,7 @@ class Program
             }
             else
             {
-                RepoPath = @"C:\dev\test";
+                RepoPath = @"C:\dev\g4";
                 Console.WriteLine($"Debug: Using {RepoPath}");
             }
 
@@ -149,7 +151,18 @@ class Program
                 remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
             }
 
+            if (o.UnpackRefs)
+            {
+                UnPackRefs = true;
+            }
+
         });
+
+        if (UnPackRefs)
+        {
+            UnpackRefs(RepoPath);
+            UnPackPackFile(RepoPath);
+        }
 
         if (exePath == RepoPath)
         {
@@ -159,9 +172,7 @@ class Program
             return;
         }
 
-        Console.WriteLine("Hello, World!");
 
-       
 
         // string password = builder.Build().GetSection("docker").GetSection("password").Value;
         // string uri = builder.Build().GetSection("docker").GetSection("url").Value;
@@ -171,6 +182,8 @@ class Program
         // string uri = builder.Build().GetSection("cloud").GetSection("url").Value;
         // string username = builder.Build().GetSection("cloud").GetSection("username").Value;
 
+        // Initial Run to check for files without detecting any file changes
+        Run();
 
         using var watcher = new FileSystemWatcher(RepoPath);
         {
@@ -196,13 +209,82 @@ class Program
             Console.ReadLine();
         }
 
+     
 
+    }
+
+    static void UnPackPackFile(string RepoPath)
+    {
+        int tries = 0;
+        bool exit = false;
+
+        Console.WriteLine("Moving Pack Files from .git folder into base folder");
+        var files = new DirectoryInfo($"{RepoPath}\\.git\\objects\\pack").GetFiles("*pack-*");
+        foreach (FileInfo fi in files)
+        {
+            string dest = $"{RepoPath}\\{Path.GetFileName(fi.FullName)}";
+            fi.MoveTo(dest,true);
+        }
+
+        Console.WriteLine("Unpacking PACK file");
+        Process p = new Process();
+        p.StartInfo = new ProcessStartInfo($"cmd.exe");
+        p.StartInfo.Arguments = $"/C type pack-*.pack | git unpack-objects";
+        p.StartInfo.RedirectStandardOutput = true;
+        p.StartInfo.WorkingDirectory = workingArea;
+        p.Start();
+
+        while (!p.HasExited && !exit)
+        {
+            System.Threading.Thread.Sleep(100);
+            if (tries++ > 10)
+            {
+                exit = true;
+                throw new Exception("Delet Pack File did not return within a second");
+            }
+        }
+        Console.WriteLine(p.StandardOutput.ReadToEnd());
+
+        Console.WriteLine("Deleting PACK files from base folder");
+        var MovedPackfiles = new DirectoryInfo($"{RepoPath}").GetFiles("*pack-*");
+        foreach (FileInfo fi in MovedPackfiles)
+        {
+            fi.IsReadOnly = false;
+            fi.Delete();
+        }
+
+    }
+
+    static void UnpackRefs(string RepoPath) 
+    {
+        Regex regex = new Regex(@"([A-Za-z0-9]{40})\s(refs/heads/)([a-zA-Z0-9]+)");
+        string pathToPackedRefsFile = $"{RepoPath}\\.git\\packed-refs";
+        string pathToRefsHeadsFolder = $"{RepoPath}\\.git\\refs\\heads\\";
+
+        Console.WriteLine(path);
+
+        string packedRefsText = File.ReadAllText(pathToPackedRefsFile);
+
+        MatchCollection matches = regex.Matches(packedRefsText);
+
+        Console.WriteLine("Looking for packed_refs matches");
+        foreach(Match match in matches)
+        {
+            Console.WriteLine($"Found match {match.Value}");
+
+            if (match.Success)
+            {
+                string fileName = $"{pathToRefsHeadsFolder}{match.Groups[3]}";
+                string contents = $"{match.Groups[1]}";
+                File.WriteAllText(fileName, contents);
+            }
+        }
     }
 
 
     static void OnChanged(object sender, FileSystemEventArgs e)
     {
-        //Console.WriteLine(e.Name);
+        Console.WriteLine(e.Name);
 
         if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
         e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))
@@ -274,7 +356,6 @@ class Program
                     }
                 }
             }
-            //Console.WriteLine($"Checking Directories {path}");
 
             List<string> directories = Directory.GetDirectories(path).ToList();
             List<string> files = new List<string>();
@@ -292,10 +373,21 @@ class Program
 
             foreach (string dir in directories)
             {
+                if (dir.Contains("pack") || dir.Contains("info"))
+                {
+                    break;
+                }
+
                 files = Directory.GetFiles(dir).ToList();
 
                 foreach (string file in files)
                 {
+                    if (file.Contains("pack-") || file.Contains(".idx"))
+                    {
+                        break;
+                    }
+              
+
                     string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
 
                     HashCodeFilenames.Add(hashCode);
@@ -359,7 +451,7 @@ class Program
                                 string blobHash = blobMatch.Groups[1].Value;
                                 string blobContents = string.Empty;
 
-                                if (!NoExtract)
+                                if (PerformTextExtraction)
                                 {
                                     FileType.GetContents(blobHash, workingArea);
                                 }
@@ -418,14 +510,14 @@ class Program
             if (EmitNeo)
             {
                 AddCommitParentLinks(session, path, workingArea);
-                BlobCode.AddOrphanBlobs(session, branchPath, path, blobs, workingArea, NoExtract);
+                BlobCode.AddOrphanBlobs(session, branchPath, path, blobs, workingArea, PerformTextExtraction);
                 GetHEAD(session, head);
             }
 
 
             if (EmitJsonOnly)
             {
-                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, NoExtract);
+                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, PerformTextExtraction);
                 OutputNodesJson(CommitNodes, CommitNodesJsonFile);
                 OutputNodesJson(TreeNodes, TreeNodesJsonFile);
                 OutputNodesJson(blobs, BlobNodesJsonFile);
@@ -437,8 +529,8 @@ class Program
 
             if (EmitWeb)
             {
-                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, NoExtract);
-                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea, NoExtract), HEADNodes(head));
+                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, PerformTextExtraction);
+                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea, PerformTextExtraction), HEADNodes(head));
             }
 
             // Only run this on the first run
@@ -459,8 +551,6 @@ class Program
                 Console.WriteLine($"Error while getting files in {path} {e.Message} {e}");
             }
         }
-
-
     }
 
 
@@ -560,7 +650,7 @@ class Program
         File.WriteAllText(JsonPath, Json);
     }
 
-    static List<WorkingFile> WorkingFilesNodes(string workingFolder, bool NoExtract)
+    static List<WorkingFile> WorkingFilesNodes(string workingFolder, bool PerformTextExtraction)
     {
 
         List<string> files = FileType.GetWorkingFiles(workingFolder);
@@ -571,7 +661,7 @@ class Program
         {
             WorkingFile FileObj = new WorkingFile();
             FileObj.filename = file;
-            if (!NoExtract)
+            if (PerformTextExtraction)
             {
                 FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             }

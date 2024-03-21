@@ -26,10 +26,11 @@ namespace Yargs
         public bool Bare { get; set; }
 
 
-         [Option('u', "noextract", Required = false, HelpText = "No extraction from the file contents will take place.")]
-        public bool NoExtract { get; set; }
+         [Option('e', "extract", Required = false, Default = false, HelpText = "Extraction from the file contents will take place.")]
+        public bool Extract { get; set; }
 
-    
+        [Option('r', "unpackrefs", Required = false, HelpText = "Unpack Refs")]
+        public bool UnpackRefs { get; set; }
     }
 }
     

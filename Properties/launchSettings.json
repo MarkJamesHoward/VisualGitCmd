@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "visual": {
+      "commandName": "Project",
+      "commandLineArgs": "-d, -r"
+    }
+  }
+}
