@@ -75,89 +75,98 @@ class Program
         //Display version so can compare with Website
         Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
 
-        Parser.Default.ParseArguments<Options>(args)
-        .WithParsed<Options>(o =>
+        try
         {
-           
-            if (o.Web)
+            if (args != null)
             {
-                EmitWeb = true;
-                Console.WriteLine($"Web emission enabled");
-            }
-
-            if (o.Bare)
-            {
-                head = Path.Combine(RepoPath, @".\");
-                path = Path.Combine(RepoPath, @".\objects\");
-                branchPath = Path.Combine(RepoPath, @".\refs\heads");
-                remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
-            }
-
-            if (o.Json)
-            {
-                EmitJsonOnly = true;
-            }
-
-            if (o.Neo)
-            {
-                EmitNeo = true;
-            }
-
-            if (o.Extract)
-            {
-                PerformTextExtraction = true;
-                Console.WriteLine($"Extraction of file contents will take place");
-            }
-
-            if (o.Debug)
-            {
-                debug = true;
-                Console.WriteLine($"Debug mode enabled");
-            }
-
-            if (!debug)
-            {
-                RepoPath = Environment.CurrentDirectory;
-
-                // Check if the path to examine the repo of is provided on the command line
-                if (o.RepoPath != null)
+                Parser.Default.ParseArguments<Options>(args)
+                .WithParsed<Options>(o =>
                 {
-                    RepoPath = o.RepoPath;
-                    //Console.WriteLine($"Using user provided repo location - {o.RepoPath}");
-                }
-                Console.WriteLine($"Repo to examine: {RepoPath}");
-            }
-            else
-            {
-                RepoPath = @"C:\dev\g4";
-                Console.WriteLine($"Debug: Using {RepoPath}");
-            }
+
+                    if (o.Web)
+                    {
+                        EmitWeb = true;
+                        Console.WriteLine($"Web emission enabled");
+                    }
+
+                    if (o.Bare)
+                    {
+                        head = Path.Combine(RepoPath, @".\");
+                        path = Path.Combine(RepoPath, @".\objects\");
+                        branchPath = Path.Combine(RepoPath, @".\refs\heads");
+                        remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
+                    }
+
+                    if (o.Json)
+                    {
+                        EmitJsonOnly = true;
+                    }
+
+                    if (o.Neo)
+                    {
+                        EmitNeo = true;
+                    }
+
+                    if (o.Extract)
+                    {
+                        PerformTextExtraction = true;
+                        Console.WriteLine($"Extraction of file contents will take place");
+                    }
+
+                    if (o.Debug)
+                    {
+                        debug = true;
+                        Console.WriteLine($"Debug mode enabled");
+                    }
+
+                    if (!debug)
+                    {
+                        RepoPath = Environment.CurrentDirectory;
+
+                        // Check if the path to examine the repo of is provided on the command line
+                        if (o.RepoPath != null)
+                        {
+                            RepoPath = o.RepoPath;
+                            //Console.WriteLine($"Using user provided repo location - {o.RepoPath}");
+                        }
+                        Console.WriteLine($"Repo to examine: {RepoPath}");
+                    }
+                    else
+                    {
+                        RepoPath = @"C:\dev\g4";
+                        Console.WriteLine($"Debug: Using {RepoPath}");
+                    }
 
 
-            if (debug)
-            {
-                workingArea = RepoPath;
-                head = Path.Combine(RepoPath, @".git\");
-                path = Path.Combine(RepoPath, @".git\objects\");
-                branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-                remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
-            }
-            else
-            {
-                workingArea = Path.Combine(RepoPath, @".\");
-                head = Path.Combine(RepoPath, @".git\");
-                path = Path.Combine(RepoPath, @".git\objects\");
-                branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-                remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
-            }
+                    if (debug)
+                    {
+                        workingArea = RepoPath;
+                        head = Path.Combine(RepoPath, @".git\");
+                        path = Path.Combine(RepoPath, @".git\objects\");
+                        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+                        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+                    }
+                    else
+                    {
+                        workingArea = Path.Combine(RepoPath, @".\");
+                        head = Path.Combine(RepoPath, @".git\");
+                        path = Path.Combine(RepoPath, @".git\objects\");
+                        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
+                        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+                    }
 
-            if (o.UnpackRefs)
-            {
-                UnPackRefs = true;
-                Console.WriteLine($"PACK files will be UnPacked");
-            }
+                    if (o.UnpackRefs)
+                    {
+                        UnPackRefs = true;
+                        Console.WriteLine($"PACK files will be UnPacked");
+                    }
 
-        });
+                });
+            }
+        }
+        catch(Exception ex) {
+            Console.WriteLine("Warning! Error reading CommandLine arguments");
+        }
 
         if (UnPackRefs)
         {
