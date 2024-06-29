@@ -40,11 +40,11 @@ class Program
     static string IndexFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "IndexfilesGitInJson.json");
     static string WorkingFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "WorkingfilesGitInJson.json");
 
-    static string workingArea;
-    static string head;
-    static string path;
-    static string branchPath;
-    static string remoteBranchPath;
+    static string workingArea = "";
+    static string head = "";
+    static string path = "";
+    static string branchPath = "";
+    static string remoteBranchPath = "";
 
     static List<string> HashCodeFilenames = new List<string>();
 
@@ -59,7 +59,7 @@ class Program
     {
         //string RepoPath = @"";
         string RepoPath = Environment.CurrentDirectory;
-        string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? "";
         Console.WriteLine($"Exe Path {exePath}");
 
         //Console.WriteLine($"Current folder is {RepoPath}");
@@ -295,8 +295,10 @@ class Program
     {
         //Console.WriteLine(e.Name);
 
-        if (e.Name.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ||
-        e.Name.Contains("tmp", StringComparison.CurrentCultureIgnoreCase))
+        if (
+            (e?.Name?.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ?? false)  ||
+            (e?.Name?.Contains("tmp", StringComparison.CurrentCultureIgnoreCase) ?? false)
+        )
         {
             return;
         }
@@ -360,7 +362,7 @@ class Program
                 {
                     foreach (string file in Directory.GetFiles(remoteDir).ToList())
                     {
-                        var DirName = new DirectoryInfo(Path.GetDirectoryName(remoteDir + "\\"));
+                        var DirName = new DirectoryInfo(Path.GetDirectoryName(remoteDir + "\\") ?? "");
                         remoteBranchFiles.Add(file);
                     }
                 }

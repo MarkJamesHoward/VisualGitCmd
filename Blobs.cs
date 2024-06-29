@@ -119,9 +119,9 @@ public static class BlobCode
             // If filename is different then it has the same contents 
             // Combine the names so they are both displayed
             var existingBlob = Blobs.Find(i => i.hash == b.hash);
-            if (!existingBlob.filename.Contains(b.filename))
+            if (existingBlob?.filename?.Contains(b.filename) == false)
             {
-                existingBlob.filename = existingBlob.filename + " " + b.filename;
+                existingBlob.filename = existingBlob?.filename + " " + b.filename;
             }
 
         }
