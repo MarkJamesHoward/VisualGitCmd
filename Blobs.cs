@@ -7,11 +7,11 @@ using System.Text.Json.Serialization;
 
 public static class BlobCode
 {
-     public static void AddBlobToNeo(ISession session, string filename, string hash, string contents)
+     public static void AddBlobToNeo(ISession? session, string filename, string hash, string contents)
     {
         string filenameplushash = $"{filename} #{hash}";
 
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -66,7 +66,7 @@ public static class BlobCode
         }
     }
 
-    public static void AddOrphanBlobs(ISession session, string branchPath, string path,List<Blob> blobs, string workingArea, bool PerformTextExtraction)
+    public static void AddOrphanBlobs(ISession? session, string branchPath, string path,List<Blob> blobs, string workingArea, bool PerformTextExtraction)
     {
 
         List<string> branchFiles = Directory.GetFiles(branchPath).ToList();

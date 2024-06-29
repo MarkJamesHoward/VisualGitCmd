@@ -372,7 +372,7 @@ class Program
             List<string> files = new List<string>();
 
             IDriver _driver;
-            ISession session = null;
+            ISession? session = null;
 
             if (EmitNeo)
             {
@@ -815,7 +815,7 @@ class Program
     }
 
 
-    static void GetHEAD(ISession session, string path)
+    static void GetHEAD(ISession? session, string path)
     {
         string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
 
@@ -844,16 +844,19 @@ class Program
 
 
 
-    static bool DoesTreeToBlobLinkExist(ISession session, string treeHash, string blobHash)
+    static bool DoesTreeToBlobLinkExist(ISession? session, string treeHash, string blobHash)
     {
         string query = "MATCH (t:tree { hash: $treeHash })-[r:blob]->(b:blob {hash: $blobHash }) RETURN r, b";
-        var result = session.Run(
+        var result = session?.Run(
                 query,
                 new { treeHash, blobHash });
 
-        foreach (var record in result)
+        if (result != null)
         {
-            return true;
+            foreach (var record in result)
+            {
+                return true;
+            }
         }
 
         return false;
@@ -862,7 +865,7 @@ class Program
 
 
 
-    static void AddCommitParentLinks(ISession session, string path, string workingArea)
+    static void AddCommitParentLinks(ISession? session, string path, string workingArea)
     {
         List<string> directories = Directory.GetDirectories(path).ToList();
 
@@ -923,9 +926,9 @@ class Program
         treeNode?.blobs?.Add(child);
     }
 
-    static void CreateLinkNeo(ISession session, string parent, string child, string parentType, string childType)
+    static void CreateLinkNeo(ISession? session, string parent, string child, string parentType, string childType)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -936,11 +939,11 @@ class Program
         });
     }
 
-    static bool CreateHEADTOBranchLinkNeo(ISession session, string branchName)
+    static bool CreateHEADTOBranchLinkNeo(ISession? session, string branchName)
     {
 
         //Console.WriteLine("HEAD -> " + branchName);
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -953,10 +956,10 @@ class Program
         return greeting > 0 ? true : false;
     }
 
-    static bool CreateHEADTOCommitLinkNeo(ISession session, string childCommit)
+    static bool CreateHEADTOCommitLinkNeo(ISession? session, string childCommit)
     {
         //Console.WriteLine("HEAD -> " + childCommit);
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -969,9 +972,9 @@ class Program
         return greeting > 0 ? true : false;
     }
 
-    static bool CreateCommitTOCommitLinkNeo(ISession session, string parent, string child)
+    static bool CreateCommitTOCommitLinkNeo(ISession? session, string parent, string child)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -984,9 +987,9 @@ class Program
         return greeting > 0 ? true : false;
     }
 
-    static bool CreateCommitLinkNeo(ISession session, string parent, string child, string parentType, string childType)
+    static bool CreateCommitLinkNeo(ISession? session, string parent, string child, string parentType, string childType)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -999,11 +1002,11 @@ class Program
         return greeting > 0 ? true : false;
     }
 
-    static bool CreateRemoteBranchLinkNeo(ISession session, string parent, string child)
+    static bool CreateRemoteBranchLinkNeo(ISession? session, string parent, string child)
     {
         //Console.WriteLine($"Create Remote Branch link {parent} {child}");
 
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -1017,9 +1020,9 @@ class Program
     }
 
 
-    static bool CreateBranchLinkNeo(ISession session, string parent, string child)
+    static bool CreateBranchLinkNeo(ISession? session, string parent, string child)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -1034,11 +1037,11 @@ class Program
 
 
 
-    static void AddCommitToNeo(ISession session, string comment, string hash, string contents)
+    static void AddCommitToNeo(ISession? session, string comment, string hash, string contents)
     {
         string name = $"commit #{hash} {comment}";
 
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -1068,9 +1071,9 @@ class Program
 
     }
 
-    static void AddBranchToNeo(ISession session, string name, string hash)
+    static void AddBranchToNeo(ISession? session, string name, string hash)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -1084,11 +1087,11 @@ class Program
         });
     }
 
-    static void AddRemoteBranchToNeo(ISession session, string name, string hash)
+    static void AddRemoteBranchToNeo(ISession? session, string name, string hash)
     {
         name = $"remote{name}";
 
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -1105,11 +1108,11 @@ class Program
 
 
 
-    static void AddTreeToNeo(ISession session, string hash, string contents)
+    static void AddTreeToNeo(ISession? session, string hash, string contents)
     {
         string name = $"tree #{hash}";
 
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -1124,9 +1127,9 @@ class Program
         });
     }
 
-    static void AddHeadToNeo(ISession session, string hash, string contents)
+    static void AddHeadToNeo(ISession? session, string hash, string contents)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(

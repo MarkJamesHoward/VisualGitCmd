@@ -7,9 +7,9 @@ using System.Text.Json.Serialization;
 
 public static class FileType {
 
-     public static bool DoesNodeExistAlready(ISession session, string hash, string type)
+     public static bool DoesNodeExistAlready(ISession? session, string hash, string type)
     {
-        var greeting = session.ExecuteWrite(
+        var greeting = session?.ExecuteWrite(
         tx =>
         {
             var result = tx.Run(
@@ -19,7 +19,7 @@ public static class FileType {
             return result.Count() > 0 ? true : false;
         });
 
-        return greeting;
+        return greeting ?? false;
     }
     public static string GetContents(string file, string workingArea)
     {
