@@ -1,15 +1,15 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+FROM  mcr.microsoft.com/dotnet/sdk:8.0-alpine
 WORKDIR /App
+COPY . ./ 
 
-# Copy everything
-COPY . ./
-# Restore as distinct layers
-RUN dotnet restore
-# Build and publish a release
-RUN dotnet publish -c Release -o out
+WORKDIR /Test
+COPY . .
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+RUN apk update
+RUN apk add git
+
+
+WORKDIR /App/docker-test-folder
+RUN git init
 WORKDIR /App
-COPY --from=build-env /App/out .
-ENTRYPOINT ["dotnet", "DotNet.Docker.dll"]
+ENTRYPOINT ["dotnet", "run", "-p /App/docker-test-folder"]

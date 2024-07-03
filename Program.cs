@@ -63,11 +63,11 @@ class Program
         Console.WriteLine($"Exe Path {exePath}");
 
         //Console.WriteLine($"Current folder is {RepoPath}");
-         workingArea = Path.Combine(RepoPath, @".\");
-         head = Path.Combine(RepoPath, @".git\");
-         path = Path.Combine(RepoPath, @".git\objects\");
-         branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-         remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+         workingArea = Path.Combine(RepoPath, @"./");
+         head = Path.Combine(RepoPath, @".git/");
+         path = Path.Combine(RepoPath, @".git/objects\");
+         branchPath = Path.Combine(RepoPath, @".git/refs/heads");
+         remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
 
         // Cant use this in single file publish ;
         //string MyExeFolder = "";
@@ -122,14 +122,24 @@ class Program
                     if (!debug)
                     {
                         RepoPath = Environment.CurrentDirectory;
+                        Console.WriteLine($"Default RepoPath {RepoPath}");
 
                         // Check if the path to examine the repo of is provided on the command line
                         if (o.RepoPath != null)
                         {
-                            RepoPath = o.RepoPath;
-                            //Console.WriteLine($"Using user provided repo location - {o.RepoPath}");
+                           RepoPath = Path.Combine(RepoPath.Trim(), o.RepoPath.Trim());
+                            Console.WriteLine($"Combined RepoPath {RepoPath}");
+                                
+                            // Check if path exists
+                            if (!Directory.Exists(RepoPath)) {
+                                Console.WriteLine($"Invalid RepoPath-{RepoPath}");
+                                throw new Exception("Invalid RepoPath");
+                            }
+                            else 
+                            {
+                                Console.WriteLine($"Repo to examine: {RepoPath}");
+                            }
                         }
-                        Console.WriteLine($"Repo to examine: {RepoPath}");
                     }
                     else
                     {
@@ -141,18 +151,18 @@ class Program
                     if (debug)
                     {
                         workingArea = RepoPath;
-                        head = Path.Combine(RepoPath, @".git\");
-                        path = Path.Combine(RepoPath, @".git\objects\");
-                        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+                        head = Path.Combine(RepoPath, @".git/");
+                        path = Path.Combine(RepoPath, @".git/objects/");
+                        branchPath = Path.Combine(RepoPath, @".git/refs/heads");
+                        remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
                     }
                     else
                     {
-                        workingArea = Path.Combine(RepoPath, @".\");
-                        head = Path.Combine(RepoPath, @".git\");
-                        path = Path.Combine(RepoPath, @".git\objects\");
-                        branchPath = Path.Combine(RepoPath, @".git\refs\heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".git\refs\remotes");
+                        workingArea = RepoPath;
+                        head = Path.Combine(RepoPath, @".git/");
+                        path = Path.Combine(RepoPath, @".git/objects/");
+                        branchPath = Path.Combine(RepoPath, @".git/refs/heads");
+                        remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
                     }
 
                     if (o.UnpackRefs)
@@ -166,6 +176,9 @@ class Program
         }
         catch(Exception ex) {
             Console.WriteLine("Warning! Error reading CommandLine arguments");
+            if (debug) {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         if (UnPackRefs)
@@ -419,8 +432,9 @@ class Program
 
                     if (fileType.Contains("commit"))
                     {
-
-                        string commitContents = FileType.GetContents(hashCode, workingArea);
+                        string commitContents;
+                        commitContents = FileType.GetContents(hashCode, workingArea);
+                       
                         var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
                         var commitParents = Regex.Matches(commitContents, "parent ([0-9a-f]{4})");
                         var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
@@ -565,6 +579,15 @@ class Program
             if (e.Message.Contains($"Could not find a part of the path"))
             {
                 Console.WriteLine("Waiting for Git to be initiased in this folder...");
+
+                if (debug)
+                {
+                    Console.WriteLine($"Details: {e.Message}");
+                }
+                else {
+                    Console.WriteLine($"Details: {e.Message}");
+
+                }
             }
             else
             {

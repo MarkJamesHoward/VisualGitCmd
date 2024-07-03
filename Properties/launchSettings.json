@@ -2,7 +2,7 @@
   "profiles": {
     "visual": {
       "commandName": "Project",
-      "commandLineArgs": "-d, -r"
+      "commandLineArgs": "-p ..\\..\\dev\\test"
     }
   }
 }
