@@ -100,11 +100,16 @@ class Program
                     if (o.Json)
                     {
                         EmitJsonOnly = true;
+                        EmitWeb = false;
+                        Console.WriteLine($"Json emission enabled");
                     }
 
                     if (o.Neo)
                     {
                         EmitNeo = true;
+                        EmitJsonOnly = false;
+                        EmitWeb = false;
+                        Console.WriteLine($"Neo4J emission enabled");
                     }
 
                     if (o.Extract)
@@ -143,7 +148,7 @@ class Program
                     }
                     else
                     {
-                        RepoPath = @"C:\dev\g4";
+                        RepoPath = @"C:\dev\test";
                         Console.WriteLine($"Debug: Using {RepoPath}");
                     }
 
@@ -420,7 +425,6 @@ class Program
                         break;
                     }
               
-
                     string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
 
                     HashCodeFilenames.Add(hashCode);
@@ -428,7 +432,6 @@ class Program
                     string fileType = FileType.GetFileType(hashCode, workingArea);
 
                     //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
-
 
                     if (fileType.Contains("commit"))
                     {

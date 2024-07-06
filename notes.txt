@@ -1,1 +1,8 @@
+-- Docker builds
 dotnet publish --os linux --arch x64 /t:PublishContainer
+
+
+-- Building
+dotnet publish --os linux 
+dotnet publish --os osx 
+dotnet publish -r win-x64 
