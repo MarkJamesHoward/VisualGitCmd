@@ -31,14 +31,14 @@ class Program
     static  string uri = "";
     static  string username = "";
 
-    static string UserProfileFolder = @"C:\github\gitgraph\src";
-    static string CommitNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "CommitGitInJson.json");
-    static string TreeNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "TreeGitInJson.json");
-    static string BlobNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BlobGitInJson.json");
-    static string HeadNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "HeadGitInJson.json");
-    static string BranchNodesJsonFile = Path.Combine(UserProfileFolder, "Json", "BranchGitInJson.json");
-    static string IndexFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "IndexfilesGitInJson.json");
-    static string WorkingFilesJsonFile = Path.Combine(UserProfileFolder, "Json", "WorkingfilesGitInJson.json");
+    static string UserProfileFolder = @"./";
+    static string CommitNodesJsonFile = "";
+    static string TreeNodesJsonFile = "";
+    static string BlobNodesJsonFile = "";
+    static string HeadNodesJsonFile = "";
+    static string BranchNodesJsonFile = "";
+    static string IndexFilesJsonFile = "";
+    static string WorkingFilesJsonFile = "";
 
     static string workingArea = "";
     static string head = "";
@@ -62,15 +62,20 @@ class Program
         string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? "";
         Console.WriteLine($"Exe Path {exePath}");
 
+        CommitNodesJsonFile = Path.Combine(RepoPath, "CommitGitInJson.json");
+        TreeNodesJsonFile = Path.Combine(RepoPath, "TreeGitInJson.json");
+        BlobNodesJsonFile = Path.Combine(RepoPath, "BlobGitInJson.json");
+        HeadNodesJsonFile = Path.Combine(RepoPath, "HeadGitInJson.json");
+        BranchNodesJsonFile = Path.Combine(RepoPath, "BranchGitInJson.json");
+        IndexFilesJsonFile = Path.Combine(RepoPath, "IndexfilesGitInJson.json");
+        WorkingFilesJsonFile = Path.Combine(RepoPath, "WorkingfilesGitInJson.json");
+
         //Console.WriteLine($"Current folder is {RepoPath}");
          workingArea = Path.Combine(RepoPath, @"./");
          head = Path.Combine(RepoPath, @".git/");
          path = Path.Combine(RepoPath, @".git/objects\");
          branchPath = Path.Combine(RepoPath, @".git/refs/heads");
          remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
-
-        // Cant use this in single file publish ;
-        //string MyExeFolder = "";
 
         //Display version so can compare with Website
         Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
@@ -86,7 +91,6 @@ class Program
                     if (o.Web)
                     {
                         EmitWeb = true;
-                        Console.WriteLine($"Web emission enabled");
                     }
 
                     if (o.Bare)
@@ -101,7 +105,6 @@ class Program
                     {
                         EmitJsonOnly = true;
                         EmitWeb = false;
-                        Console.WriteLine($"Json emission enabled");
                     }
 
                     if (o.Neo)
@@ -174,6 +177,16 @@ class Program
                     {
                         UnPackRefs = true;
                         Console.WriteLine($"PACK files will be UnPacked");
+                    }
+
+                    if (EmitJsonOnly)
+                    {
+                        Console.WriteLine($"Json emission enabled");
+                    }
+
+                    if (EmitWeb)
+                    {
+                        Console.WriteLine($"Web emission enabled");
                     }
 
                 });
@@ -773,7 +786,7 @@ class Program
 
         Json = JsonSerializer.Serialize(IndexFilesList);
 
-        //Console.WriteLine(Json);
+        Console.WriteLine(JsonPath);
         File.WriteAllText(JsonPath, Json);
     }
 
