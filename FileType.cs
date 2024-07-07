@@ -52,7 +52,7 @@ public static class FileType {
 
         //run the git cat-file command to determine the file type
         Process p = new Process();
-        Console.WriteLine("git " + $"cat-file {file} -t");
+        //Console.WriteLine("git " + $"cat-file {file} -t");
         p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -t");
         p.StartInfo.RedirectStandardOutput = true;
         p.StartInfo.WorkingDirectory = workingArea;
