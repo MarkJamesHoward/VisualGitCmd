@@ -31,7 +31,6 @@ class Program
     static  string uri = "";
     static  string username = "";
 
-    static string UserProfileFolder = @"./";
     static string CommitNodesJsonFile = "";
     static string TreeNodesJsonFile = "";
     static string BlobNodesJsonFile = "";
@@ -62,13 +61,7 @@ class Program
         string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? "";
         Console.WriteLine($"Exe Path {exePath}");
 
-        CommitNodesJsonFile = Path.Combine(RepoPath, "CommitGitInJson.json");
-        TreeNodesJsonFile = Path.Combine(RepoPath, "TreeGitInJson.json");
-        BlobNodesJsonFile = Path.Combine(RepoPath, "BlobGitInJson.json");
-        HeadNodesJsonFile = Path.Combine(RepoPath, "HeadGitInJson.json");
-        BranchNodesJsonFile = Path.Combine(RepoPath, "BranchGitInJson.json");
-        IndexFilesJsonFile = Path.Combine(RepoPath, "IndexfilesGitInJson.json");
-        WorkingFilesJsonFile = Path.Combine(RepoPath, "WorkingfilesGitInJson.json");
+
 
         //Console.WriteLine($"Current folder is {RepoPath}");
          workingArea = Path.Combine(RepoPath, @"./");
@@ -101,10 +94,18 @@ class Program
                         remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
                     }
 
-                    if (o.Json)
+                    if (o.Json != null)
                     {
                         EmitJsonOnly = true;
                         EmitWeb = false;
+
+                        CommitNodesJsonFile = Path.Combine(o.Json, "CommitGitInJson.json");
+                        TreeNodesJsonFile = Path.Combine(o.Json, "TreeGitInJson.json");
+                        BlobNodesJsonFile = Path.Combine(o.Json, "BlobGitInJson.json");
+                        HeadNodesJsonFile = Path.Combine(o.Json, "HeadGitInJson.json");
+                        BranchNodesJsonFile = Path.Combine(o.Json, "BranchGitInJson.json");
+                        IndexFilesJsonFile = Path.Combine(o.Json, "IndexfilesGitInJson.json");
+                        WorkingFilesJsonFile = Path.Combine(o.Json, "WorkingfilesGitInJson.json");
                     }
 
                     if (o.Neo)

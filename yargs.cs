@@ -12,8 +12,8 @@ namespace Yargs
         [Option('n', "neo", Required = false, HelpText = "Send Output to Neo4j - Experimental")]
         public bool Neo { get; set; }
 
-        [Option('j', "json", Required = false, HelpText = "Send Output to JSON")]
-        public bool Json { get; set; }
+        [Option('j', "jsonPath", Required = false, HelpText = "Folder to send JSON")]
+        public string? Json { get; set; }
 
         [Option('p', "RepoPath", Required = false, HelpText = "Git Repo Folder. By default we look in the current folder. But if this option is specified then it will override and use this path instead")]
         public string? RepoPath { get; set; }
