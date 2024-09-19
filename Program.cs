@@ -13,11 +13,24 @@ using Yargs;
 using System.Runtime.CompilerServices;
 using Sentry;
 using Sentry.Profiling;
+using Polly;
+using Microsoft.VisualBasic;
+using Polly.Retry;
 
 namespace MyProject;
 
 class Program
 {
+
+    private static readonly ResiliencePipeline _resilienace =  new ResiliencePipelineBuilder()
+        .AddRetry(new RetryStrategyOptions {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                Delay = TimeSpan.FromSeconds(5),
+                MaxRetryAttempts = 10,
+        })
+        .AddTimeout(TimeSpan.FromSeconds(60))
+        .Build();
+
     static bool BatchingUpFileChanges = false;
     static string version = "0.0.14";
     static object MainLockObj = new Object();
@@ -855,9 +868,17 @@ SentrySdk.Init(options =>
                 Encoding.UTF8,
                 "application/json");
 
-        using HttpResponseMessage response = await httpClient.PostAsync(
-            "GitInternals",
-            jsonContent);
+        // var resilienace =  new ResiliencePipelineBuilder()
+        // .AddRetry(new RetryStrategyOptions {
+        //         ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+        //         Delay = TimeSpan.FromSeconds(2),
+        //         MaxRetryAttempts = 2,
+        //         BackoffType = DelayBackoffType.Exponential
+        // })
+        // .AddTimeout(TimeSpan.FromSeconds(30))
+        // .Build();
+
+        HttpResponseMessage response = await _resilienace.ExecuteAsync(async ct => await httpClient.PostAsync("GitInternals",jsonContent, ct)); 
 
         try
         {
