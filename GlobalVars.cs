@@ -23,7 +23,7 @@ public abstract class GlobalVars {
     public static string IndexFilesJsonFile = "";
     public static string WorkingFilesJsonFile = "";
      
-    static bool debug = false;
+    public static bool debug = false;
 
 
 }

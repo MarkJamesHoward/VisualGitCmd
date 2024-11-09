@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text;
 using CommandLine;
 using Yargs;
+using MyProjectl;
 
 namespace MyProject;
 
@@ -23,32 +24,20 @@ class Program
     static  string uri = "";
     static  string username = "";
 
-    static string CommitNodesJsonFile = "";
-    static string TreeNodesJsonFile = "";
-    static string BlobNodesJsonFile = "";
-    static string HeadNodesJsonFile = "";
-    static string BranchNodesJsonFile = "";
-    static string IndexFilesJsonFile = "";
-    static string WorkingFilesJsonFile = "";
 
-    static string workingArea = "";
-    static string head = "";
-    static string path = "";
-    static string branchPath = "";
-    static string remoteBranchPath = "";
+
+ 
 
     static List<string> HashCodeFilenames = new List<string>();
 
     static object balanceLock = new object();
 
-    static bool debug = false;
 
     static void Main(string[] args)
     {
         Sentry.ConfigureSentry();
 
         //string RepoPath = @"";
-        string RepoPath = Environment.CurrentDirectory;
         string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? "";
         Console.WriteLine($"Exe Path {exePath}");
 
@@ -72,7 +61,7 @@ class Program
 
                     if (o.Web)
                     {
-                        EmitWeb = true;
+                        GlobalVars.EmitWeb = true;
                     }
 
                     if (o.Bare)

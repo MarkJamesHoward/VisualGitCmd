@@ -100,33 +100,33 @@ public static void ProcessCmdLineArguments(string[] args)
 
                     if (debug)
                     {
-                        workingArea = RepoPath;
-                        head = Path.Combine(RepoPath, @".git/");
-                        path = Path.Combine(RepoPath, @".git/objects/");
-                        branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
+                        GlobalVars.workingArea = RepoPath;
+                        GlobalVars.head = Path.Combine(RepoPath, @".git/");
+                        GlobalVars.path = Path.Combine(RepoPath, @".git/objects/");
+                        GlobalVars.branchPath = Path.Combine(RepoPath, @".git/refs/heads");
+                        GlobalVars.remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
                     }
                     else
                     {
-                        workingArea = RepoPath;
-                        head = Path.Combine(RepoPath, @".git/");
-                        path = Path.Combine(RepoPath, @".git/objects/");
-                        branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
+                        GlobalVars.workingArea = RepoPath;
+                        GlobalVars.head = Path.Combine(RepoPath, @".git/");
+                        GlobalVars.path = Path.Combine(RepoPath, @".git/objects/");
+                        GlobalVars.branchPath = Path.Combine(RepoPath, @".git/refs/heads");
+                        GlobalVars.remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
                     }
 
                     if (o.UnpackRefs)
                     {
-                        UnPackRefs = true;
+                        GlobalVars.UnPackRefs = true;
                         Console.WriteLine($"PACK files will be UnPacked");
                     }
 
-                    if (EmitJsonOnly)
+                    if (GlobalVars.EmitJsonOnly)
                     {
                         Console.WriteLine($"Json emission enabled");
                     }
 
-                    if (EmitWeb)
+                    if (GlobalVars.EmitWeb)
                     {
                         Console.WriteLine($"Web emission enabled");
                     }
@@ -136,7 +136,7 @@ public static void ProcessCmdLineArguments(string[] args)
         }
         catch(Exception ex) {
             Console.WriteLine("Warning! Error reading CommandLine arguments");
-            if (debug) {
+            if (GlobalVars.debug) {
                 Console.WriteLine(ex.Message);
             }
         }
