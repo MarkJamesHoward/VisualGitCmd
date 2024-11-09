@@ -98,7 +98,7 @@ public static void ProcessCmdLineArguments(string[] args)
                     }
 
 
-                    if (debug)
+                    if (GlobalVars.debug)
                     {
                         GlobalVars.workingArea = RepoPath;
                         GlobalVars.head = Path.Combine(RepoPath, @".git/");
