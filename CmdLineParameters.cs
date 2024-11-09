@@ -7,12 +7,15 @@ namespace MyProject;
 
 public class CmdLineArguments {
 
-
-
 public static void ProcessCmdLineArguments(string[] args)
 {
-        string RepoPath = Environment.CurrentDirectory;
-   
+        GlobalVars.RepoPath = Environment.CurrentDirectory;
+      //Console.WriteLine($"Current folder is {GlobalVars.RepoPath}");
+         GlobalVars.workingArea = Path.Combine(GlobalVars.RepoPath, @"./");
+         GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
+         GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects\");
+         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
+         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
 
       try
         {
@@ -29,10 +32,10 @@ public static void ProcessCmdLineArguments(string[] args)
 
                     if (o.Bare)
                     {
-                        GlobalVars.head = Path.Combine(RepoPath, @".\");
-                        GlobalVars.path = Path.Combine(RepoPath, @".\objects\");
-                        GlobalVars.branchPath = Path.Combine(RepoPath, @".\refs\heads");
-                        GlobalVars.remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
+                        GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".\");
+                        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".\objects\");
+                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\heads");
+                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\remotes");
                     }
 
                     if (o.Json != null)
@@ -71,48 +74,48 @@ public static void ProcessCmdLineArguments(string[] args)
 
                     if (!GlobalVars.debug)
                     {
-                        RepoPath = Environment.CurrentDirectory;
-                        Console.WriteLine($"Default RepoPath {RepoPath}");
+                        GlobalVars.RepoPath = Environment.CurrentDirectory;
+                        Console.WriteLine($"Default GlobalVars.RepoPath {GlobalVars.RepoPath}");
 
                         // Check if the path to examine the repo of is provided on the command line
                         if (o.RepoPath != null)
                         {
-                           RepoPath = Path.Combine(RepoPath.Trim(), o.RepoPath.Trim());
-                            Console.WriteLine($"Combined RepoPath {RepoPath}");
+                           GlobalVars.RepoPath = Path.Combine(GlobalVars.RepoPath.Trim(), o.RepoPath.Trim());
+                            Console.WriteLine($"Combined GlobalVars.RepoPath {GlobalVars.RepoPath}");
                                 
                             // Check if path exists
-                            if (!Directory.Exists(RepoPath)) {
-                                Console.WriteLine($"Invalid RepoPath-{RepoPath}");
-                                throw new Exception("Invalid RepoPath");
+                            if (!Directory.Exists(GlobalVars.RepoPath)) {
+                                Console.WriteLine($"Invalid GlobalVars.RepoPath-{GlobalVars.RepoPath}");
+                                throw new Exception("Invalid GlobalVars.RepoPath");
                             }
                             else 
                             {
-                                Console.WriteLine($"Repo to examine: {RepoPath}");
+                                Console.WriteLine($"Repo to examine: {GlobalVars.RepoPath}");
                             }
                         }
                     }
                     else
                     {
-                        RepoPath = @"C:\dev\test";
-                        Console.WriteLine($"Debug: Using {RepoPath}");
+                        GlobalVars.RepoPath = @"C:\dev\test";
+                        Console.WriteLine($"Debug: Using {GlobalVars.RepoPath}");
                     }
 
 
                     if (GlobalVars.debug)
                     {
-                        GlobalVars.workingArea = RepoPath;
-                        GlobalVars.head = Path.Combine(RepoPath, @".git/");
-                        GlobalVars.path = Path.Combine(RepoPath, @".git/objects/");
-                        GlobalVars.branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-                        GlobalVars.remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
+                        GlobalVars.workingArea = GlobalVars.RepoPath;
+                        GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
+                        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
+                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
+                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
                     }
                     else
                     {
-                        GlobalVars.workingArea = RepoPath;
-                        GlobalVars.head = Path.Combine(RepoPath, @".git/");
-                        GlobalVars.path = Path.Combine(RepoPath, @".git/objects/");
-                        GlobalVars.branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-                        GlobalVars.remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
+                        GlobalVars.workingArea = GlobalVars.RepoPath;
+                        GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
+                        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
+                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
+                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
                     }
 
                     if (o.UnpackRefs)
@@ -140,4 +143,5 @@ public static void ProcessCmdLineArguments(string[] args)
                 Console.WriteLine(ex.Message);
             }
         }
+}
 }

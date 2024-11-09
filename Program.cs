@@ -41,150 +41,19 @@ class Program
         string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? "";
         Console.WriteLine($"Exe Path {exePath}");
 
-        //Console.WriteLine($"Current folder is {RepoPath}");
-         workingArea = Path.Combine(RepoPath, @"./");
-         head = Path.Combine(RepoPath, @".git/");
-         path = Path.Combine(RepoPath, @".git/objects\");
-         branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-         remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
-
+        CmdLineArguments.ProcessCmdLineArguments(args);
+  
         //Display version so can compare with Website
         Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
 
-        try
+
+        if (GlobalVars.UnPackRefs)
         {
-            if (args != null)
-            {
-                Parser.Default.ParseArguments<Options>(args)
-                .WithParsed<Options>(o =>
-                {
-
-                    if (o.Web)
-                    {
-                        GlobalVars.EmitWeb = true;
-                    }
-
-                    if (o.Bare)
-                    {
-                        head = Path.Combine(RepoPath, @".\");
-                        path = Path.Combine(RepoPath, @".\objects\");
-                        branchPath = Path.Combine(RepoPath, @".\refs\heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".\refs\remotes");
-                    }
-
-                    if (o.Json != null)
-                    {
-                        EmitJsonOnly = true;
-                        EmitWeb = false;
-
-                        CommitNodesJsonFile = Path.Combine(o.Json, "CommitGitInJson.json");
-                        TreeNodesJsonFile = Path.Combine(o.Json, "TreeGitInJson.json");
-                        BlobNodesJsonFile = Path.Combine(o.Json, "BlobGitInJson.json");
-                        HeadNodesJsonFile = Path.Combine(o.Json, "HeadGitInJson.json");
-                        BranchNodesJsonFile = Path.Combine(o.Json, "BranchGitInJson.json");
-                        IndexFilesJsonFile = Path.Combine(o.Json, "IndexfilesGitInJson.json");
-                        WorkingFilesJsonFile = Path.Combine(o.Json, "WorkingfilesGitInJson.json");
-                    }
-
-                    if (o.Neo)
-                    {
-                        EmitNeo = true;
-                        EmitJsonOnly = false;
-                        EmitWeb = false;
-                        Console.WriteLine($"Neo4J emission enabled");
-                    }
-
-                    if (o.Extract)
-                    {
-                        PerformTextExtraction = true;
-                        Console.WriteLine($"Extraction of file contents will take place");
-                    }
-
-                    if (o.Debug)
-                    {
-                        debug = true;
-                        Console.WriteLine($"Debug mode enabled");
-                    }
-
-                    if (!debug)
-                    {
-                        RepoPath = Environment.CurrentDirectory;
-                        Console.WriteLine($"Default RepoPath {RepoPath}");
-
-                        // Check if the path to examine the repo of is provided on the command line
-                        if (o.RepoPath != null)
-                        {
-                           RepoPath = Path.Combine(RepoPath.Trim(), o.RepoPath.Trim());
-                            Console.WriteLine($"Combined RepoPath {RepoPath}");
-                                
-                            // Check if path exists
-                            if (!Directory.Exists(RepoPath)) {
-                                Console.WriteLine($"Invalid RepoPath-{RepoPath}");
-                                throw new Exception("Invalid RepoPath");
-                            }
-                            else 
-                            {
-                                Console.WriteLine($"Repo to examine: {RepoPath}");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        RepoPath = @"C:\dev\test";
-                        Console.WriteLine($"Debug: Using {RepoPath}");
-                    }
-
-
-                    if (debug)
-                    {
-                        workingArea = RepoPath;
-                        head = Path.Combine(RepoPath, @".git/");
-                        path = Path.Combine(RepoPath, @".git/objects/");
-                        branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
-                    }
-                    else
-                    {
-                        workingArea = RepoPath;
-                        head = Path.Combine(RepoPath, @".git/");
-                        path = Path.Combine(RepoPath, @".git/objects/");
-                        branchPath = Path.Combine(RepoPath, @".git/refs/heads");
-                        remoteBranchPath = Path.Combine(RepoPath, @".git/refs/remotes");
-                    }
-
-                    if (o.UnpackRefs)
-                    {
-                        UnPackRefs = true;
-                        Console.WriteLine($"PACK files will be UnPacked");
-                    }
-
-                    if (EmitJsonOnly)
-                    {
-                        Console.WriteLine($"Json emission enabled");
-                    }
-
-                    if (EmitWeb)
-                    {
-                        Console.WriteLine($"Web emission enabled");
-                    }
-
-                });
-            }
-        }
-        catch(Exception ex) {
-            Console.WriteLine("Warning! Error reading CommandLine arguments");
-            if (debug) {
-                Console.WriteLine(ex.Message);
-            }
+            UnpackRefs(GlobalVars.RepoPath);
+            UnPackPackFile(GlobalVars.RepoPath);
         }
 
-        if (UnPackRefs)
-        {
-            UnpackRefs(RepoPath);
-            UnPackPackFile(RepoPath);
-        }
-
-        if (exePath == RepoPath)
+        if (exePath == GlobalVars.RepoPath)
         {
             Console.WriteLine("VisualGit cannot be run in the same folder as the Repository to be examined");
             Console.WriteLine("Option1: Place Visual.exe into another folder and run with --p pointing to this folder");
@@ -205,7 +74,7 @@ class Program
         // Initial Run to check for files without detecting any file changes
         Run();
 
-        using var watcher = new FileSystemWatcher(RepoPath);
+        using var watcher = new FileSystemWatcher(GlobalVars.RepoPath);
         {
             watcher.NotifyFilter = NotifyFilters.Attributes
                                     | NotifyFilters.CreationTime
@@ -251,7 +120,7 @@ class Program
         p.StartInfo = new ProcessStartInfo($"cmd.exe");
         p.StartInfo.Arguments = $"/C type pack-*.pack | git unpack-objects";
         p.StartInfo.RedirectStandardOutput = true;
-        p.StartInfo.WorkingDirectory = workingArea;
+        p.StartInfo.WorkingDirectory = GlobalVars.workingArea;
         p.Start();
 
         while (!p.HasExited && !exit)
@@ -281,7 +150,7 @@ class Program
         string pathToPackedRefsFile = $"{RepoPath}\\.git\\packed-refs";
         string pathToRefsHeadsFolder = $"{RepoPath}\\.git\\refs\\heads\\";
 
-        Console.WriteLine(path);
+        Console.WriteLine(GlobalVars.path);
 
         string packedRefsText = File.ReadAllText(pathToPackedRefsFile);
 
@@ -373,10 +242,10 @@ class Program
         {
             List<string> remoteBranchFiles = new List<string>();
 
-            List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
-            if (Directory.Exists(remoteBranchPath))
+            List<string> branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
+            if (Directory.Exists(GlobalVars.remoteBranchPath))
             {
-                List<string> RemoteDirs = Directory.GetDirectories(remoteBranchPath).ToList();
+                List<string> RemoteDirs = Directory.GetDirectories(GlobalVars.remoteBranchPath).ToList();
                 foreach (string remoteDir in RemoteDirs)
                 {
                     foreach (string file in Directory.GetFiles(remoteDir).ToList())
@@ -387,13 +256,13 @@ class Program
                 }
             }
 
-            List<string> directories = Directory.GetDirectories(path).ToList();
+            List<string> directories = Directory.GetDirectories(GlobalVars.path).ToList();
             List<string> files = new List<string>();
 
             IDriver _driver;
             ISession? session = null;
 
-            if (EmitNeo)
+            if (GlobalVars.EmitNeo)
             {
                 _driver = GetDriver(uri, username, password);
                 session = _driver.Session();
@@ -421,14 +290,14 @@ class Program
 
                     HashCodeFilenames.Add(hashCode);
 
-                    string fileType = FileType.GetFileType(hashCode, workingArea);
+                    string fileType = FileType.GetFileType(hashCode, GlobalVars.workingArea);
 
                     //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
 
                     if (fileType.Contains("commit"))
                     {
                         string commitContents;
-                        commitContents = FileType.GetContents(hashCode, workingArea);
+                        commitContents = FileType.GetContents(hashCode, GlobalVars.workingArea);
                        
                         var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
                         var commitParents = Regex.Matches(commitContents, "parent ([0-9a-f]{4})");
@@ -452,27 +321,27 @@ class Program
                             string comment = commitComment.Groups[1].Value;
                             comment = comment.Trim();
 
-                            if (EmitNeo)
+                            if (GlobalVars.EmitNeo)
                             {
                                 AddCommitToNeo(session, comment, hashCode, commitContents);
                             }
 
-                            if (EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
+                            if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
                             {
-                                if (EmitNeo)
-                                    AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash, workingArea));
+                                if (GlobalVars.EmitNeo)
+                                    AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
                             }
 
-                            CreateTreeJson(treeHash, FileType.GetContents(treeHash, workingArea), TreeNodes);
+                            CreateTreeJson(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea), TreeNodes);
                             CreateCommitJson(commitParentHashes, comment, hashCode, treeHash, commitContents, CommitNodes);
 
-                            if (EmitNeo)
+                            if (GlobalVars.EmitNeo)
                             {
                                 CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
                             }
 
                             // Get the details of the Blobs in this Tree
-                            string tree = FileType.GetContents(match.Groups[1].Value, workingArea);
+                            string tree = FileType.GetContents(match.Groups[1].Value, GlobalVars.workingArea);
                             var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
 
                             foreach (Match blobMatch in blobsInTree)
@@ -480,24 +349,24 @@ class Program
                                 string blobHash = blobMatch.Groups[1].Value;
                                 string blobContents = string.Empty;
 
-                                if (PerformTextExtraction)
+                                if (GlobalVars.PerformTextExtraction)
                                 {
-                                    FileType.GetContents(blobHash, workingArea);
+                                    FileType.GetContents(blobHash, GlobalVars.workingArea);
                                 }
 
                                 //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
-                                if (EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
+                                if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
                                 {
-                                    if (EmitNeo)
+                                    if (GlobalVars.EmitNeo)
                                         BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                                 }
                                 //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 
                                 BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
 
-                                if (EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
+                                if (GlobalVars.EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
                                 {
-                                    if (EmitNeo)
+                                    if (GlobalVars.EmitNeo)
                                         CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                                 }
 
@@ -516,7 +385,7 @@ class Program
             foreach (var file in branchFiles)
             {
                 var branchHash = File.ReadAllText(file);
-                if (EmitNeo)
+                if (GlobalVars.EmitNeo)
                 {
                     AddBranchToNeo(session, Path.GetFileName(file), branchHash);
                     CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
@@ -528,7 +397,7 @@ class Program
             foreach (var file in remoteBranchFiles)
             {
                 var branchHash = File.ReadAllText(file);
-                if (EmitNeo)
+                if (GlobalVars.EmitNeo)
                 {
                     AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
                     CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
@@ -536,30 +405,30 @@ class Program
                 AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), remoteBranches);
 
             }
-            if (EmitNeo)
+            if (GlobalVars.EmitNeo)
             {
-                AddCommitParentLinks(session, path, workingArea);
-                BlobCode.AddOrphanBlobs(session, branchPath, path, blobs, workingArea, PerformTextExtraction);
-                GetHEAD(session, head);
+                AddCommitParentLinks(session, GlobalVars.path, GlobalVars.workingArea);
+                BlobCode.AddOrphanBlobs(session, GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                GetHEAD(session, GlobalVars.head);
             }
 
 
-            if (EmitJsonOnly)
+            if (GlobalVars.EmitJsonOnly)
             {
-                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, PerformTextExtraction);
-                OutputNodesJson(CommitNodes, CommitNodesJsonFile);
-                OutputNodesJson(TreeNodes, TreeNodesJsonFile);
-                OutputNodesJson(blobs, BlobNodesJsonFile);
-                OutputHEADJson(HEAD, HeadNodesJsonFile, head);
-                OutputBranchJson(branches, TreeNodes, blobs, BranchNodesJsonFile);
-                OutputIndexFilesJson(IndexFilesJsonFile);
-                OutputWorkingFilesJson(workingArea, WorkingFilesJsonFile);
+                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                OutputNodesJson(CommitNodes, GlobalVars.CommitNodesJsonFile);
+                OutputNodesJson(TreeNodes, GlobalVars.TreeNodesJsonFile);
+                OutputNodesJson(blobs, GlobalVars.BlobNodesJsonFile);
+                OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
+                OutputBranchJson(branches, TreeNodes, blobs, GlobalVars.BranchNodesJsonFile);
+                OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
+                OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
             }
 
-            if (EmitWeb)
+            if (GlobalVars.EmitWeb)
             {
-                BlobCode.AddOrphanBlobsToJson(branchPath, path, blobs, workingArea, PerformTextExtraction);
-                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(workingArea), WorkingFilesNodes(workingArea, PerformTextExtraction), HEADNodes(head));
+                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(GlobalVars.workingArea), WorkingFilesNodes(GlobalVars.workingArea), HEADNodes(GlobalVars.head));
             }
 
             // Only run this on the first run
@@ -571,11 +440,11 @@ class Program
         }
         catch (Exception e)
         {
-            if (e.Message.Contains($"Could not find a part of the path"))
+            if (e.Message.Contains($"Could not find a part of the GlobalVars.path"))
             {
                 Console.WriteLine("Waiting for Git to be initiased in this folder...");
 
-                if (debug)
+                if (GlobalVars.debug)
                 {
                     Console.WriteLine($"Details: {e.Message}");
                 }
@@ -586,7 +455,7 @@ class Program
             }
             else
             {
-                Console.WriteLine($"Error while getting files in {path} {e.Message} {e}");
+                Console.WriteLine($"Error while getting files in {GlobalVars.path} {e.Message} {e}");
             }
         }
     }
@@ -619,7 +488,7 @@ class Program
 
     static HEAD HEADNodes(string path)
     {
-        string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
+        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
         //Console.WriteLine("Outputting JSON HEAD");
         string HEADHash = "";
 
@@ -647,7 +516,7 @@ class Program
 
     static void OutputHEADJson(HEAD head, string JsonPath, string path)
     {
-        string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
+        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
         //Console.WriteLine("Outputting JSON HEAD");
         string HEADHash = "";
 
@@ -688,7 +557,7 @@ class Program
         File.WriteAllText(JsonPath, Json);
     }
 
-    static List<WorkingFile> WorkingFilesNodes(string workingFolder, bool PerformTextExtraction)
+    static List<WorkingFile> WorkingFilesNodes(string workingFolder)
     {
 
         List<string> files = FileType.GetWorkingFiles(workingFolder);
@@ -699,7 +568,7 @@ class Program
         {
             WorkingFile FileObj = new WorkingFile();
             FileObj.filename = file;
-            if (PerformTextExtraction)
+            if (GlobalVars.PerformTextExtraction)
             {
                 FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             }
@@ -732,7 +601,7 @@ class Program
         var Json = string.Empty;
         List<IndexFile> IndexFilesList = new List<IndexFile>();
 
-        string files = FileType.GetIndexFiles(workingArea);
+        string files = FileType.GetIndexFiles(GlobalVars.workingArea);
         // Console.WriteLine(files);
         List<string> fileList = files.Split("\n").ToList();
 
@@ -852,7 +721,7 @@ class Program
 
     static void GetHEAD(ISession? session, string path)
     {
-        string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
+        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
 
         // Is the HEAD detached in which case it contains a Commit Hash
         Match match = Regex.Match(HeadContents, "[0-9a-f]{40}");
@@ -902,7 +771,7 @@ class Program
 
     static void AddCommitParentLinks(ISession? session, string path, string workingArea)
     {
-        List<string> directories = Directory.GetDirectories(path).ToList();
+        List<string> directories = Directory.GetDirectories(GlobalVars.path).ToList();
 
         foreach (string dir in directories)
         {
@@ -912,11 +781,11 @@ class Program
             {
 
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode, workingArea);
+                string fileType = FileType.GetFileType(hashCode, GlobalVars.workingArea);
 
                 if (fileType.Contains("commit"))
                 {
-                    string commitContents = FileType.GetContents(hashCode, workingArea);
+                    string commitContents = FileType.GetContents(hashCode, GlobalVars.workingArea);
                     var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
 
                     if (commitParent.Success)
