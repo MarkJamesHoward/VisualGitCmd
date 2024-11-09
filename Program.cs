@@ -471,7 +471,7 @@ class Program
 
     static HEAD HEADNodes(string path)
     {
-        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
+        string HeadContents = File.ReadAllText(Path.Combine(path, "HEAD"));
         //Console.WriteLine("Outputting JSON HEAD");
         string HEADHash = "";
 
