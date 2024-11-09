@@ -22,14 +22,9 @@ class Program
     static  string uri = "";
     static  string username = "";
 
-
-
- 
-
     static List<string> HashCodeFilenames = new List<string>();
 
     static object balanceLock = new object();
-
 
     static void Main(string[] args)
     {
@@ -44,7 +39,6 @@ class Program
         //Display version so can compare with Website
         Console.WriteLine($"Version {version} - Ensure matches against website for compatibility");
 
-
         if (GlobalVars.UnPackRefs)
         {
             UnpackRefs(GlobalVars.RepoPath);
@@ -58,8 +52,6 @@ class Program
             Console.WriteLine("Option2: Place the Visual.exe application into a folder on your PATH. Then just run Visual from within the Repository as you just did");
             return;
         }
-
-
 
         // string password = builder.Build().GetSection("docker").GetSection("password").Value;
         // string uri = builder.Build().GetSection("docker").GetSection("url").Value;
@@ -95,9 +87,6 @@ class Program
 
             Console.ReadLine();
         }
-
-     
-
     }
 
     static void UnPackPackFile(string RepoPath)
@@ -223,15 +212,11 @@ class Program
 
     static void Run()
     {
-
-
-
         List<CommitNode> CommitNodes = new List<CommitNode>();
         List<TreeNode> TreeNodes = new List<TreeNode>();
         List<Blob> blobs = new List<Blob>();
         List<Branch> branches = new List<Branch>();
         List<Branch> remoteBranches = new List<Branch>();
-
 
         HEAD HEAD = new HEAD();
 
