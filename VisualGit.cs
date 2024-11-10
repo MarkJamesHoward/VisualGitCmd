@@ -222,7 +222,7 @@ namespace MyProject
                     OutputNodesJson(CommitNodes, GlobalVars.CommitNodesJsonFile);
                     OutputNodesJson(TreeNodes, GlobalVars.TreeNodesJsonFile);
                     OutputNodesJson(blobs, GlobalVars.BlobNodesJsonFile);
-                    OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
+                    JSONGeneration.OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
                     OutputBranchJson(branches, TreeNodes, blobs, GlobalVars.BranchNodesJsonFile);
                     OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
                     OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
@@ -231,7 +231,7 @@ namespace MyProject
                 if (GlobalVars.EmitWeb)
                 {
                     BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                    OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(GlobalVars.workingArea), WorkingFilesNodes(GlobalVars.workingArea), HEADNodes(GlobalVars.head));
+                    JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, IndexFilesJsonNodes(GlobalVars.workingArea), WorkingFilesNodes(GlobalVars.workingArea), HEADNodes(GlobalVars.head));
                 }
 
                 // Only run this on the first run
@@ -315,37 +315,7 @@ namespace MyProject
 
         }
 
-        void OutputHEADJson(HEAD head, string JsonPath, string path)
-        {
-            string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
-            //Console.WriteLine("Outputting JSON HEAD");
-            string HEADHash = "";
-
-            // Is the HEAD detached in which case it contains a Commit Hash
-            Match match = Regex.Match(HeadContents, "[0-9a-f]{40}");
-            if (match.Success)
-            {
-                //Console.WriteLine("Outputting JSON HEAD match found 1");
-                HEADHash = match.Value.Substring(0, 4);
-            }
-            match = Regex.Match(HeadContents, @"ref: refs/heads/(\w+)");
-            if (match.Success)
-            {
-                //Console.WriteLine("Outputting JSON HEAD match found 2");
-
-                //Console.WriteLine("HEAD Branch extract: " + match.Groups[1]?.Value);
-                HEADHash = match.Groups[1].Value;
-                //CreateHEADTOBranchLinkNeo(session, branch);
-            }
-            HEAD h = new HEAD();
-            h.hash = HEADHash;
-
-            var Json = string.Empty;
-            Json = JsonSerializer.Serialize(h);
-
-            //Console.WriteLine(Json);
-            File.WriteAllText(JsonPath, Json);
-        }
+        
 
 
         void OutputBranchJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath)
@@ -439,74 +409,6 @@ namespace MyProject
             File.WriteAllText(JsonPath, Json);
         }
 
-
-        static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
-        {
-            if (firstrun)
-                Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
-
-            using StringContent jsonContent = new(
-                JsonSerializer.Serialize(new
-                {
-                    userId = $"{name.Replace(' ', 'x')}",
-                    id = $"{dataID++}",
-                    commitNodes = commitjson ?? "",
-                    blobNodes = blobjson ?? "",
-                    treeNodes = treejson ?? "",
-                    branchNodes = branchjson ?? "",
-                    remoteBranchNodes = remotebranchjson ?? "",
-                    headNodes = HEADjson ?? "",
-                    indexFilesNodes = indexfilesjson ?? "",
-                    workingFilesNodes = workingfilesjson ?? ""
-                }),
-                    Encoding.UTF8,
-                    "application/json");
-
-            // var resilienace =  new ResiliencePipelineBuilder()
-            // .AddRetry(new RetryStrategyOptions {
-            //         ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-            //         Delay = TimeSpan.FromSeconds(2),
-            //         MaxRetryAttempts = 2,
-            //         BackoffType = DelayBackoffType.Exponential
-            // })
-            // .AddTimeout(TimeSpan.FromSeconds(30))
-            // .Build();
-
-            HttpResponseMessage response = await Resiliance._resilienace.ExecuteAsync(async ct => await httpClient.PostAsync("GitInternals",jsonContent, ct)); 
-
-            try
-            {
-                response.EnsureSuccessStatusCode();
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("Please restart VisualGit...");
-            }
-        }
-
-        static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes,
-         List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
-         List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEAD HEADNodes)
-        {
-            var Json = string.Empty;
-
-            var CommitJson = JsonSerializer.Serialize(CommitNodes);
-            var BlobJson = JsonSerializer.Serialize(BlobNodes);
-            var TreeJson = JsonSerializer.Serialize(TreeNodes);
-            var BranchJson = JsonSerializer.Serialize(BranchNodes);
-            var RemoteBranchJson = JsonSerializer.Serialize(RemoteBranchNodes);
-            var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
-            var WorkingFilesJson = JsonSerializer.Serialize(WorkingFilesNodes);
-            var HEADJson = JsonSerializer.Serialize(HEADNodes);
-
-            HttpClient sharedClient = new()
-            {
-                BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
-            };
-            await PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
-        }
 
         void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
         {
