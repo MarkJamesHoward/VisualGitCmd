@@ -1,7 +1,11 @@
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using MyProjectl;
+
 namespace MyProject {
 
     public static class UnPacking{
-        static void UnPackPackFile(string RepoPath)
+        public static void UnPackPackFile(string RepoPath)
         {
             int tries = 0;
             bool exit = false;
@@ -13,7 +17,7 @@ namespace MyProject {
                 string dest = $"{RepoPath}\\{Path.GetFileName(fi.FullName)}";
                 fi.MoveTo(dest,true);
             }
-
+ 
             Console.WriteLine("Unpacking PACK file");
             Process p = new Process();
             p.StartInfo = new ProcessStartInfo($"cmd.exe");
@@ -43,7 +47,7 @@ namespace MyProject {
 
         }
 
-        static void UnpackRefs(string RepoPath) 
+        public static void UnpackRefs(string RepoPath) 
         {
             Regex regex = new Regex(@"([A-Za-z0-9]{40})\s(refs/heads/)([a-zA-Z0-9]+)");
             string pathToPackedRefsFile = $"{RepoPath}\\.git\\packed-refs";
