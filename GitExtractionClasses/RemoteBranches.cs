@@ -1,15 +1,27 @@
 using MyProjectl;
+using Neo4j.Driver;
 
 namespace MyProject {
 
 public abstract class RemoteBranches {
 
-    public static void GetRemoteBranches(ref List<string> remoteBranchFiles, ref List<string> branchFiles ) {
+    public static void ProcessRemoteBranches(List<string> remoteBranchFiles, ISession? session,  ref List<Branch> remoteBranches) {
+                
+                // Add the Remote Branches
+                foreach (var file in remoteBranchFiles)
+                {
+                    var branchHash = File.ReadAllText(file);
+                    if (GlobalVars.EmitNeo)
+                    {
+                        Neo4j.AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
+                        Neo4j.CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
+                    }
+                    GitBranches.AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), ref remoteBranches);
 
-                // List<string> remoteBranchFiles = new List<string>();
+                }
+    }
+    public static void GetRemoteBranches(ref List<string> remoteBranchFiles) {
 
-                // List<string> branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
-                branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
 
                 if (Directory.Exists(GlobalVars.remoteBranchPath))
                 {
@@ -23,7 +35,6 @@ public abstract class RemoteBranches {
                         }
                     }
                 }
-                // return remoteBranchFiles;
             }
         }
 }

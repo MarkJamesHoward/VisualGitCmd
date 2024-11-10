@@ -22,11 +22,8 @@ namespace MyProject
         string username = "";
         List<string> HashCodeFilenames = new List<string>();
 
-
         public void OnChanged(object sender, FileSystemEventArgs e)
         {
-            //Console.WriteLine(e.Name);
-
             if (
                 (e?.Name?.Contains(".lock", StringComparison.CurrentCultureIgnoreCase) ?? false)  ||
                 (e?.Name?.Contains("tmp", StringComparison.CurrentCultureIgnoreCase) ?? false)
@@ -63,10 +60,6 @@ namespace MyProject
             }
         }
 
-        // var builder = new ConfigurationBuilder()
-        //                                .SetBasePath(MyExeFolder)
-        //                                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-
         public void Run()
         {
             List<CommitNode> CommitNodes = new List<CommitNode>();
@@ -83,7 +76,8 @@ namespace MyProject
                 List<string> remoteBranchFiles = new List<string>();
                 List<string> branchFiles = new List<string>();
 
-                RemoteBranches.GetRemoteBranches(ref remoteBranchFiles, ref branchFiles);
+                branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
+                RemoteBranches.GetRemoteBranches(ref remoteBranchFiles);
 
                 List<string> directories = Directory.GetDirectories(GlobalVars.path).ToList();
                 List<string> files = new List<string>();
@@ -152,13 +146,13 @@ namespace MyProject
 
                                 if (GlobalVars.EmitNeo)
                                 {
-                                    AddCommitToNeo(session, comment, hashCode, commitContents);
+                                    Neo4j.AddCommitToNeo(session, comment, hashCode, commitContents);
                                 }
 
                                 if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
                                 {
                                     if (GlobalVars.EmitNeo)
-                                        AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
+                                        Neo4j.AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
                                 }
 
                                 CreateTreeJson(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea), TreeNodes);
@@ -166,7 +160,7 @@ namespace MyProject
 
                                 if (GlobalVars.EmitNeo)
                                 {
-                                    CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
+                                    Neo4j.CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
                                 }
 
                                 // Get the details of the Blobs in this Tree
@@ -196,7 +190,7 @@ namespace MyProject
                                     if (GlobalVars.EmitNeo && !DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
                                     {
                                         if (GlobalVars.EmitNeo)
-                                            CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
+                                            Neo4j.CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                                     }
 
                                     CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value, TreeNodes);
@@ -210,30 +204,10 @@ namespace MyProject
                     }
 
                 }
-                // Add the Branches
-                foreach (var file in branchFiles)
-                {
-                    var branchHash = File.ReadAllText(file);
-                    if (GlobalVars.EmitNeo)
-                    {
-                        AddBranchToNeo(session, Path.GetFileName(file), branchHash);
-                        CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
-                    }
-                    AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), branches);
-                }
+                
+                GitBranches.ProcessBranches(branchFiles, session, ref branches);
+                RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, session, ref remoteBranches);
 
-                // Add the Remote Branches
-                foreach (var file in remoteBranchFiles)
-                {
-                    var branchHash = File.ReadAllText(file);
-                    if (GlobalVars.EmitNeo)
-                    {
-                        AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
-                        CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
-                    }
-                    AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), remoteBranches);
-
-                }
                 if (GlobalVars.EmitNeo)
                 {
                     AddCommitParentLinks(session, GlobalVars.path, GlobalVars.workingArea);
@@ -556,9 +530,9 @@ namespace MyProject
             {
                 string HEADHash = match.Value.Substring(0, 4);
                 //Create the HEAD Node
-                AddHeadToNeo(session, HEADHash, HeadContents);
+                Neo4j.AddHeadToNeo(session, HEADHash, HeadContents);
                 //Create Link to Commit
-                CreateHEADTOCommitLinkNeo(session, HEADHash);
+                Neo4j.CreateHEADTOCommitLinkNeo(session, HEADHash);
             }
 
             match = Regex.Match(HeadContents, @"ref: refs/heads/(\w+)");
@@ -567,9 +541,9 @@ namespace MyProject
                 //Console.WriteLine("HEAD Branch extract: " + match.Groups[1]?.Value);
                 string branch = match.Groups[1].Value;
                 //Create the HEAD Node
-                AddHeadToNeo(session, branch, HeadContents);
+                Neo4j.AddHeadToNeo(session, branch, HeadContents);
                 //Create Link to Commit
-                CreateHEADTOBranchLinkNeo(session, branch);
+                Neo4j.CreateHEADTOBranchLinkNeo(session, branch);
             }
         }
 
@@ -623,7 +597,7 @@ namespace MyProject
                                 string parentHash = item.Value;
                                 //Console.WriteLine($"\t-> parent commit {commitParent}");
 
-                                CreateCommitTOCommitLinkNeo(session, hashCode, parentHash);
+                                Neo4j.CreateCommitTOCommitLinkNeo(session, hashCode, parentHash);
                             }
 
                         }
@@ -657,223 +631,15 @@ namespace MyProject
             treeNode?.blobs?.Add(child);
         }
 
-        void CreateLinkNeo(ISession? session, string parent, string child, string parentType, string childType)
-        {
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:tree), (b:blob) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[blob_link:blob]->(b) RETURN type(blob_link)",
-                    new { });
+    
 
-                return result;
-            });
-        }
-
-        static bool CreateHEADTOBranchLinkNeo(ISession? session, string branchName)
-        {
-
-            //Console.WriteLine("HEAD -> " + branchName);
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:HEAD), (b:branch) WHERE t.name ='HEAD' AND b.name ='{branchName}' CREATE (t)-[head_link:HEAD]->(b) RETURN type(head_link)",
-                    new { });
-
-                return result.Count();
-            });
-
-            return greeting > 0 ? true : false;
-        }
-
-        static bool CreateHEADTOCommitLinkNeo(ISession? session, string childCommit)
-        {
-            //Console.WriteLine("HEAD -> " + childCommit);
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:HEAD), (b:commit) WHERE t.name ='HEAD' AND b.hash ='{childCommit}' CREATE (t)-[head_link:HEAD]->(b) RETURN type(head_link)",
-                    new { });
-
-                return result.Count();
-            });
-
-            return greeting > 0 ? true : false;
-        }
-
-        static bool CreateCommitTOCommitLinkNeo(ISession? session, string parent, string child)
-        {
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:commit), (b:commit) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[parent_link:parent]->(b) RETURN type(parent_link)",
-                    new { });
-
-                return result.Count();
-            });
-
-            return greeting > 0 ? true : false;
-        }
-
-        static bool CreateCommitLinkNeo(ISession? session, string parent, string child, string parentType, string childType)
-        {
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:commit), (b:tree) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[tree_link:tree]->(b) RETURN type(tree_link)",
-                    new { });
-
-                return result.Count();
-            });
-
-            return greeting > 0 ? true : false;
-        }
-
-        static bool CreateRemoteBranchLinkNeo(ISession? session, string parent, string child)
-        {
-            //Console.WriteLine($"Create Remote Branch link {parent} {child}");
-
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:remotebranch), (b:commit) WHERE t.name ='{parent}' AND b.hash ='{child}' CREATE (t)-[remotebranch_link:branch]->(b) RETURN type(remotebranch_link)",
-                    new { });
-
-                return result.Count();
-            });
-
-            return greeting > 0 ? true : false;
-        }
+  
 
 
-        static bool CreateBranchLinkNeo(ISession? session, string parent, string child)
-        {
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    $"MATCH (t:branch), (b:commit) WHERE t.name ='{parent}' AND b.hash ='{child}' CREATE (t)-[branch_link:branch]->(b) RETURN type(branch_link)",
-                    new { });
-
-                return result.Count();
-            });
-
-            return greeting > 0 ? true : false;
-        }
+       
 
 
-
-        void AddCommitToNeo(ISession? session, string comment, string hash, string contents)
-        {
-            string name = $"commit #{hash} {comment}";
-
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    "CREATE (a:commit) " +
-                    "SET a.name = $name " +
-                    "SET a.comment = $comment " +
-                    "SET a.contents = $contents " +
-                    "SET a.hash = $hash " +
-                    "RETURN a.name + ', from node ' + id(a)",
-                    new { comment, hash, name, contents });
-
-                return "created node";
-            });
-        }
-
-        void AddBranchToJson(string name, string hash, List<Branch> branches)
-        {
-            Branch b = new Branch();
-            b.hash = hash;
-            b.name = name;
-
-            if (!branches.Exists(i => i.name == b.name))
-            {
-                //Console.WriteLine($"Adding branch {b.name} {b.hash}");
-                branches.Add(b);
-            }
-
-        }
-
-        void AddBranchToNeo(ISession? session, string name, string hash)
-        {
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    "CREATE (a:branch) " +
-                    "SET a.name = $name " +
-                    "SET a.hash = $hash " +
-                    "RETURN a.name + ', from node ' + id(a)",
-                    new { name, hash });
-
-                return "created node";
-            });
-        }
-
-        void AddRemoteBranchToNeo(ISession? session, string name, string hash)
-        {
-            name = $"remote{name}";
-
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    "CREATE (a:remotebranch) " +
-                    "SET a.name = $name " +
-                    "SET a.hash = $hash " +
-                    "RETURN a.name + ', from node ' + id(a)",
-                    new { name, hash });
-
-                return "created node";
-            });
-        }
-
-
-
-
-        void AddTreeToNeo(ISession? session, string hash, string contents)
-        {
-            string name = $"tree #{hash}";
-
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    "CREATE (a:tree) " +
-                    "SET a.name = $name " +
-                    "SET a.hash = $hash " +
-                    "SET a.contents = $contents " +
-                    "RETURN a.name + ', from node ' + id(a)",
-                    new { hash, contents, name });
-
-                return "created node";
-            });
-        }
-
-        void AddHeadToNeo(ISession? session, string hash, string contents)
-        {
-            var greeting = session?.ExecuteWrite(
-            tx =>
-            {
-                var result = tx.Run(
-                    "CREATE (a:HEAD) " +
-                    "SET a.name = 'HEAD' " +
-                    "SET a.hash = $hash " +
-                    "SET a.contents = $contents " +
-                    "RETURN a.name + ', from node ' + id(a)",
-                    new { hash, contents });
-
-                return "created node";
-            });
-        }
+        
 
 
     }
