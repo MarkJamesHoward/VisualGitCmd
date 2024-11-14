@@ -46,7 +46,9 @@ public abstract class FileWatching
     }
     public delegate void OnChangedDelegate(object sender, FileSystemEventArgs e);
 
-    public static void CreateFileWatcher(OnChangedDelegate OnChanged)
+    private static OnChangedDelegate handler = OnChanged;
+
+    public static void CreateFileWatcher()
     {
         using var watcher = new FileSystemWatcher(GlobalVars.RepoPath);
         {
@@ -59,11 +61,10 @@ public abstract class FileWatching
                                     | NotifyFilters.Security
                                     | NotifyFilters.Size;
 
-            watcher.Changed += OnChanged.Invoke;
-            watcher.Created += OnChanged.Invoke;
-            watcher.Deleted += OnChanged.Invoke;
-            watcher.Renamed += OnChanged.Invoke;
-            //watcher.Error += OnError;
+            watcher.Changed += handler.Invoke;
+            watcher.Created += handler.Invoke;
+            watcher.Deleted += handler.Invoke;
+            watcher.Renamed += handler.Invoke;
 
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;

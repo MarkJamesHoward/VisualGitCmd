@@ -1,7 +1,8 @@
 
 public abstract class GlobalVars
 {
-
+    public static string? exePath { get; set; }
+    public static string version = "0.0.14";
     public static bool EmitJsonOnly = false;
     public static bool EmitWeb = false;
     public static bool UnPackRefs = false;
