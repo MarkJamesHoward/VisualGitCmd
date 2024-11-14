@@ -7,6 +7,117 @@ namespace MyProject {
 
     public abstract class JSONGeneration {
 
+        public static void CreateTreeToBlobLinkJson(string parent, string child, List<TreeNode> treeNodes)
+        {
+            var treeNode = treeNodes?.Find(i => i.hash == parent);
+            treeNode?.blobs?.Add(child);
+        }
+
+        public static void OutputWorkingFilesJson(string workingFolder, string JsonPath)
+        {
+            var Json = string.Empty;
+            List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
+
+            List<string> files = FileType.GetWorkingFiles(workingFolder);
+
+            foreach (string file in files)
+            {
+                WorkingFile FileObj = new WorkingFile();
+                FileObj.filename = file;
+                FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
+                WorkingFilesList.Add(FileObj);
+            }
+
+            Json = JsonSerializer.Serialize(WorkingFilesList);
+            File.WriteAllText(JsonPath, Json);
+        }
+
+        public static List<IndexFile> IndexFilesJsonNodes(string workingArea)
+        {
+            var Json = string.Empty;
+            List<IndexFile> IndexFilesList = new List<IndexFile>();
+
+            string files = FileType.GetIndexFiles(GlobalVars.workingArea);
+            // Console.WriteLine(files);
+            List<string> fileList = files.Split("\n").ToList();
+
+            foreach (string file in fileList)
+            {
+                IndexFile FileObj = new IndexFile();
+                FileObj.filename = file;
+                IndexFilesList.Add(FileObj);
+            }
+
+            return IndexFilesList;
+
+        }
+        public static void OutputIndexFilesJson(string JsonPath)
+        {
+            var Json = string.Empty;
+            List<IndexFile> IndexFilesList = new List<IndexFile>();
+
+            string files = FileType.GetIndexFiles("");
+            //Console.WriteLine(files);
+            List<string> fileList = files.Split("\n").ToList();
+
+            foreach (string file in fileList)
+            {
+                IndexFile FileObj = new IndexFile();
+                FileObj.filename = file;
+                IndexFilesList.Add(FileObj);
+            }
+
+            Json = JsonSerializer.Serialize(IndexFilesList);
+
+            Console.WriteLine(JsonPath);
+            File.WriteAllText(JsonPath, Json);
+        }
+
+
+        public static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
+        {
+            var Json = string.Empty;
+
+            Json = JsonSerializer.Serialize(Nodes);
+
+            //Console.WriteLine(Json);
+            //Console.WriteLine(JsonPath);
+            File.WriteAllText(JsonPath, Json);
+        }
+
+        public static void OutputBranchJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath)
+        {
+            var Json = string.Empty;
+
+            Json = JsonSerializer.Serialize(Nodes);
+
+            //Console.WriteLine(Json);
+            File.WriteAllText(JsonPath, Json);
+        }
+
+        public static void CreateCommitJson(List<string> parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
+        {
+            CommitNode n = new CommitNode();
+            n.text = comment;
+            n.hash = hash;
+            n.parent = parentCommitHash;
+            n.tree = treeHash;
+
+            if (!CommitNodes.Exists(i => i.hash == n.hash))
+                CommitNodes.Add(n);
+        }
+
+        public static void CreateTreeJson(string treeHash, string contents, List<TreeNode> TreeNodes)
+        {
+            TreeNode tn = new TreeNode();
+            tn.hash = treeHash;
+            tn.blobs = new List<string>();
+
+            if (!TreeNodes.Exists(i => i.hash == tn.hash))
+            {
+                TreeNodes.Add(tn);
+            }
+        }
         public static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
         {
             if (firstrun)

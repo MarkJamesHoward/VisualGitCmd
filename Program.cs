@@ -42,10 +42,10 @@ namespace MyProject
             // string username = builder.Build().GetSection("cloud").GetSection("username").Value;
 
             // Initial Run to check for files without detecting any file changes
-            VisualGit _visualGit = new VisualGit();
-            _visualGit.Run();
+            //VisualGit _visualGit = new VisualGit();
+            VisualGit.Run();
 
-            FileWatching.OnChangedDelegate handler = _visualGit.OnChanged;
+            FileWatching.OnChangedDelegate handler = FileWatching.OnChanged;
             FileWatching.CreateFileWatcher(handler);
         }
     }

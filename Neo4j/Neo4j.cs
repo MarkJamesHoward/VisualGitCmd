@@ -4,6 +4,25 @@ namespace MyProject {
 
     public abstract class Neo4j {
 
+        public static IDriver GetDriver(string uri, string username, string password)
+        {
+            IDriver _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
+            return _driver;
+        }
+
+        public static void ClearExistingNodesInNeo(ISession session)
+        {
+            var greeting = session.ExecuteWrite(
+            tx =>
+            {
+                var result = tx.Run(
+                    $"MATCH (n) DETACH DELETE n",
+                    new { });
+
+                return result;
+            });
+        }
+
         public static void AddCommitToNeo(ISession? session, string comment, string hash, string contents)
         {
             string name = $"commit #{hash} {comment}";
