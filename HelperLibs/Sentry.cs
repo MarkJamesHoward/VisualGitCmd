@@ -3,7 +3,7 @@ using Sentry.Profiling;
 
 namespace MyProject {
 
-public abstract class Sentry {
+public abstract class SentryMethods {
 public static void ConfigureSentry() {
 
 SentrySdk.Init(options =>

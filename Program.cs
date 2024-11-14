@@ -1,15 +1,12 @@
-﻿using System.Diagnostics;
+﻿
+using System.Diagnostics;
+using MyProject;
 using MyProjectl;
 
-namespace MyProject
-{
-    class Program
-    {
-        static string version = "0.0.14";
+        string version = "0.0.14";
 
-        static void Main(string[] args)
-        {        
-            Sentry.ConfigureSentry();
+       
+            SentryMethods.ConfigureSentry();
 
             string exePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? "";
             Console.WriteLine($"Exe Path {exePath}");
@@ -47,6 +44,3 @@ namespace MyProject
 
             FileWatching.OnChangedDelegate handler = FileWatching.OnChanged;
             FileWatching.CreateFileWatcher(handler);
-        }
-    }
-}
