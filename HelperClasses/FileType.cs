@@ -1,13 +1,8 @@
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Neo4j.Driver;
-using Microsoft.Extensions.Configuration;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
-public static class FileType {
 
-     public static bool DoesNodeExistAlready(ISession? session, string hash, string type)
+public abstract class FileType
+{
+    public static bool DoesNodeExistAlready(ISession? session, string hash, string type)
     {
         var greeting = session?.ExecuteWrite(
         tx =>
@@ -61,19 +56,20 @@ public static class FileType {
         while (!p.HasExited && !exit)
         {
             System.Threading.Thread.Sleep(100);
-           // Console.WriteLine($"Running git cat-file {file} -t");
-            if (tries++ > 10) {
+            // Console.WriteLine($"Running git cat-file {file} -t");
+            if (tries++ > 10)
+            {
                 exit = true;
                 throw new Exception("Cat File did not return within a second");
             }
         }
         return p.StandardOutput.ReadToEnd();
     }
-    
+
 
     public static string GetIndexFiles(string workingArea)
     {
-         int count = 0;
+        int count = 0;
         //run the git cat-file command to determine the file type
         Process p = new Process();
         p.StartInfo = new ProcessStartInfo("git", $"ls-files -s");
@@ -84,14 +80,15 @@ public static class FileType {
         while (!p.HasExited)
         {
             System.Threading.Thread.Sleep(100);
-            if (count++ > 10) {
+            if (count++ > 10)
+            {
                 throw new Exception("git ls-files failed to return..");
             }
         }
         return p.StandardOutput.ReadToEnd();
     }
 
-     public static List<string> GetWorkingFiles(string dir)
+    public static List<string> GetWorkingFiles(string dir)
     {
         //run the git cat-file command to determine the file type
         List<string> StrippedFiles = new List<string>();
@@ -105,7 +102,8 @@ public static class FileType {
         return StrippedFiles;
     }
 
-    public static string GetFileContents(string filename) {
+    public static string GetFileContents(string filename)
+    {
 
         string contents = File.ReadAllText(filename);
         //Console.WriteLine("Reading File contents " + filename);

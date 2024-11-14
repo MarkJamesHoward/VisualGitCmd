@@ -1,13 +1,6 @@
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Neo4j.Driver;
-using Microsoft.Extensions.Configuration;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-public static class BlobCode
+public abstract class BlobCode
 {
-     public static void AddBlobToNeo(ISession? session, string filename, string hash, string contents)
+    public static void AddBlobToNeo(ISession? session, string filename, string hash, string contents)
     {
         string filenameplushash = $"{filename} #{hash}";
 
@@ -26,7 +19,7 @@ public static class BlobCode
             return "created node";
         });
     }
-     public static void AddOrphanBlobsToJson(string branchPath, string path,List<Blob> blobs, string workingArea, bool PerformTextExtraction)
+    public static void AddOrphanBlobsToJson(string branchPath, string path, List<Blob> blobs, string workingArea, bool PerformTextExtraction)
     {
         //Console.WriteLine("Adding orphan blobs to json");
 
@@ -49,7 +42,8 @@ public static class BlobCode
                 string fileType = FileType.GetFileType(hashCode, workingArea);
 
                 if (fileType.Contains("blob"))
-                {;
+                {
+                    ;
 
                     string blobContents = String.Empty;
 
@@ -60,13 +54,13 @@ public static class BlobCode
 
                     //Console.WriteLine($"blob {hashCode}");
                     AddBlobToJson("", "", hashCode, blobContents, blobs);
-                    
+
                 }
             }
         }
     }
 
-    public static void AddOrphanBlobs(ISession? session, string branchPath, string path,List<Blob> blobs, string workingArea, bool PerformTextExtraction)
+    public static void AddOrphanBlobs(ISession? session, string branchPath, string path, List<Blob> blobs, string workingArea, bool PerformTextExtraction)
     {
 
         List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
@@ -100,7 +94,7 @@ public static class BlobCode
             }
         }
     }
-      public static void AddBlobToJson(string treeHash, string filename, string hash, string contents, List<Blob> Blobs)
+    public static void AddBlobToJson(string treeHash, string filename, string hash, string contents, List<Blob> Blobs)
     {
         Blob b = new Blob();
         b.filename = filename;
