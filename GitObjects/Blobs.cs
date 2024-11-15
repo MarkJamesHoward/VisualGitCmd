@@ -22,20 +22,16 @@ public abstract class BlobCode
     }
     public static void AddOrphanBlobsToJson(string branchPath, string path, List<Blob> blobs, string workingArea, bool PerformTextExtraction)
     {
-        //Console.WriteLine("Adding orphan blobs to json");
+        TraceMessages.AddingOrphanBlobsToJson();
 
-        List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
-        List<string> directories = Directory.GetDirectories(path).ToList();
-        List<string> files = new List<string>();
-
-        foreach (string dir in directories)
+        foreach (string dir in Directory.GetDirectories(path).ToList())
         {
             if (dir.Contains("info") || dir.Contains("pack"))
             {
                 break;
             }
 
-            files = Directory.GetFiles(dir).ToList();
+            List<string> files = Directory.GetFiles(dir).ToList();
 
             foreach (string file in files)
             {
@@ -51,9 +47,7 @@ public abstract class BlobCode
                         blobContents = FileType.GetContents(hashCode, workingArea);
                     }
 
-                    //Console.WriteLine($"blob {hashCode}");
                     AddBlobToJson("", "", hashCode, blobContents, blobs);
-
                 }
             }
         }
