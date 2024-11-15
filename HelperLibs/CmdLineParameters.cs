@@ -83,12 +83,12 @@ public class CmdLineArguments
                             // Check if path exists
                             if (!Directory.Exists(GlobalVars.RepoPath))
                             {
-                                Console.WriteLine($"Invalid GlobalVars.RepoPath-{GlobalVars.RepoPath}");
-                                throw new Exception("Invalid GlobalVars.RepoPath");
+                                StandardMessages.InvalidRepoPath(GlobalVars.RepoPath);
+                                throw new Exception("Invalid RepoPath");
                             }
                             else
                             {
-                                Console.WriteLine($"Repo to examine: {GlobalVars.RepoPath}");
+                                StandardMessages.RepoToExamine(GlobalVars.RepoPath);
                             }
                         }
                     }
@@ -129,7 +129,7 @@ public class CmdLineArguments
 
                     if (GlobalVars.EmitWeb)
                     {
-                        Console.WriteLine($"Web emission enabled");
+                        StandardMessages.WebEmissionEnabled();
                     }
 
                 });

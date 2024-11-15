@@ -1,3 +1,4 @@
+using Neo4j.Driver;
 public abstract class BlobCode
 {
     public static void AddBlobToNeo(ISession? session, string filename, string hash, string contents)
@@ -43,8 +44,6 @@ public abstract class BlobCode
 
                 if (fileType.Contains("blob"))
                 {
-                    ;
-
                     string blobContents = String.Empty;
 
                     if (PerformTextExtraction)
@@ -104,17 +103,17 @@ public abstract class BlobCode
 
         if (!Blobs.Exists(i => i.hash == b.hash))
         {
-            //Console.WriteLine($"Adding blob {b.hash}");
+            StandardMessages.AddingBlobObject(b.hash);
             Blobs.Add(b);
         }
         else
         {
-            //Console.WriteLine($"Skipping blob {b.hash}");
             // If filename is different then it has the same contents 
             // Combine the names so they are both displayed
             var existingBlob = Blobs.Find(i => i.hash == b.hash);
             if (existingBlob?.filename?.Contains(b.filename) == false)
             {
+                StandardMessages.BlobSkippedAsSameContents(b.hash);
                 existingBlob.filename = existingBlob?.filename + " " + b.filename;
             }
 

@@ -1,5 +1,7 @@
 ﻿SentryMethods.ConfigureSentry();
 
+MyLogging.CreateLogger();
+
 // Determine where we are running
 FilePath.GetExeFilePath();
 

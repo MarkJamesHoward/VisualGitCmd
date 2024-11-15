@@ -1,4 +1,4 @@
-
+using Neo4j.Driver;
 public abstract class VisualGit
 {
     #region StaticVariables
@@ -87,9 +87,9 @@ public abstract class VisualGit
 
                             foreach (Match commitParentMatch in commitParents)
                             {
-                                //string parentHash = commitParent.Groups[1].Value;
-                                commitParentHashes.Add(commitParentMatch.Groups[1].Value);
-                                //Console.WriteLine($"\t-> hashCode parent commit {commitParentMatch.Groups[1].Value}");
+                                string parentHash = commitParentMatch.Groups[1].Value;
+                                commitParentHashes.Add(parentHash);
+                                StandardMessages.ParentCommitHashCode(hashCode, parentHash);
                             }
 
                             string comment = commitComment.Groups[1].Value;

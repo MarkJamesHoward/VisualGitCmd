@@ -1,4 +1,4 @@
-
+using Neo4j.Driver;
 public abstract class RemoteBranches
 {
 
@@ -14,7 +14,7 @@ public abstract class RemoteBranches
                 Neo4jHelper.AddRemoteBranchToNeo(session, Path.GetFileName(file), branchHash);
                 Neo4jHelper.CreateRemoteBranchLinkNeo(session, $"remote{Path.GetFileName(file)}", branchHash.Substring(0, 4));
             }
-            GitBranches.AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), ref remoteBranches);
+            GitBranches.CreateBranchObject(Path.GetFileName(file), branchHash.Substring(0, 4), ref remoteBranches);
 
         }
     }

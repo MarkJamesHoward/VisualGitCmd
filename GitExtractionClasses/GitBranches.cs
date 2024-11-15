@@ -1,9 +1,8 @@
-
+using Neo4j.Driver;
 
 public abstract class GitBranches
 {
-
-    public static void AddBranchToJson(string name, string hash, ref List<Branch> branches)
+    public static void CreateBranchObject(string name, string hash, ref List<Branch> branches)
     {
         Branch b = new Branch();
         b.hash = hash;
@@ -28,7 +27,7 @@ public abstract class GitBranches
                 Neo4jHelper.AddBranchToNeo(session, Path.GetFileName(file), branchHash);
                 Neo4jHelper.CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
             }
-            AddBranchToJson(Path.GetFileName(file), branchHash.Substring(0, 4), ref branches);
+            CreateBranchObject(Path.GetFileName(file), branchHash.Substring(0, 4), ref branches);
         }
 
     }
