@@ -4,20 +4,21 @@ public abstract class GitBranches
 {
     public static void CreateBranchObject(string name, string hash, ref List<Branch> branches)
     {
-        Branch b = new Branch();
-        b.hash = hash;
-        b.name = name;
+        Branch b = new Branch
+        {
+            hash = hash,
+            name = name
+        };
 
         if (!branches.Exists(i => i.name == b.name))
         {
-            //Console.WriteLine($"Adding branch {b.name} {b.hash}");
+            StandardMessages.AddingBranchObject(b.name, b.hash);
             branches.Add(b);
         }
     }
 
     public static void ProcessBranches(List<string> branchFiles, ISession? session, ref List<Branch> branches)
     {
-
         // Add the Branches
         foreach (var file in branchFiles)
         {
@@ -29,6 +30,5 @@ public abstract class GitBranches
             }
             CreateBranchObject(Path.GetFileName(file), branchHash.Substring(0, 4), ref branches);
         }
-
     }
 }

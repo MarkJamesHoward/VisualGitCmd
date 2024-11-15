@@ -2,6 +2,11 @@ using static MyLogging;
 
 public abstract class StandardMessages()
 {
+    public static void AddingBranchObject(string name, string hash)
+    {
+        logger?.LogInformation($"Adding Branch {name} {hash}");
+    }
+
     public static void DisplayVersion()
     {
         logger?.LogInformation($"Version {GlobalVars.version} - Ensure matches against website for compatibility");
