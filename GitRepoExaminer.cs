@@ -7,6 +7,71 @@ public abstract class GitRepoExaminer
 
     #endregion
 
+    public static void ProcessEachFile(string dir)
+    {
+        foreach (string file in Directory.GetFiles(dir).ToList())
+        {
+            if (file.Contains("pack-") || file.Contains(".idx"))
+            {
+                break;
+            }
+
+            string hashCode_determinedFrom_dir_and_first2charOfFilename = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
+
+            string fileType = FileType.GetFileType(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
+
+            //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
+
+            if (fileType.Contains("commit"))
+            {
+                CommitNodeExtraction CommitNode = new(hashCode_determinedFrom_dir_and_first2charOfFilename);
+
+                if (CommitNode.commitTreeDetails.Success)
+                {
+                    // Get details of the tree,parent and comment in this commit
+                    string treeHash = CommitNode.commitTreeDetails.Groups[1].Value;
+
+                    List<string> commitParentHashes = new List<string>();
+
+                    foreach (Match commitParentMatch in CommitNode.commitParentDetails)
+                    {
+                        string parentHash = commitParentMatch.Groups[1].Value;
+                        commitParentHashes.Add(parentHash);
+                        StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
+                    }
+
+                    string comment = CommitNode.commitCommentDetails.Groups[1].Value;
+                    comment = comment.Trim();
+
+                    if (GlobalVars.EmitNeo)
+                    {
+                        Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.commitContents);
+                    }
+
+                    if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, treeHash, "tree"))
+                    {
+                        if (GlobalVars.EmitNeo)
+                            Neo4jHelper.AddTreeToNeo(Neo4jHelper.session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
+                    }
+
+                    TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
+                    CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
+
+                    if (GlobalVars.EmitNeo)
+                    {
+                        Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
+                    }
+
+                    BlobNodeExtraction BlobNode = new();
+                    BlobNode.ProcessBlob(treeHash, CommitNode);
+                }
+                else
+                {
+                    //Console.WriteLine("No Tree found in Commit");
+                }
+            }
+        }
+    }
     public static void Run()
     {
         // Get all the files in the .git/objects folder
@@ -20,70 +85,7 @@ public abstract class GitRepoExaminer
                 {
                     break;
                 }
-
-                foreach (string file in Directory.GetFiles(dir).ToList())
-                {
-                    if (file.Contains("pack-") || file.Contains(".idx"))
-                    {
-                        break;
-                    }
-
-                    string hashCode_determinedFrom_dir_and_first2charOfFilename = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-
-                    string fileType = FileType.GetFileType(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
-
-                    //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
-
-                    if (fileType.Contains("commit"))
-                    {
-                        CommitNodeExtraction CommitNode = new(hashCode_determinedFrom_dir_and_first2charOfFilename);
-
-                        if (CommitNode.commitTreeDetails.Success)
-                        {
-                            // Get details of the tree,parent and comment in this commit
-                            string treeHash = CommitNode.commitTreeDetails.Groups[1].Value;
-
-                            List<string> commitParentHashes = new List<string>();
-
-                            foreach (Match commitParentMatch in CommitNode.commitParentDetails)
-                            {
-                                string parentHash = commitParentMatch.Groups[1].Value;
-                                commitParentHashes.Add(parentHash);
-                                StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
-                            }
-
-                            string comment = CommitNode.commitCommentDetails.Groups[1].Value;
-                            comment = comment.Trim();
-
-                            if (GlobalVars.EmitNeo)
-                            {
-                                Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.commitContents);
-                            }
-
-                            if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, treeHash, "tree"))
-                            {
-                                if (GlobalVars.EmitNeo)
-                                    Neo4jHelper.AddTreeToNeo(Neo4jHelper.session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                            }
-
-                            TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                            CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
-
-                            if (GlobalVars.EmitNeo)
-                            {
-                                Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
-                            }
-
-                            BlobNodeExtraction BlobNode = new();
-                            BlobNode.ProcessBlob(treeHash, CommitNode);
-                        }
-                        else
-                        {
-                            //Console.WriteLine("No Tree found in Commit");
-                        }
-                    }
-                }
-
+                ProcessEachFile(dir);
             }
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
