@@ -2,6 +2,19 @@ using Neo4j.Driver;
 
 public abstract class Neo4jHelper
 {
+    static string password = "";
+    static string uri = "";
+    static string username = "";
+
+    public static void CheckIfNeoj4EmissionEnabled(ref IDriver _driver, ref ISession session)
+    {
+        if (GlobalVars.EmitNeo)
+        {
+            _driver = Neo4jHelper.GetDriver(uri, username, password);
+            session = _driver.Session();
+            Neo4jHelper.ClearExistingNodesInNeo(session);
+        }
+    }
 
     public static IDriver GetDriver(string uri, string username, string password)
     {

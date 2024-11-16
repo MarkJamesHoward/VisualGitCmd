@@ -5,15 +5,12 @@ public abstract class GitRepoExaminer
     static string name = RandomName.randomNameGenerator.GenerateRandomPlaceName();
     static bool firstRun = true;
     static int dataID = 1;
-    static string password = "";
-    static string uri = "";
-    static string username = "";
+
     static List<string> HashCodeFilenames = new List<string>();
     #endregion
 
     public static void Run()
     {
-
         List<TreeNode> TreeNodes = new List<TreeNode>();
         List<Branch> branches = new List<Branch>();
         List<Branch> remoteBranches = new List<Branch>();
@@ -32,16 +29,10 @@ public abstract class GitRepoExaminer
             List<string> directories = Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList();
             List<string> files = new List<string>();
 
-            IDriver _driver;
+            IDriver? _driver = null;
             ISession? session = null;
 
-            if (GlobalVars.EmitNeo)
-            {
-                _driver = Neo4jHelper.GetDriver(uri, username, password);
-                session = _driver.Session();
-                Neo4jHelper.ClearExistingNodesInNeo(session);
-            }
-
+            Neo4jHelper.CheckIfNeoj4EmissionEnabled(ref _driver, ref session);
 
             foreach (string dir in directories)
             {

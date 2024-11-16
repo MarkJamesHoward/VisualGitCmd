@@ -99,7 +99,7 @@ public abstract class BlobCode
 
         if (!Blobs.Exists(i => i.hash == b.hash))
         {
-            StandardMessages.AddingBlobObject(b.hash);
+            DebugMessages.AddingBlobObject(b.hash, b.filename);
             Blobs.Add(b);
         }
         else

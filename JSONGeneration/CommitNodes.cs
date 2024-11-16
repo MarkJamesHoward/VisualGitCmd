@@ -11,6 +11,9 @@ public abstract class Commits
         n.tree = treeHash;
 
         if (!CommitNodesList.Exists(i => i.hash == n.hash))
+        {
+            DebugMessages.AddedNewCommitObjectToCommitNodesList(n.hash, n.text);
             CommitNodesList.Add(n);
+        }
     }
 }

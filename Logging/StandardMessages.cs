@@ -38,10 +38,6 @@ public abstract class StandardMessages()
         logger?.LogInformation($"Git Repo Selected: {value}");
     }
 
-    public static void AddingBlobObject(string hash)
-    {
-        logger?.LogDebug($"Adding Blob Object {hash}");
-    }
 
     public static void BlobSkippedAsSameContents(string hash)
     {
