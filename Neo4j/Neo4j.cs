@@ -2,11 +2,13 @@ using Neo4j.Driver;
 
 public abstract class Neo4jHelper
 {
+    public static IDriver? _driver = null;
+    public static ISession? session = null;
     static string password = "";
     static string uri = "";
     static string username = "";
 
-    public static void CheckIfNeoj4EmissionEnabled(ref IDriver _driver, ref ISession session)
+    public static void CheckIfNeoj4EmissionEnabled()
     {
         if (GlobalVars.EmitNeo)
         {

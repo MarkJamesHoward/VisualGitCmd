@@ -1,6 +1,6 @@
-public abstract class Commits
+public abstract class CommitNodesList
 {
-    public static List<CommitNode> CommitNodesList = new List<CommitNode>();
+    public static List<CommitNode> CommitNodes = new List<CommitNode>();
 
     public static void AddCommitObjectToCommitNodeList(List<string> parentCommitHash, string comment, string hash, string treeHash, string contents)
     {
@@ -10,10 +10,10 @@ public abstract class Commits
         n.parent = parentCommitHash;
         n.tree = treeHash;
 
-        if (!CommitNodesList.Exists(i => i.hash == n.hash))
+        if (!CommitNodes.Exists(i => i.hash == n.hash))
         {
             DebugMessages.AddedNewCommitObjectToCommitNodesList(n.hash, n.text);
-            CommitNodesList.Add(n);
+            CommitNodes.Add(n);
         }
     }
 }

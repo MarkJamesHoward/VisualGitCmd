@@ -10,7 +10,6 @@ public abstract class GitRepoExaminer
 
     public static void Run()
     {
-        List<TreeNode> TreeNodes = new List<TreeNode>();
         List<Branch> branches = new List<Branch>();
         List<Branch> remoteBranches = new List<Branch>();
 
@@ -28,10 +27,7 @@ public abstract class GitRepoExaminer
             List<string> directories = Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList();
             List<string> files = new List<string>();
 
-            IDriver? _driver = null;
-            ISession? session = null;
-
-            Neo4jHelper.CheckIfNeoj4EmissionEnabled(ref _driver, ref session);
+            Neo4jHelper.CheckIfNeoj4EmissionEnabled();
 
             foreach (string dir in directories)
             {
@@ -86,21 +82,21 @@ public abstract class GitRepoExaminer
 
                             if (GlobalVars.EmitNeo)
                             {
-                                Neo4jHelper.AddCommitToNeo(session, comment, hashCode, commitContents);
+                                Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode, commitContents);
                             }
 
-                            if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(session, treeHash, "tree"))
+                            if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, treeHash, "tree"))
                             {
                                 if (GlobalVars.EmitNeo)
-                                    Neo4jHelper.AddTreeToNeo(session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
+                                    Neo4jHelper.AddTreeToNeo(Neo4jHelper.session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
                             }
 
-                            JSONGeneration.CreateTreeJson(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea), TreeNodes);
-                            Commits.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode, treeHash, commitContents);
+                            TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
+                            CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode, treeHash, commitContents);
 
                             if (GlobalVars.EmitNeo)
                             {
-                                Neo4jHelper.CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
+                                Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode, treeHash, "", "");
                             }
 
                             // Get the details of the BlobCode.Blobs in this Tree
@@ -118,22 +114,22 @@ public abstract class GitRepoExaminer
                                 }
 
                                 //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
-                                if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(session, blobHash, "blob"))
+                                if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, blobHash, "blob"))
                                 {
                                     if (GlobalVars.EmitNeo)
-                                        BlobCode.AddBlobToNeo(session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+                                        BlobCode.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
                                 }
                                 //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 
                                 BlobCode.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
-                                if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
+                                if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(Neo4jHelper.session, match.Groups[1].Value, blobHash))
                                 {
                                     if (GlobalVars.EmitNeo)
-                                        Neo4jHelper.CreateLinkNeo(session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
+                                        Neo4jHelper.CreateLinkNeo(Neo4jHelper.session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                                 }
 
-                                JSONGeneration.CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value, TreeNodes);
+                                TreeNodesList.CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value);
                             }
                         }
                         else
@@ -145,25 +141,25 @@ public abstract class GitRepoExaminer
 
             }
 
-            GitBranches.ProcessBranches(branchFiles, session, ref branches);
-            RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, session, ref remoteBranches);
+            GitBranches.ProcessBranches(branchFiles, Neo4jHelper.session, ref branches);
+            RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, Neo4jHelper.session, ref remoteBranches);
 
             if (GlobalVars.EmitNeo)
             {
-                Links.AddCommitParentLinks(session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
-                BlobCode.AddOrphanBlobs(session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                Nodes.GetHEAD(session, GlobalVars.head);
+                Links.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
+                BlobCode.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                Nodes.GetHEAD(Neo4jHelper.session, GlobalVars.head);
             }
 
 
             if (GlobalVars.EmitJsonOnly)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJson(Commits.CommitNodesList, GlobalVars.CommitNodesJsonFile);
-                JSONGeneration.OutputNodesJson(TreeNodes, GlobalVars.TreeNodesJsonFile);
+                JSONGeneration.OutputNodesJson(CommitNodesList.CommitNodes, GlobalVars.CommitNodesJsonFile);
+                JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
                 JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
                 JSONGeneration.OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
-                JSONGeneration.OutputBranchJson(branches, TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
+                JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
                 JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
                 JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
             }
@@ -171,7 +167,7 @@ public abstract class GitRepoExaminer
             if (GlobalVars.EmitWeb)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++, Commits.CommitNodesList, BlobCode.Blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
+                JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++, CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
             }
 
             // Only run this on the first run

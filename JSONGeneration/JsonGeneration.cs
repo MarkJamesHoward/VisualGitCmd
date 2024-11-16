@@ -1,12 +1,6 @@
 public abstract class JSONGeneration
 {
 
-    public static void CreateTreeToBlobLinkJson(string parent, string child, List<TreeNode> treeNodes)
-    {
-        var treeNode = treeNodes?.Find(i => i.hash == parent);
-        treeNode?.blobs?.Add(child);
-    }
-
     public static void OutputWorkingFilesJson(string workingFolder, string JsonPath)
     {
         var Json = string.Empty;
@@ -91,17 +85,7 @@ public abstract class JSONGeneration
 
 
 
-    public static void CreateTreeJson(string treeHash, string contents, List<TreeNode> TreeNodes)
-    {
-        TreeNode tn = new TreeNode();
-        tn.hash = treeHash;
-        tn.blobs = new List<string>();
 
-        if (!TreeNodes.Exists(i => i.hash == tn.hash))
-        {
-            TreeNodes.Add(tn);
-        }
-    }
     public static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
         if (firstrun)
