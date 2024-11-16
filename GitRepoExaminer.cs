@@ -13,7 +13,7 @@ public abstract class GitRepoExaminer
 
     public static void Run()
     {
-        List<CommitNode> CommitNodes = new List<CommitNode>();
+
         List<TreeNode> TreeNodes = new List<TreeNode>();
         List<Branch> branches = new List<Branch>();
         List<Branch> remoteBranches = new List<Branch>();
@@ -106,7 +106,7 @@ public abstract class GitRepoExaminer
                             }
 
                             JSONGeneration.CreateTreeJson(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea), TreeNodes);
-                            JSONGeneration.CreateCommitJson(commitParentHashes, comment, hashCode, treeHash, commitContents, CommitNodes);
+                            Commits.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode, treeHash, commitContents);
 
                             if (GlobalVars.EmitNeo)
                             {
@@ -169,7 +169,7 @@ public abstract class GitRepoExaminer
             if (GlobalVars.EmitJsonOnly)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJson(CommitNodes, GlobalVars.CommitNodesJsonFile);
+                JSONGeneration.OutputNodesJson(Commits.CommitNodesList, GlobalVars.CommitNodesJsonFile);
                 JSONGeneration.OutputNodesJson(TreeNodes, GlobalVars.TreeNodesJsonFile);
                 JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
                 JSONGeneration.OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
@@ -181,7 +181,7 @@ public abstract class GitRepoExaminer
             if (GlobalVars.EmitWeb)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, BlobCode.Blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
+                JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, Commits.CommitNodesList, BlobCode.Blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
             }
 
             // Only run this on the first run

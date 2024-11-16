@@ -89,17 +89,7 @@ public abstract class JSONGeneration
         File.WriteAllText(JsonPath, Json);
     }
 
-    public static void CreateCommitJson(List<string> parentCommitHash, string comment, string hash, string treeHash, string contents, List<CommitNode> CommitNodes)
-    {
-        CommitNode n = new CommitNode();
-        n.text = comment;
-        n.hash = hash;
-        n.parent = parentCommitHash;
-        n.tree = treeHash;
 
-        if (!CommitNodes.Exists(i => i.hash == n.hash))
-            CommitNodes.Add(n);
-    }
 
     public static void CreateTreeJson(string treeHash, string contents, List<TreeNode> TreeNodes)
     {
