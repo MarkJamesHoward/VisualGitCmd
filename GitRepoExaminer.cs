@@ -13,8 +13,6 @@ public abstract class GitRepoExaminer
         List<Branch> branches = new List<Branch>();
         List<Branch> remoteBranches = new List<Branch>();
 
-        HEAD HEAD = new HEAD();
-
         // Get all the files in the .git/objects folder
         try
         {
@@ -145,12 +143,16 @@ public abstract class GitRepoExaminer
             RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, Neo4jHelper.session, ref remoteBranches);
 
             Neo4jHelper.ProcessNeo4jOutput();
-            JSONGeneration.ProcessJSONOutput(HEAD, branches);
+            JSONGeneration.ProcessJSONONLYOutput(branches);
 
             if (GlobalVars.EmitWeb)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++, CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
+
+                JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
+                    CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, branches,
+                        remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
+                             Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNode.GetHeadNodeFromPath());
             }
 
             // Only run this on the first run

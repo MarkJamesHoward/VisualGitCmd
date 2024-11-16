@@ -1,6 +1,6 @@
 public abstract class JSONGeneration
 {
-    public static void ProcessJSONOutput(HEAD head, List<Branch> branches)
+    public static void ProcessJSONONLYOutput(List<Branch> branches)
     {
         if (GlobalVars.EmitJsonOnly)
         {
@@ -8,7 +8,7 @@ public abstract class JSONGeneration
             JSONGeneration.OutputNodesJson(CommitNodesList.CommitNodes, GlobalVars.CommitNodesJsonFile);
             JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
             JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
-            JSONGeneration.OutputHEADJson(head, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
+            HEADJsonGeneration.OutputHEADJson(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);
             JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
             JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
             JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
@@ -170,37 +170,7 @@ public abstract class JSONGeneration
         };
         await PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
     }
-    public static void OutputHEADJson(HEAD head, string JsonPath, string path)
-    {
-        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.GITobjectsPath, "HEAD"));
-        //Console.WriteLine("Outputting JSON HEAD");
-        string HEADHash = "";
 
-        // Is the HEAD detached in which case it contains a Commit Hash
-        Match match = Regex.Match(HeadContents, "[0-9a-f]{40}");
-        if (match.Success)
-        {
-            //Console.WriteLine("Outputting JSON HEAD match found 1");
-            HEADHash = match.Value.Substring(0, 4);
-        }
-        match = Regex.Match(HeadContents, @"ref: refs/heads/(\w+)");
-        if (match.Success)
-        {
-            //Console.WriteLine("Outputting JSON HEAD match found 2");
-
-            //Console.WriteLine("HEAD Branch extract: " + match.Groups[1]?.Value);
-            HEADHash = match.Groups[1].Value;
-            //CreateHEADTOBranchLinkNeo(session, branch);
-        }
-        HEAD h = new HEAD();
-        h.hash = HEADHash;
-
-        var Json = string.Empty;
-        Json = JsonSerializer.Serialize(h);
-
-        //Console.WriteLine(Json);
-        File.WriteAllText(JsonPath, Json);
-    }
 
 }
 

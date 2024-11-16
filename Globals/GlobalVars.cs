@@ -12,7 +12,7 @@ public abstract class GlobalVars
     public static string RepoPath = "";
 
     public static string workingArea = "";
-    public static string head = "";
+    public static string headPath = "";
     public static string GITobjectsPath = "";
     public static string branchPath = "";
     public static string remoteBranchPath = "";

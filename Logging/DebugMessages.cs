@@ -15,6 +15,10 @@ public abstract class DebugMessages()
         logger?.LogDebug($"Adding Blob object to our list of BLOB Nodes: hash={hash} name={name}");
     }
 
+    public static void HeadPointingTo(string hash)
+    {
+        logger?.LogDebug($"HEAD is now pointing to {hash}");
+    }
 
     public static void DisplayCurrentDirectory(string path)
     {
