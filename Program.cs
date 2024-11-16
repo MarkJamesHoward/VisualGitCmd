@@ -1,12 +1,14 @@
 ﻿SentryMethods.ConfigureSentry();
 
-MyLogging.CreateLogger();
-
 // Determine where we are running
 FilePath.GetExeFilePath();
 
+MyLogging.CreateLogger();
+
 // Check which folder the user would like to examine
 CmdLineArguments.ProcessCmdLineArguments(args);
+
+MyLogging.CreateLogger();
 
 //Display version so can compare with Website
 StandardMessages.DisplayVersion();

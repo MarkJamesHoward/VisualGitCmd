@@ -12,7 +12,7 @@ public abstract class GitBranches
 
         if (!branches.Exists(i => i.name == b.name))
         {
-            StandardMessages.AddingBranchObject(b.name, b.hash);
+            DebugMessages.AddingBranchObject(b.name, b.hash);
             branches.Add(b);
         }
     }

@@ -3,11 +3,9 @@ using CommandLine;
 
 public class CmdLineArguments
 {
-
     public static void ProcessCmdLineArguments(string[] args)
     {
         GlobalVars.RepoPath = Environment.CurrentDirectory;
-        //Console.WriteLine($"Current folder is {GlobalVars.RepoPath}");
         GlobalVars.workingArea = Path.Combine(GlobalVars.RepoPath, @"./");
         GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
         GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects\");
@@ -66,19 +64,18 @@ public class CmdLineArguments
                     if (o.Debug)
                     {
                         GlobalVars.debug = true;
-                        Console.WriteLine($"Debug mode enabled");
+                        StandardMessages.DebugModeEnabled();
                     }
 
                     if (!GlobalVars.debug)
                     {
                         GlobalVars.RepoPath = Environment.CurrentDirectory;
-                        Console.WriteLine($"Default GlobalVars.RepoPath {GlobalVars.RepoPath}");
+                        DebugMessages.DisplayCurrentDirectory(GlobalVars.RepoPath);
 
                         // Check if the path to examine the repo of is provided on the command line
                         if (o.RepoPath != null)
                         {
                             GlobalVars.RepoPath = Path.Combine(GlobalVars.RepoPath.Trim(), o.RepoPath.Trim());
-                            Console.WriteLine($"Combined GlobalVars.RepoPath {GlobalVars.RepoPath}");
 
                             // Check if path exists
                             if (!Directory.Exists(GlobalVars.RepoPath))
@@ -94,8 +91,16 @@ public class CmdLineArguments
                     }
                     else
                     {
-                        GlobalVars.RepoPath = @"C:\dev\test";
-                        Console.WriteLine($"Debug: Using {GlobalVars.RepoPath}");
+                        if (o.RepoPath == null)
+                        {
+                            GlobalVars.RepoPath = @"C:\dev\test";
+                            StandardMessages.UsingDebugHardCodedPath(GlobalVars.RepoPath);
+                        }
+                        else
+                        {
+                            GlobalVars.RepoPath = o.RepoPath;
+                            StandardMessages.DebugSelectedAndAlsoRepoPathProvided(GlobalVars.RepoPath);
+                        }
                     }
 
 

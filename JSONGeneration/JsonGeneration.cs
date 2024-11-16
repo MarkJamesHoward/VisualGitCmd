@@ -115,7 +115,10 @@ public abstract class JSONGeneration
     public static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
         if (firstrun)
-            Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
+        {
+            StandardMessages.VisualGitID(name);
+            // Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
+        }
 
         using StringContent jsonContent = new(
             JsonSerializer.Serialize(new
