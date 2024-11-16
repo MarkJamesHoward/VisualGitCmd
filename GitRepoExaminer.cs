@@ -194,7 +194,6 @@ public abstract class GitRepoExaminer
                 else
                 {
                     Console.WriteLine($"Details: {e.Message}");
-
                 }
             }
             else
