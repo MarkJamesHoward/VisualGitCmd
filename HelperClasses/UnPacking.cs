@@ -2,6 +2,16 @@
 
 public abstract class UnPacking
 {
+    public static void PerformUnpackingIfRequested()
+    {
+        // If Unpacking then perform this first prior to looking at the files in the repo
+        if (GlobalVars.UnPackRefs)
+        {
+            UnPacking.UnpackRefs(GlobalVars.RepoPath);
+            UnPacking.UnPackPackFile(GlobalVars.RepoPath);
+        }
+    }
+
     public static void UnPackPackFile(string RepoPath)
     {
         int tries = 0;
@@ -50,7 +60,7 @@ public abstract class UnPacking
         string pathToPackedRefsFile = $"{RepoPath}\\.git\\packed-refs";
         string pathToRefsHeadsFolder = $"{RepoPath}\\.git\\refs\\heads\\";
 
-        Console.WriteLine(GlobalVars.path);
+        Console.WriteLine(GlobalVars.GITobjectsPath);
 
         string packedRefsText = File.ReadAllText(pathToPackedRefsFile);
 

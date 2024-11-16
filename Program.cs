@@ -8,24 +8,12 @@ MyLogging.CreateLogger();
 // Check which folder the user would like to examine
 CmdLineArguments.ProcessCmdLineArguments(args);
 
-MyLogging.CreateLogger();
-
 //Display version so can compare with Website
 StandardMessages.DisplayVersion();
 
-// If Unpacking then perform this first prior to looking at the files in the repo
-if (GlobalVars.UnPackRefs)
-{
-    UnPacking.UnpackRefs(GlobalVars.RepoPath);
-    UnPacking.UnPackPackFile(GlobalVars.RepoPath);
-}
+UnPacking.PerformUnpackingIfRequested();
 
-// Remeber best not to run VisualGit in the repo being examined
-if (GlobalVars.exePath == GlobalVars.RepoPath)
-{
-    StandardMessages.SameFolderMessage();
-    return;
-}
+SameFolderCheck.Validate();
 
 // Perform intial check of files
 VisualGit.Run();

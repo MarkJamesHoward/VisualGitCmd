@@ -8,7 +8,7 @@ public class CmdLineArguments
         GlobalVars.RepoPath = Environment.CurrentDirectory;
         GlobalVars.workingArea = Path.Combine(GlobalVars.RepoPath, @"./");
         GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
-        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects\");
+        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects\");
         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
 
@@ -28,7 +28,7 @@ public class CmdLineArguments
                     if (o.Bare)
                     {
                         GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".\");
-                        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".\objects\");
+                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".\objects\");
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\heads");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\remotes");
                     }
@@ -108,7 +108,7 @@ public class CmdLineArguments
                     {
                         GlobalVars.workingArea = GlobalVars.RepoPath;
                         GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
-                        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
+                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
                     }
@@ -116,7 +116,7 @@ public class CmdLineArguments
                     {
                         GlobalVars.workingArea = GlobalVars.RepoPath;
                         GlobalVars.head = Path.Combine(GlobalVars.RepoPath, @".git/");
-                        GlobalVars.path = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
+                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
                     }
@@ -139,6 +139,9 @@ public class CmdLineArguments
 
                 });
             }
+
+            // Update logger with Debug settings if specified in the cmd line arguments
+            MyLogging.CreateLogger();
         }
         catch (Exception ex)
         {

@@ -13,7 +13,7 @@ public abstract class GlobalVars
 
     public static string workingArea = "";
     public static string head = "";
-    public static string path = "";
+    public static string GITobjectsPath = "";
     public static string branchPath = "";
     public static string remoteBranchPath = "";
 

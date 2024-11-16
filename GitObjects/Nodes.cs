@@ -23,7 +23,7 @@ public class Nodes
     }
     public static void GetHEAD(ISession? session, string path)
     {
-        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
+        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.GITobjectsPath, "HEAD"));
 
         // Is the HEAD detached in which case it contains a Commit Hash
         Match match = Regex.Match(HeadContents, "[0-9a-f]{40}");

@@ -21,7 +21,7 @@ public class Links
 
     public static void AddCommitParentLinks(ISession? session, string path, string workingArea)
     {
-        List<string> directories = Directory.GetDirectories(GlobalVars.path).ToList();
+        List<string> directories = Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList();
 
         foreach (string dir in directories)
         {

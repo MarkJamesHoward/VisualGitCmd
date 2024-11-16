@@ -30,7 +30,7 @@ public abstract class VisualGit
             branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
             RemoteBranches.GetRemoteBranches(ref remoteBranchFiles);
 
-            List<string> directories = Directory.GetDirectories(GlobalVars.path).ToList();
+            List<string> directories = Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList();
             List<string> files = new List<string>();
 
             IDriver _driver;
@@ -161,15 +161,15 @@ public abstract class VisualGit
 
             if (GlobalVars.EmitNeo)
             {
-                Links.AddCommitParentLinks(session, GlobalVars.path, GlobalVars.workingArea);
-                BlobCode.AddOrphanBlobs(session, GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                Links.AddCommitParentLinks(session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
+                BlobCode.AddOrphanBlobs(session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
                 Nodes.GetHEAD(session, GlobalVars.head);
             }
 
 
             if (GlobalVars.EmitJsonOnly)
             {
-                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.GITobjectsPath, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
                 JSONGeneration.OutputNodesJson(CommitNodes, GlobalVars.CommitNodesJsonFile);
                 JSONGeneration.OutputNodesJson(TreeNodes, GlobalVars.TreeNodesJsonFile);
                 JSONGeneration.OutputNodesJson(blobs, GlobalVars.BlobNodesJsonFile);
@@ -181,7 +181,7 @@ public abstract class VisualGit
 
             if (GlobalVars.EmitWeb)
             {
-                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.path, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.GITobjectsPath, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
             }
 
@@ -210,7 +210,7 @@ public abstract class VisualGit
             }
             else
             {
-                Console.WriteLine($"Error while getting files in {GlobalVars.path} {e.Message} {e}");
+                Console.WriteLine($"Error while getting files in {GlobalVars.GITobjectsPath} {e.Message} {e}");
             }
         }
     }

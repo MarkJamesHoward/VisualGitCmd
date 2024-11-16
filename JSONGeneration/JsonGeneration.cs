@@ -184,7 +184,7 @@ public abstract class JSONGeneration
     }
     public static void OutputHEADJson(HEAD head, string JsonPath, string path)
     {
-        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.path, "HEAD"));
+        string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.GITobjectsPath, "HEAD"));
         //Console.WriteLine("Outputting JSON HEAD");
         string HEADHash = "";
 
