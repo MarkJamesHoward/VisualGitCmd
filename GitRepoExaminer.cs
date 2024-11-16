@@ -5,7 +5,6 @@ public abstract class GitRepoExaminer
     static bool firstRun = true;
     static int dataID = 1;
 
-    static List<string> HashCodeFilenames = new List<string>();
     #endregion
 
     public static void Run()
@@ -29,17 +28,15 @@ public abstract class GitRepoExaminer
                         break;
                     }
 
-                    string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
+                    string hashCode_determinedFrom_dir_and_first2charOfFilename = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
 
-                    HashCodeFilenames.Add(hashCode);
-
-                    string fileType = FileType.GetFileType(hashCode, GlobalVars.workingArea);
+                    string fileType = FileType.GetFileType(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
 
                     //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
 
                     if (fileType.Contains("commit"))
                     {
-                        CommitNodeExtraction CommitNode = new(hashCode);
+                        CommitNodeExtraction CommitNode = new(hashCode_determinedFrom_dir_and_first2charOfFilename);
 
                         if (CommitNode.commitTreeDetails.Success)
                         {
@@ -52,7 +49,7 @@ public abstract class GitRepoExaminer
                             {
                                 string parentHash = commitParentMatch.Groups[1].Value;
                                 commitParentHashes.Add(parentHash);
-                                StandardMessages.ParentCommitHashCode(hashCode, parentHash);
+                                StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
                             }
 
                             string comment = CommitNode.commitCommentDetails.Groups[1].Value;
@@ -60,7 +57,7 @@ public abstract class GitRepoExaminer
 
                             if (GlobalVars.EmitNeo)
                             {
-                                Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode, CommitNode.commitContents);
+                                Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.commitContents);
                             }
 
                             if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, treeHash, "tree"))
@@ -70,11 +67,11 @@ public abstract class GitRepoExaminer
                             }
 
                             TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                            CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode, treeHash, CommitNode.commitContents);
+                            CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
 
                             if (GlobalVars.EmitNeo)
                             {
-                                Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode, treeHash, "", "");
+                                Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
                             }
 
                             BlobNodeExtraction BlobNode = new();
