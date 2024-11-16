@@ -4,9 +4,10 @@ public abstract class RemoteBranches
 
     public static List<Branch> remoteBranches = new List<Branch>();
 
-    public static void ProcessRemoteBranches(List<string> remoteBranchFiles, ISession? session)
+    public static void ProcessRemoteBranches(ISession? session)
     {
         remoteBranches = new List<Branch>();
+        List<string> remoteBranchFiles = GetRemoteBranchesFiles();
 
         // Add the Remote Branches
         foreach (var file in remoteBranchFiles)
@@ -36,9 +37,9 @@ public abstract class RemoteBranches
         }
     }
 
-    public static void GetRemoteBranches(ref List<string> remoteBranchFiles)
+    public static List<string> GetRemoteBranchesFiles()
     {
-
+        List<string> remoteBranchFiles = new List<string>();
 
         if (Directory.Exists(GlobalVars.remoteBranchPath))
         {
@@ -52,6 +53,7 @@ public abstract class RemoteBranches
                 }
             }
         }
+        return remoteBranchFiles;
     }
 }
 

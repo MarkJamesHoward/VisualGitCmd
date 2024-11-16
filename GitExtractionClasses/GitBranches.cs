@@ -19,9 +19,11 @@ public abstract class GitBranches
         }
     }
 
-    public static void ProcessBranches(List<string> branchFiles, ISession? session)
+    public static void ProcessBranches(ISession? session)
     {
         branches = new List<Branch>();
+
+        List<string> branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
 
         // Add the Branches
         foreach (var file in branchFiles)

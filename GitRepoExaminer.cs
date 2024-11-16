@@ -10,31 +10,19 @@ public abstract class GitRepoExaminer
 
     public static void Run()
     {
-
         // Get all the files in the .git/objects folder
         try
         {
-            List<string> remoteBranchFiles = new List<string>();
-            List<string> branchFiles = new List<string>();
-
-            branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
-            RemoteBranches.GetRemoteBranches(ref remoteBranchFiles);
-
-            List<string> directories = Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList();
-            List<string> files = new List<string>();
-
             Neo4jHelper.CheckIfNeoj4EmissionEnabled();
 
-            foreach (string dir in directories)
+            foreach (string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList())
             {
                 if (dir.Contains("pack") || dir.Contains("info"))
                 {
                     break;
                 }
 
-                files = Directory.GetFiles(dir).ToList();
-
-                foreach (string file in files)
+                foreach (string file in Directory.GetFiles(dir).ToList())
                 {
                     if (file.Contains("pack-") || file.Contains(".idx"))
                     {
@@ -51,34 +39,29 @@ public abstract class GitRepoExaminer
 
                     if (fileType.Contains("commit"))
                     {
-                        string commitContents;
-                        commitContents = FileType.GetContents(hashCode, GlobalVars.workingArea);
+                        CommitNodeExtraction CommitNode = new(hashCode);
 
-                        var match = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
-                        var commitParents = Regex.Matches(commitContents, "parent ([0-9a-f]{4})");
-                        var commitComment = Regex.Match(commitContents, "\n\n(.+)\n");
-
-                        if (match.Success)
+                        if (CommitNode.commitTreeDetails.Success)
                         {
                             // Get details of the tree,parent and comment in this commit
-                            string treeHash = match.Groups[1].Value;
+                            string treeHash = CommitNode.commitTreeDetails.Groups[1].Value;
                             //Console.WriteLine($"\t-> tree {treeHash}");
 
                             List<string> commitParentHashes = new List<string>();
 
-                            foreach (Match commitParentMatch in commitParents)
+                            foreach (Match commitParentMatch in CommitNode.commitParentDetails)
                             {
                                 string parentHash = commitParentMatch.Groups[1].Value;
                                 commitParentHashes.Add(parentHash);
                                 StandardMessages.ParentCommitHashCode(hashCode, parentHash);
                             }
 
-                            string comment = commitComment.Groups[1].Value;
+                            string comment = CommitNode.commitCommentDetails.Groups[1].Value;
                             comment = comment.Trim();
 
                             if (GlobalVars.EmitNeo)
                             {
-                                Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode, commitContents);
+                                Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode, CommitNode.commitContents);
                             }
 
                             if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, treeHash, "tree"))
@@ -88,7 +71,7 @@ public abstract class GitRepoExaminer
                             }
 
                             TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                            CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode, treeHash, commitContents);
+                            CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode, treeHash, CommitNode.commitContents);
 
                             if (GlobalVars.EmitNeo)
                             {
@@ -96,7 +79,7 @@ public abstract class GitRepoExaminer
                             }
 
                             // Get the details of the BlobCode.Blobs in this Tree
-                            string tree = FileType.GetContents(match.Groups[1].Value, GlobalVars.workingArea);
+                            string tree = FileType.GetContents(CommitNode.commitTreeDetails.Groups[1].Value, GlobalVars.workingArea);
                             var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
 
                             foreach (Match blobMatch in blobsInTree)
@@ -119,13 +102,13 @@ public abstract class GitRepoExaminer
 
                                 BlobCode.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
-                                if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(Neo4jHelper.session, match.Groups[1].Value, blobHash))
+                                if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(Neo4jHelper.session, CommitNode.commitTreeDetails.Groups[1].Value, blobHash))
                                 {
                                     if (GlobalVars.EmitNeo)
-                                        Neo4jHelper.CreateLinkNeo(Neo4jHelper.session, match.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
+                                        Neo4jHelper.CreateLinkNeo(Neo4jHelper.session, CommitNode.commitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
                                 }
 
-                                TreeNodesList.CreateTreeToBlobLinkJson(match.Groups[1].Value, blobMatch.Groups[1].Value);
+                                TreeNodesList.CreateTreeToBlobLinkJson(CommitNode.commitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
                             }
                         }
                         else
@@ -137,8 +120,8 @@ public abstract class GitRepoExaminer
 
             }
 
-            GitBranches.ProcessBranches(branchFiles, Neo4jHelper.session);
-            RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, Neo4jHelper.session);
+            GitBranches.ProcessBranches(Neo4jHelper.session);
+            RemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
 
             Neo4jHelper.ProcessNeo4jOutput();
             JSONGeneration.ProcessJSONONLYOutput(GitBranches.branches);

@@ -1,6 +1,4 @@
-﻿using RandomNameGeneratorLibrary;
-
-SentryMethods.ConfigureSentry();
+﻿SentryMethods.ConfigureSentry();
 
 // Determine where we are running
 FilePath.GetExeFilePath();
@@ -25,11 +23,5 @@ GitRepoExaminer.Run();
 /// Now setup event handler for checking when files are modified
 FileWatching.CreateFileWatcher();
 
-// string password = builder.Build().GetSection("docker").GetSection("password").Value;
-// string uri = builder.Build().GetSection("docker").GetSection("url").Value;
-// string username = builder.Build().GetSection("docker").GetSection("username").Value;
 
-// string password = builder.Build().GetSection("cloud").GetSection("password").Value;
-// string uri = builder.Build().GetSection("cloud").GetSection("url").Value;
-// string username = builder.Build().GetSection("cloud").GetSection("username").Value;
 
