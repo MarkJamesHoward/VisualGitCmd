@@ -7,7 +7,7 @@ public abstract class GitRepoExaminer
 
     #endregion
 
-    public static void ProcessEachFile(string dir)
+    public static void ProcessEachCOMMITFile(string dir)
     {
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
@@ -18,9 +18,9 @@ public abstract class GitRepoExaminer
 
             string hashCode_determinedFrom_dir_and_first2charOfFilename = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
 
-            string fileType = FileType.GetFileType(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
+            string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
 
-            //Console.WriteLine($"{fileType.TrimEnd('\n', '\r')} {hashCode}");
+            DebugMessages.FoundFileOfType(fileType, hashCode_determinedFrom_dir_and_first2charOfFilename);
 
             if (fileType.Contains("commit"))
             {
@@ -28,8 +28,9 @@ public abstract class GitRepoExaminer
 
                 if (CommitNode.commitTreeDetails.Success)
                 {
-                    // Get details of the tree,parent and comment in this commit
+                    // Get details of the tree, parent and comment in this commit
                     string treeHash = CommitNode.commitTreeDetails.Groups[1].Value;
+                    string commitComment = CommitNode.commitCommentDetails.Groups[1].Value.Trim();
 
                     List<string> commitParentHashes = new List<string>();
 
@@ -40,34 +41,13 @@ public abstract class GitRepoExaminer
                         StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
                     }
 
-                    string comment = CommitNode.commitCommentDetails.Groups[1].Value;
-                    comment = comment.Trim();
-
-                    if (GlobalVars.EmitNeo)
-                    {
-                        Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.commitContents);
-                    }
-
-                    if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, treeHash, "tree"))
-                    {
-                        if (GlobalVars.EmitNeo)
-                            Neo4jHelper.AddTreeToNeo(Neo4jHelper.session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                    }
+                    Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode);
 
                     TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                    CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, comment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
-
-                    if (GlobalVars.EmitNeo)
-                    {
-                        Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
-                    }
+                    CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
 
                     BlobNodeExtraction BlobNode = new();
                     BlobNode.ProcessBlob(treeHash, CommitNode);
-                }
-                else
-                {
-                    //Console.WriteLine("No Tree found in Commit");
                 }
             }
         }
@@ -85,7 +65,7 @@ public abstract class GitRepoExaminer
                 {
                     break;
                 }
-                ProcessEachFile(dir);
+                ProcessEachCOMMITFile(dir);
             }
 
             GitBranches.ProcessBranches(Neo4jHelper.session);

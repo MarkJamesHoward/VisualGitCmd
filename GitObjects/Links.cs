@@ -31,7 +31,7 @@ public class Links
             {
 
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode, GlobalVars.workingArea);
+                string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode, GlobalVars.workingArea);
 
                 if (fileType.Contains("commit"))
                 {

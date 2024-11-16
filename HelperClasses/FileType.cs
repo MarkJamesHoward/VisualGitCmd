@@ -40,14 +40,14 @@ public abstract class FileType
     }
 
 
-    public static string GetFileType(string file, string workingArea)
+    public static string GetFileType_UsingGitCatFileCmd_Param_T(string file, string workingArea)
     {
         int tries = 0;
         bool exit = false;
 
         //run the git cat-file command to determine the file type
         Process p = new Process();
-        //Console.WriteLine("git " + $"cat-file {file} -t");
+        TraceMessages.RunningCatFile(file);
         p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -t");
         p.StartInfo.RedirectStandardOutput = true;
         p.StartInfo.WorkingDirectory = workingArea;
@@ -56,7 +56,6 @@ public abstract class FileType
         while (!p.HasExited && !exit)
         {
             System.Threading.Thread.Sleep(100);
-            // Console.WriteLine($"Running git cat-file {file} -t");
             if (tries++ > 10)
             {
                 exit = true;

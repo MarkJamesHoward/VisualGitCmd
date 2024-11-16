@@ -38,7 +38,7 @@ public abstract class BlobCode
             foreach (string file in files)
             {
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode, workingArea);
+                string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode, workingArea);
 
                 if (fileType.Contains("blob"))
                 {
@@ -69,7 +69,7 @@ public abstract class BlobCode
             foreach (string file in files)
             {
                 string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
-                string fileType = FileType.GetFileType(hashCode, workingArea);
+                string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode, workingArea);
 
                 if (fileType.Contains("blob"))
                 {

@@ -8,6 +8,13 @@ public abstract class Neo4jHelper
     static string uri = "";
     static string username = "";
 
+    public static void ProcessCommitForNeo4j(string commitComment, string treeHash, string hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtraction CommitNode)
+    {
+        Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.commitContents);
+        Neo4jHelper.AddTreeToNeo(Neo4jHelper.session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
+        Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
+    }
+
     public static void ProcessNeo4jOutput()
     {
         if (GlobalVars.EmitNeo)
@@ -76,22 +83,25 @@ public abstract class Neo4jHelper
 
     public static void AddCommitToNeo(ISession? session, string comment, string hash, string contents)
     {
-        string name = $"commit #{hash} {comment}";
-
-        var greeting = session?.ExecuteWrite(
-        tx =>
+        if (GlobalVars.EmitNeo)
         {
-            var result = tx.Run(
-                "CREATE (a:commit) " +
-                "SET a.name = $name " +
-                "SET a.comment = $comment " +
-                "SET a.contents = $contents " +
-                "SET a.hash = $hash " +
-                "RETURN a.name + ', from node ' + id(a)",
-                new { comment, hash, name, contents });
+            string name = $"commit #{hash} {comment}";
 
-            return "created node";
-        });
+            var greeting = session?.ExecuteWrite(
+            tx =>
+            {
+                var result = tx.Run(
+                    "CREATE (a:commit) " +
+                    "SET a.name = $name " +
+                    "SET a.comment = $comment " +
+                    "SET a.contents = $contents " +
+                    "SET a.hash = $hash " +
+                    "RETURN a.name + ', from node ' + id(a)",
+                    new { comment, hash, name, contents });
+
+                return "created node";
+            });
+        }
     }
 
     public static void CreateLinkNeo(ISession? session, string parent, string child, string parentType, string childType)
@@ -157,36 +167,44 @@ public abstract class Neo4jHelper
 
     public static bool CreateCommitLinkNeo(ISession? session, string parent, string child, string parentType, string childType)
     {
-        var greeting = session?.ExecuteWrite(
-        tx =>
+        if (GlobalVars.EmitNeo)
         {
-            var result = tx.Run(
-                $"MATCH (t:commit), (b:tree) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[tree_link:tree]->(b) RETURN type(tree_link)",
-                new { });
+            var greeting = session?.ExecuteWrite(
+            tx =>
+            {
+                var result = tx.Run(
+                    $"MATCH (t:commit), (b:tree) WHERE t.hash ='{parent}' AND b.hash ='{child}' CREATE (t)-[tree_link:tree]->(b) RETURN type(tree_link)",
+                    new { });
 
-            return result.Count();
-        });
+                return result.Count();
+            });
 
-        return greeting > 0 ? true : false;
+
+            return greeting > 0 ? true : false;
+        }
+        return false;
     }
 
     public static void AddTreeToNeo(ISession? session, string hash, string contents)
     {
-        string name = $"tree #{hash}";
-
-        var greeting = session?.ExecuteWrite(
-        tx =>
+        if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, hash, "tree"))
         {
-            var result = tx.Run(
-                "CREATE (a:tree) " +
-                "SET a.name = $name " +
-                "SET a.hash = $hash " +
-                "SET a.contents = $contents " +
-                "RETURN a.name + ', from node ' + id(a)",
-                new { hash, contents, name });
+            string name = $"tree #{hash}";
 
-            return "created node";
-        });
+            var greeting = session?.ExecuteWrite(
+            tx =>
+            {
+                var result = tx.Run(
+                    "CREATE (a:tree) " +
+                    "SET a.name = $name " +
+                    "SET a.hash = $hash " +
+                    "SET a.contents = $contents " +
+                    "RETURN a.name + ', from node ' + id(a)",
+                    new { hash, contents, name });
+
+                return "created node";
+            });
+        }
     }
 
     public static void AddHeadToNeo(ISession? session, string hash, string contents)
