@@ -1,6 +1,8 @@
 using Neo4j.Driver;
 public abstract class BlobCode
 {
+    public static List<Blob> Blobs = new List<Blob>();
+
     public static void AddBlobToNeo(ISession? session, string filename, string hash, string contents)
     {
         string filenameplushash = $"{filename} #{hash}";
@@ -20,7 +22,7 @@ public abstract class BlobCode
             return "created node";
         });
     }
-    public static void AddOrphanBlobsToJson(string branchPath, string path, List<Blob> blobs, string workingArea, bool PerformTextExtraction)
+    public static void FindBlobs(string path, string workingArea, bool PerformTextExtraction)
     {
         TraceMessages.AddingOrphanBlobsToJson();
 
@@ -47,13 +49,13 @@ public abstract class BlobCode
                         blobContents = FileType.GetContents(hashCode, workingArea);
                     }
 
-                    AddBlobToJson("", "", hashCode, blobContents, blobs);
+                    AddToBlobObjectCollection("", "", hashCode, blobContents);
                 }
             }
         }
     }
 
-    public static void AddOrphanBlobs(ISession? session, string branchPath, string path, List<Blob> blobs, string workingArea, bool PerformTextExtraction)
+    public static void AddOrphanBlobs(ISession? session, string branchPath, string path, string workingArea, bool PerformTextExtraction)
     {
 
         List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
@@ -87,7 +89,7 @@ public abstract class BlobCode
             }
         }
     }
-    public static void AddBlobToJson(string treeHash, string filename, string hash, string contents, List<Blob> Blobs)
+    public static void AddToBlobObjectCollection(string treeHash, string filename, string hash, string contents)
     {
         Blob b = new Blob();
         b.filename = filename;

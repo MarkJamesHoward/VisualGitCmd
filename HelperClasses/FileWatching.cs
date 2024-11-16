@@ -32,7 +32,7 @@ public abstract class FileWatching
                     BatchingUpFileChanges = false;
 
                     Console.WriteLine($"Batch {batch} Processing.....");
-                    VisualGit.Run();
+                    GitRepoExaminer.Run();
                     Console.WriteLine($"Batch {batch} Completed.....");
                 }
 

@@ -1,5 +1,5 @@
 using Neo4j.Driver;
-public abstract class VisualGit
+public abstract class GitRepoExaminer
 {
     #region StaticVariables
     static string name = RandomName.randomNameGenerator.GenerateRandomPlaceName();
@@ -15,7 +15,6 @@ public abstract class VisualGit
     {
         List<CommitNode> CommitNodes = new List<CommitNode>();
         List<TreeNode> TreeNodes = new List<TreeNode>();
-        List<Blob> blobs = new List<Blob>();
         List<Branch> branches = new List<Branch>();
         List<Branch> remoteBranches = new List<Branch>();
 
@@ -114,7 +113,7 @@ public abstract class VisualGit
                                 Neo4jHelper.CreateCommitLinkNeo(session, hashCode, treeHash, "", "");
                             }
 
-                            // Get the details of the Blobs in this Tree
+                            // Get the details of the BlobCode.Blobs in this Tree
                             string tree = FileType.GetContents(match.Groups[1].Value, GlobalVars.workingArea);
                             var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
 
@@ -136,7 +135,7 @@ public abstract class VisualGit
                                 }
                                 //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 
-                                BlobCode.AddBlobToJson(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents, blobs);
+                                BlobCode.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
                                 if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(session, match.Groups[1].Value, blobHash))
                                 {
@@ -162,27 +161,27 @@ public abstract class VisualGit
             if (GlobalVars.EmitNeo)
             {
                 Links.AddCommitParentLinks(session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
-                BlobCode.AddOrphanBlobs(session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                BlobCode.AddOrphanBlobs(session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
                 Nodes.GetHEAD(session, GlobalVars.head);
             }
 
 
             if (GlobalVars.EmitJsonOnly)
             {
-                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.GITobjectsPath, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
                 JSONGeneration.OutputNodesJson(CommitNodes, GlobalVars.CommitNodesJsonFile);
                 JSONGeneration.OutputNodesJson(TreeNodes, GlobalVars.TreeNodesJsonFile);
-                JSONGeneration.OutputNodesJson(blobs, GlobalVars.BlobNodesJsonFile);
+                JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
                 JSONGeneration.OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
-                JSONGeneration.OutputBranchJson(branches, TreeNodes, blobs, GlobalVars.BranchNodesJsonFile);
+                JSONGeneration.OutputBranchJson(branches, TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
                 JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
                 JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
             }
 
             if (GlobalVars.EmitWeb)
             {
-                BlobCode.AddOrphanBlobsToJson(GlobalVars.branchPath, GlobalVars.GITobjectsPath, blobs, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
+                BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, CommitNodes, BlobCode.Blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
             }
 
             // Only run this on the first run

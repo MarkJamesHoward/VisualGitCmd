@@ -16,7 +16,7 @@ UnPacking.PerformUnpackingIfRequested();
 SameFolderCheck.Validate();
 
 // Perform intial check of files
-VisualGit.Run();
+GitRepoExaminer.Run();
 
 /// Now setup event handler for checking when files are modified
 FileWatching.CreateFileWatcher();
