@@ -1,4 +1,6 @@
-﻿SentryMethods.ConfigureSentry();
+﻿using RandomNameGeneratorLibrary;
+
+SentryMethods.ConfigureSentry();
 
 // Determine where we are running
 FilePath.GetExeFilePath();
@@ -14,6 +16,8 @@ StandardMessages.DisplayVersion();
 UnPacking.PerformUnpackingIfRequested();
 
 SameFolderCheck.Validate();
+
+RandomName.GenerateRandomName();
 
 // Perform intial check of files
 GitRepoExaminer.Run();

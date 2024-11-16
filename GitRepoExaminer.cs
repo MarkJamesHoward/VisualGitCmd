@@ -2,7 +2,6 @@ using Neo4j.Driver;
 public abstract class GitRepoExaminer
 {
     #region StaticVariables
-    static string name = RandomName.randomNameGenerator.GenerateRandomPlaceName();
     static bool firstRun = true;
     static int dataID = 1;
 
@@ -172,14 +171,14 @@ public abstract class GitRepoExaminer
             if (GlobalVars.EmitWeb)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJsonToAPI(firstRun, name, dataID++, Commits.CommitNodesList, BlobCode.Blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
+                JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++, Commits.CommitNodesList, BlobCode.Blobs, TreeNodes, branches, remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea), Nodes.WorkingFilesNodes(GlobalVars.workingArea), Nodes.HEADNodes(GlobalVars.head));
             }
 
             // Only run this on the first run
             if (firstRun)
             {
                 firstRun = false;
-                Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={name.Replace(' ', 'x')}/1") { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={RandomName.Name.Replace(' ', 'x')}/1") { UseShellExecute = true });
             }
         }
         catch (Exception e)

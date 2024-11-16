@@ -3,5 +3,11 @@ using RandomNameGeneratorLibrary;
 
 public abstract class RandomName()
 {
-    public static PlaceNameGenerator randomNameGenerator = new PlaceNameGenerator();
+    public static string Name { get; set; }
+
+    public static void GenerateRandomName()
+    {
+        PlaceNameGenerator randomNameGenerator = new PlaceNameGenerator();
+        Name = randomNameGenerator.GenerateRandomPlaceName();
+    }
 }
