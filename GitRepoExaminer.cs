@@ -144,25 +144,8 @@ public abstract class GitRepoExaminer
             GitBranches.ProcessBranches(branchFiles, Neo4jHelper.session, ref branches);
             RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, Neo4jHelper.session, ref remoteBranches);
 
-            if (GlobalVars.EmitNeo)
-            {
-                Links.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
-                BlobCode.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                Nodes.GetHEAD(Neo4jHelper.session, GlobalVars.head);
-            }
-
-
-            if (GlobalVars.EmitJsonOnly)
-            {
-                BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-                JSONGeneration.OutputNodesJson(CommitNodesList.CommitNodes, GlobalVars.CommitNodesJsonFile);
-                JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
-                JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
-                JSONGeneration.OutputHEADJson(HEAD, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
-                JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
-                JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
-                JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
-            }
+            Neo4jHelper.ProcessNeo4jOutput();
+            JSONGeneration.ProcessJSONOutput(HEAD, branches);
 
             if (GlobalVars.EmitWeb)
             {

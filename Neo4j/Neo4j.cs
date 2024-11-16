@@ -8,6 +8,16 @@ public abstract class Neo4jHelper
     static string uri = "";
     static string username = "";
 
+    public static void ProcessNeo4jOutput()
+    {
+        if (GlobalVars.EmitNeo)
+        {
+            Links.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
+            BlobCode.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            Nodes.GetHEAD(Neo4jHelper.session, GlobalVars.head);
+        }
+    }
+
     public static void CheckIfNeoj4EmissionEnabled()
     {
         if (GlobalVars.EmitNeo)

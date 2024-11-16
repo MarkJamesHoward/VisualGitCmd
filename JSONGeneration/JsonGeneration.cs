@@ -1,5 +1,19 @@
 public abstract class JSONGeneration
 {
+    public static void ProcessJSONOutput(HEAD head, List<Branch> branches)
+    {
+        if (GlobalVars.EmitJsonOnly)
+        {
+            BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            JSONGeneration.OutputNodesJson(CommitNodesList.CommitNodes, GlobalVars.CommitNodesJsonFile);
+            JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
+            JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
+            JSONGeneration.OutputHEADJson(head, GlobalVars.HeadNodesJsonFile, GlobalVars.head);
+            JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
+            JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
+            JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
+        }
+    }
 
     public static void OutputWorkingFilesJson(string workingFolder, string JsonPath)
     {
