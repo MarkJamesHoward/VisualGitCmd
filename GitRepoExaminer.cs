@@ -10,8 +10,6 @@ public abstract class GitRepoExaminer
 
     public static void Run()
     {
-        List<Branch> branches = new List<Branch>();
-        List<Branch> remoteBranches = new List<Branch>();
 
         // Get all the files in the .git/objects folder
         try
@@ -139,19 +137,19 @@ public abstract class GitRepoExaminer
 
             }
 
-            GitBranches.ProcessBranches(branchFiles, Neo4jHelper.session, ref branches);
-            RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, Neo4jHelper.session, ref remoteBranches);
+            GitBranches.ProcessBranches(branchFiles, Neo4jHelper.session);
+            RemoteBranches.ProcessRemoteBranches(remoteBranchFiles, Neo4jHelper.session);
 
             Neo4jHelper.ProcessNeo4jOutput();
-            JSONGeneration.ProcessJSONONLYOutput(branches);
+            JSONGeneration.ProcessJSONONLYOutput(GitBranches.branches);
 
             if (GlobalVars.EmitWeb)
             {
                 BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
-                    CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, branches,
-                        remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
+                    CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, GitBranches.branches,
+                        RemoteBranches.remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
                              Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNode.GetHeadNodeFromPath());
             }
 
