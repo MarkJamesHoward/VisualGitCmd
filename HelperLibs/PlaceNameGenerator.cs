@@ -3,7 +3,7 @@ using RandomNameGeneratorLibrary;
 
 public abstract class RandomName()
 {
-    public static string Name { get; set; }
+    public static string? Name { get; set; }
 
     public static void GenerateRandomName()
     {
