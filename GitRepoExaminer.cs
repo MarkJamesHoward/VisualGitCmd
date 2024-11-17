@@ -88,11 +88,7 @@ public abstract class GitRepoExaminer
             }
 
             // Only run this on the first run
-            if (firstRun)
-            {
-                firstRun = false;
-                Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={RandomName.Name.Replace(' ', 'x')}/1") { UseShellExecute = true });
-            }
+            Browser.OpenBrowser(ref firstRun);
         }
         catch (Exception e)
         {

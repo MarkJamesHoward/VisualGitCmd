@@ -78,75 +78,14 @@ public abstract class JSONGeneration
 
     public static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
     {
-        var Json = string.Empty;
-
-        Json = JsonSerializer.Serialize(Nodes);
-
-        //Console.WriteLine(Json);
-        //Console.WriteLine(JsonPath);
+        var Json = JsonSerializer.Serialize(Nodes);
         File.WriteAllText(JsonPath, Json);
     }
 
     public static void OutputBranchJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath)
     {
-        var Json = string.Empty;
-
-        Json = JsonSerializer.Serialize(Nodes);
-
-        //Console.WriteLine(Json);
+        var Json = JsonSerializer.Serialize(Nodes);
         File.WriteAllText(JsonPath, Json);
-    }
-
-
-
-
-    public static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
-    {
-        if (firstrun)
-        {
-            StandardMessages.VisualGitID(name);
-            // Console.WriteLine($"Visual Git ID:  {name}"); //Outputs some random first and last name combination in the format "{first} {last}" example: "Mark Rogers"
-        }
-
-        using StringContent jsonContent = new(
-            JsonSerializer.Serialize(new
-            {
-                userId = $"{name.Replace(' ', 'x')}",
-                id = $"{dataID++}",
-                commitNodes = commitjson ?? "",
-                blobNodes = blobjson ?? "",
-                treeNodes = treejson ?? "",
-                branchNodes = branchjson ?? "",
-                remoteBranchNodes = remotebranchjson ?? "",
-                headNodes = HEADjson ?? "",
-                indexFilesNodes = indexfilesjson ?? "",
-                workingFilesNodes = workingfilesjson ?? ""
-            }),
-                Encoding.UTF8,
-                "application/json");
-
-        // var resilienace =  new ResiliencePipelineBuilder()
-        // .AddRetry(new RetryStrategyOptions {
-        //         ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-        //         Delay = TimeSpan.FromSeconds(2),
-        //         MaxRetryAttempts = 2,
-        //         BackoffType = DelayBackoffType.Exponential
-        // })
-        // .AddTimeout(TimeSpan.FromSeconds(30))
-        // .Build();
-
-        HttpResponseMessage response = await Resiliance._resilienace.ExecuteAsync(async ct => await httpClient.PostAsync("GitInternals", jsonContent, ct));
-
-        try
-        {
-            response.EnsureSuccessStatusCode();
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            Console.WriteLine("Please restart VisualGit...");
-        }
     }
 
     public static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes,
@@ -170,7 +109,7 @@ public abstract class JSONGeneration
         {
             BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
         };
-        await PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+        await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
     }
 
 
