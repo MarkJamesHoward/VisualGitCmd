@@ -1,6 +1,6 @@
 public class BlobNodeExtraction
 {
-    public void ProcessBlob(string treeHash, CommitNodeExtraction CommitNode)
+    public void ProcessBlobsForSpecifiedTree(string treeHash, CommitNodeExtraction CommitNode)
     {
         // Get the details of the Blobs in this Tree
         string tree = FileType.GetContents(CommitNode.commitTreeDetails.Groups[1].Value, GlobalVars.workingArea);
@@ -33,7 +33,7 @@ public class BlobNodeExtraction
                     Neo4jHelper.CreateLinkNeo(Neo4jHelper.session, CommitNode.commitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
             }
 
-            TreeNodesList.CreateTreeToBlobLinkJson(CommitNode.commitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
+            TreeNodesList.CreateTreeToBlobLink(CommitNode.commitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
         }
     }
 }

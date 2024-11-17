@@ -1,4 +1,3 @@
-using Neo4j.Driver;
 public abstract class GitRepoExaminer
 {
     #region StaticVariables
@@ -24,31 +23,24 @@ public abstract class GitRepoExaminer
 
             if (fileType.Contains("commit"))
             {
-                CommitNodeExtraction CommitNode = new(hashCode_determinedFrom_dir_and_first2charOfFilename);
+                CommitNodeExtraction CommitNodeExtract = new(hashCode_determinedFrom_dir_and_first2charOfFilename);
 
-                if (CommitNode.commitTreeDetails.Success)
+                if (CommitNodeExtract.commitTreeDetails.Success)
                 {
                     // Get details of the tree, parent and comment in this commit
-                    string treeHash = CommitNode.commitTreeDetails.Groups[1].Value;
-                    string commitComment = CommitNode.commitCommentDetails.Groups[1].Value.Trim();
+                    string treeHash = CommitNodeExtract.commitTreeDetails.Groups[1].Value;
+                    string commitComment = CommitNodeExtract.commitCommentDetails.Groups[1].Value.Trim();
 
-                    List<string> commitParentHashes = new List<string>();
+                    Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtract);
 
-                    foreach (Match commitParentMatch in CommitNode.commitParentDetails)
-                    {
-                        string parentHash = commitParentMatch.Groups[1].Value;
-                        commitParentHashes.Add(parentHash);
-                        StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
-                    }
+                    TreeNodesList.AddTreeObjectToTreeNodeList(treeHash);
 
-                    Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode);
-
-                    TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
-                    CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
+                    List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(hashCode_determinedFrom_dir_and_first2charOfFilename);
+                    CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
 
                     // Now we have a tree we can look at the blobs too and create link from the Tree to Blobs
                     BlobNodeExtraction BlobNode = new();
-                    BlobNode.ProcessBlob(treeHash, CommitNode);
+                    BlobNode.ProcessBlobsForSpecifiedTree(treeHash, CommitNodeExtract);
                 }
             }
         }

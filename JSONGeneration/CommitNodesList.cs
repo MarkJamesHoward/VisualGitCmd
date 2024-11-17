@@ -2,7 +2,7 @@ public abstract class CommitNodesList
 {
     public static List<CommitNode> CommitNodes = new List<CommitNode>();
 
-    public static void AddCommitObjectToCommitNodeList(List<string> parentCommitHash, string comment, string hash, string treeHash, string contents)
+    public static void AddCommitObjectToCommitNodeList(List<string> parentCommitHash, string comment, string hash, string treeHash)
     {
         CommitNode n = new CommitNode();
         n.text = comment;

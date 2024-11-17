@@ -2,7 +2,7 @@ public abstract class TreeNodesList
 {
     public static List<TreeNode> TreeNodes = new List<TreeNode>();
 
-    public static void AddTreeObjectToTreeNodeList(string treeHash, string contents)
+    public static void AddTreeObjectToTreeNodeList(string treeHash)
     {
         TreeNode tn = new TreeNode();
         tn.hash = treeHash;
@@ -14,7 +14,7 @@ public abstract class TreeNodesList
         }
     }
 
-    public static void CreateTreeToBlobLinkJson(string parent, string child)
+    public static void CreateTreeToBlobLink(string parent, string child)
     {
         var treeNode = TreeNodes?.Find(i => i.hash == parent);
         treeNode?.blobs?.Add(child);
