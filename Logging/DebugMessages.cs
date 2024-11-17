@@ -4,7 +4,7 @@ public abstract class DebugMessages()
 {
     public static void FoundFileOfType(string type, string hash)
     {
-        logger?.LogDebug($"Processing file of type {type} hasCode={hash}");
+        logger?.LogDebug($"Processing file of type {type.Replace('\n', ' ')} hashCode={hash}");
     }
     public static void OutputBranchJson(string data)
     {

@@ -81,7 +81,7 @@ public abstract class BlobCode
                     }
 
                     Console.WriteLine($"blob {hashCode}");
-                    if (!FileType.DoesNodeExistAlready(session, hashCode, "blob"))
+                    if (!FileType.DoesNeo4jNodeExistAlready(session, hashCode, "blob"))
                     {
                         AddBlobToNeo(session, hashCode, hashCode, blobContents);
                     }

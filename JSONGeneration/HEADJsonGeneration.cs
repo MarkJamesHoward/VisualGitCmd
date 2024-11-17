@@ -25,7 +25,7 @@ public abstract class HEADJsonGeneration
             HEADHash = match.Groups[1].Value;
             //CreateHEADTOBranchLinkNeo(session, branch);
         }
-        HEAD h = new HEAD();
+        HEADNode h = new HEADNode();
         h.hash = HEADHash;
 
         var Json = string.Empty;

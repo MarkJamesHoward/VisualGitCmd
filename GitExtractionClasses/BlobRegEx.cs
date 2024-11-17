@@ -18,7 +18,7 @@ public class BlobNodeExtraction
             }
 
             //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
-            if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, blobHash, "blob"))
+            if (GlobalVars.EmitNeo && !FileType.DoesNeo4jNodeExistAlready(Neo4jHelper.session, blobHash, "blob"))
             {
                 if (GlobalVars.EmitNeo)
                     BlobCode.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);

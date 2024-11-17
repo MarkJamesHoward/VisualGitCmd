@@ -1,6 +1,6 @@
-public abstract class HEADNode
+public abstract class HEADNodeExtraction
 {
-    public static HEAD GetHeadNodeFromPath()
+    public static HEADNode GetHeadNodeFromPathAndDetermineWhereItPoints()
     {
         string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.headPath, "HEAD"));
         //Console.WriteLine("Outputting JSON HEAD");
@@ -18,7 +18,7 @@ public abstract class HEADNode
             HEADHash = match.Groups[1].Value;
             //CreateHEADTOBranchLinkNeo(session, branch);
         }
-        HEAD h = new HEAD();
+        HEADNode h = new HEADNode();
         h.hash = HEADHash;
 
         DebugMessages.HeadPointingTo(h.hash);

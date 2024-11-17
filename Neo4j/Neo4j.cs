@@ -187,7 +187,7 @@ public abstract class Neo4jHelper
 
     public static void AddTreeToNeo(ISession? session, string hash, string contents)
     {
-        if (GlobalVars.EmitNeo && !FileType.DoesNodeExistAlready(Neo4jHelper.session, hash, "tree"))
+        if (GlobalVars.EmitNeo && !FileType.DoesNeo4jNodeExistAlready(Neo4jHelper.session, hash, "tree"))
         {
             string name = $"tree #{hash}";
 

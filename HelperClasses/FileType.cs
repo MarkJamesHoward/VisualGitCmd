@@ -2,7 +2,7 @@ using Neo4j.Driver;
 
 public abstract class FileType
 {
-    public static bool DoesNodeExistAlready(ISession? session, string hash, string type)
+    public static bool DoesNeo4jNodeExistAlready(ISession? session, string hash, string type)
     {
         var greeting = session?.ExecuteWrite(
         tx =>
