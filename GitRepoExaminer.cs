@@ -7,7 +7,7 @@ public abstract class GitRepoExaminer
 
     #endregion
 
-    public static void ProcessEachCOMMITFile(string dir)
+    public static void ProcessEachFileAndExtract_Commit_Tree_Blob(string dir)
     {
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
@@ -46,6 +46,7 @@ public abstract class GitRepoExaminer
                     TreeNodesList.AddTreeObjectToTreeNodeList(treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
                     CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, CommitNode.commitContents);
 
+                    // Now we have a tree we can look at the blobs too and create link from the Tree to Blobs
                     BlobNodeExtraction BlobNode = new();
                     BlobNode.ProcessBlob(treeHash, CommitNode);
                 }
@@ -65,23 +66,25 @@ public abstract class GitRepoExaminer
                 {
                     break;
                 }
-                ProcessEachCOMMITFile(dir);
+                ProcessEachFileAndExtract_Commit_Tree_Blob(dir);
             }
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
             RemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
+
+            HEAD HEADNodeDetails = HEADNode.GetHeadNodeFromPath();
 
             Neo4jHelper.ProcessNeo4jOutput();
             JSONGeneration.ProcessJSONONLYOutput(GitBranches.branches);
 
             if (GlobalVars.EmitWeb)
             {
-                BlobCode.FindBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                BlobCode.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
                     CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, GitBranches.branches,
                         RemoteBranches.remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
-                             Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNode.GetHeadNodeFromPath());
+                             Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNodeDetails);
             }
 
             // Only run this on the first run

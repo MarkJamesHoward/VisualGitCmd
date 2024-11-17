@@ -22,7 +22,7 @@ public abstract class BlobCode
             return "created node";
         });
     }
-    public static void FindBlobs(string path, string workingArea, bool PerformTextExtraction)
+    public static void FindOrphanBlobs(string path, string workingArea, bool PerformTextExtraction)
     {
         TraceMessages.AddingOrphanBlobsToJson();
 
