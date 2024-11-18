@@ -64,7 +64,7 @@ public abstract class GitRepoExaminer
             GitBranches.ProcessBranches(Neo4jHelper.session);
             RemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
 
-            HEADNode HEADNodeDetails = HEADNodeExtraction.GetHeadNodeFromPathAndDetermineWhereItPoints();
+            HEADNode HEADNodeDetails = HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
 
             Neo4jHelper.ProcessNeo4jOutput();
             JSONGeneration.ProcessJSONONLYOutput(GitBranches.branches);

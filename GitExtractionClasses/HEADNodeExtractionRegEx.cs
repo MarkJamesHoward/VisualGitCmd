@@ -1,9 +1,8 @@
-public abstract class HEADNodeExtraction
+public abstract class HEADNodeExtractionRegEx
 {
     public static HEADNode GetHeadNodeFromPathAndDetermineWhereItPoints()
     {
         string HeadContents = File.ReadAllText(Path.Combine(GlobalVars.headPath, "HEAD"));
-        //Console.WriteLine("Outputting JSON HEAD");
         string HEADHash = "";
 
         // Is the HEAD detached in which case it contains a Commit Hash
@@ -23,6 +22,5 @@ public abstract class HEADNodeExtraction
 
         DebugMessages.HeadPointingTo(h.hash);
         return h;
-
     }
 }

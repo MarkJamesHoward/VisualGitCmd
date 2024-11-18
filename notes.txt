@@ -1,6 +1,8 @@
 -- Docker builds
 dotnet publish --os linux --arch x64 /t:PublishContainer
 
+-- Create the docker image manually rather than Dotnet doing it for us with /t:publishContainer
+docker build -t visual-git -f DockerFile .
 
 -- Building
 dotnet publish --os linux --self-contained true -p:PublishSingleFile=true

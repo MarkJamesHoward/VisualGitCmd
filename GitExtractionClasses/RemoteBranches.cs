@@ -1,7 +1,6 @@
 using Neo4j.Driver;
 public abstract class RemoteBranches
 {
-
     public static List<Branch> remoteBranches = new List<Branch>();
 
     public static void ProcessRemoteBranches(ISession? session)

@@ -2,10 +2,18 @@ public abstract class Browser
 {
     public static void OpenBrowser(ref bool firstRun)
     {
-        if (firstRun)
+        try
         {
-            firstRun = false;
-            Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={RandomName.Name.Replace(' ', 'x')}/1") { UseShellExecute = true });
+
+            if (firstRun)
+            {
+                firstRun = false;
+                Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={RandomName.Name.Replace(' ', 'x')}/1") { UseShellExecute = true });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 
