@@ -10,6 +10,10 @@
   <PropertyGroup>
   <IsPublishable>true</IsPublishable>
   <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+  <ContainerRepository>visual-git-container-dotnetpublished</ContainerRepository>
+  <ContainerBaseImage>docker.io/bigusbirdicus/ashotofcode:visualgit-baseimage</ContainerBaseImage>
+  <ContainerWorkingDirectory>app</ContainerWorkingDirectory>
+  <ContainerAppCommandInstruction>Entrypoint</ContainerAppCommandInstruction>
 </PropertyGroup>
 
 

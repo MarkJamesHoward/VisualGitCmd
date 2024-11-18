@@ -32,6 +32,7 @@ public abstract class FileWatching
                     BatchingUpFileChanges = false;
 
                     Console.WriteLine($"Batch {batch} Processing.....");
+                    DebugMessages.FileChanged(e?.Name);
                     GitRepoExaminer.Run();
                     Console.WriteLine($"Batch {batch} Completed.....");
                 }

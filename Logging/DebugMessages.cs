@@ -2,6 +2,10 @@ using static MyLogging;
 
 public abstract class DebugMessages()
 {
+    public static void FileChanged(string filename)
+    {
+        logger?.LogDebug($"File changed: {filename}");
+    }
     public static void FoundFileOfType(string type, string hash)
     {
         logger?.LogDebug($"Processing file of type {type.Replace('\n', ' ')} hashCode={hash}");

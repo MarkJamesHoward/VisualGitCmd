@@ -1,8 +1,27 @@
 -- Docker builds
 dotnet publish --os linux --arch x64 /t:PublishContainer
 
--- Create the docker image manually rather than Dotnet doing it for us with /t:publishContainer
-docker build -t visual-git -f DockerFile .
+-- *** This is the approach currenlty working for DOCKER***** ------
+
+    -- Create the docker image manually rather than Dotnet doing it for us with /t:publishContainer
+    -- this Docker File copies over the source so we can run 'dotnet run' on the bash in docker
+    docker build -t visual-git -f DockerFile .
+
+    --Then update the launch settings
+    {
+    "profiles": {
+        "visual": {
+        "commandName": "Project",
+        "commandLineArgs": "-p /App/docker-test-folder -d"
+        }
+    }
+    }
+
+-----------------------------------------------------------------
+
+
+-- Create a base Image that can be used with PublishContainer
+docker build -t bigusbirdicus/ashotofcode:visualgit-baseimage -f DockerFilePub .
 
 -- Building
 dotnet publish --os linux --self-contained true -p:PublishSingleFile=true
