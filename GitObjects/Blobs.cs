@@ -1,5 +1,5 @@
 using Neo4j.Driver;
-public abstract class BlobCode
+public abstract class GitBlobs
 {
     public static List<Blob> Blobs = new List<Blob>();
 

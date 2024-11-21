@@ -63,20 +63,20 @@ public abstract class GitRepoExaminer
             }
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
-            RemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
+            GitRemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
 
             HEADNode HEADNodeDetails = HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
 
             Neo4jHelper.ProcessNeo4jOutput();
-            JSONGeneration.ProcessJSONONLYOutput(GitBranches.branches);
+            JSONGeneration.ProcessJSONONLYOutput(GitBranches.Branches);
 
             if (GlobalVars.EmitWeb)
             {
-                BlobCode.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                GitBlobs.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
-                    GitCommits.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, GitBranches.branches,
-                        RemoteBranches.remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
+                    GitCommits.Commits, GitBlobs.Blobs, TreeNodesList.TreeNodes, GitBranches.Branches,
+                        GitRemoteBranches.RemoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
                              Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNodeDetails);
             }
 

@@ -4,12 +4,12 @@ public abstract class JSONGeneration
     {
         if (GlobalVars.EmitJsonOnly)
         {
-            BlobCode.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-            JSONGeneration.OutputNodesJson(GitCommits.CommitNodes, GlobalVars.CommitNodesJsonFile);
+            GitBlobs.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            JSONGeneration.OutputNodesJson(GitCommits.Commits, GlobalVars.CommitNodesJsonFile);
             JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
-            JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
+            JSONGeneration.OutputNodesJson(GitBlobs.Blobs, GlobalVars.BlobNodesJsonFile);
             HEADJsonGeneration.OutputHEADJson(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);
-            JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, BlobCode.Blobs, GlobalVars.BranchNodesJsonFile);
+            JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, GitBlobs.Blobs, GlobalVars.BranchNodesJsonFile);
             JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
             JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
         }
@@ -88,7 +88,7 @@ public abstract class JSONGeneration
         File.WriteAllText(JsonPath, Json);
     }
 
-    public static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<CommitNode> CommitNodes,
+    public static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<Commit> CommitNodes,
      List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
      List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEADNode HEADNodes)
     {

@@ -20,7 +20,7 @@ public abstract class Neo4jHelper
         if (GlobalVars.EmitNeo)
         {
             Links.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
-            BlobCode.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            GitBlobs.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             GetHEAD(Neo4jHelper.session, GlobalVars.headPath);
         }
     }

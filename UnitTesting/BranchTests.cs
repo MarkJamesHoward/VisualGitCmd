@@ -12,7 +12,7 @@ public class BranchTests
 
         GitBranches.ProcessBranches(null);
 
-        Assert.Collection(GitBranches.branches, b =>
+        Assert.Collection(GitBranches.Branches, b =>
         {
             Assert.IsType<Branch>(b);
             Assert.Equal("BranchTwo", b.name);
@@ -34,7 +34,7 @@ public class BranchTests
 
         GitBranches.ProcessBranches(null);
 
-        Assert.Collection(GitBranches.branches, b =>
+        Assert.Collection(GitBranches.Branches, b =>
         {
             Assert.IsType<Branch>(b);
             Assert.Equal("master", b.name);

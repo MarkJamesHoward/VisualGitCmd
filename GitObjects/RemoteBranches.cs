@@ -1,11 +1,11 @@
 using Neo4j.Driver;
-public abstract class RemoteBranches
+public abstract class GitRemoteBranches
 {
-    public static List<Branch> remoteBranches = new List<Branch>();
+    public static List<Branch> RemoteBranches = new List<Branch>();
 
     public static void ProcessRemoteBranches(ISession? session)
     {
-        remoteBranches = new List<Branch>();
+        RemoteBranches = new List<Branch>();
         List<string> remoteBranchFiles = GetRemoteBranchesFiles();
 
         // Add the Remote Branches
@@ -29,10 +29,10 @@ public abstract class RemoteBranches
             name = name
         };
 
-        if (!remoteBranches.Exists(i => i.name == b.name))
+        if (!RemoteBranches.Exists(i => i.name == b.name))
         {
             DebugMessages.AddingRemoteBranchObject(b.name, b.hash);
-            remoteBranches.Add(b);
+            RemoteBranches.Add(b);
         }
     }
 

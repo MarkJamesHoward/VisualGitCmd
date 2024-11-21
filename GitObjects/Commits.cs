@@ -1,19 +1,19 @@
 public abstract class GitCommits
 {
-    public static List<CommitNode> CommitNodes = new List<CommitNode>();
+    public static List<Commit> Commits = new List<Commit>();
 
     public static void AddCommitObjectToCommitNodeList(List<string> parentCommitHash, string comment, string hash, string treeHash)
     {
-        CommitNode n = new CommitNode();
+        Commit n = new Commit();
         n.text = comment;
         n.hash = hash;
         n.parent = parentCommitHash;
         n.tree = treeHash;
 
-        if (!CommitNodes.Exists(i => i.hash == n.hash))
+        if (!Commits.Exists(i => i.hash == n.hash))
         {
             DebugMessages.AddedNewCommitObjectToCommitNodesList(n.hash, n.text);
-            CommitNodes.Add(n);
+            Commits.Add(n);
         }
     }
 }

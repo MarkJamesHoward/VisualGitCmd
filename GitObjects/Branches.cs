@@ -2,7 +2,7 @@ using Neo4j.Driver;
 
 public abstract class GitBranches
 {
-    public static List<Branch> branches = new List<Branch>();
+    public static List<Branch> Branches = new List<Branch>();
 
     public static void CreateBranchObject(string name, string hash)
     {
@@ -12,16 +12,16 @@ public abstract class GitBranches
             name = name
         };
 
-        if (!branches.Exists(i => i.name == b.name))
+        if (!Branches.Exists(i => i.name == b.name))
         {
             DebugMessages.AddingBranchObject(b.name, b.hash);
-            branches.Add(b);
+            Branches.Add(b);
         }
     }
 
     public static void ProcessBranches(ISession? session)
     {
-        branches = new List<Branch>();
+        Branches = new List<Branch>();
 
         List<string> branchFiles = Directory.GetFiles(GlobalVars.branchPath).ToList();
 

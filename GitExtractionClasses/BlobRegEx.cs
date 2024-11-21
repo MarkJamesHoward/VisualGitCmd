@@ -21,11 +21,11 @@ public class BlobNodeExtraction
             if (GlobalVars.EmitNeo && !FileType.DoesNeo4jNodeExistAlready(Neo4jHelper.session, blobHash, "blob"))
             {
                 if (GlobalVars.EmitNeo)
-                    BlobCode.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+                    GitBlobs.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
             }
             //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 
-            BlobCode.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+            GitBlobs.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
             if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(Neo4jHelper.session, CommitNode.CommitTreeDetails.Groups[1].Value, blobHash))
             {

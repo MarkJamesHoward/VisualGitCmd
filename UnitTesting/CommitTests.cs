@@ -12,9 +12,9 @@ public class CommitTests
 
         GitRepoExaminer.ProcessEachFileAndExtract_Commit_Tree_Blob(GlobalVars.GITobjectsPath);
 
-        Assert.Collection(GitCommits.CommitNodes, n =>
+        Assert.Collection(GitCommits.Commits, n =>
         {
-            Assert.IsType<CommitNode>(n);
+            Assert.IsType<Commit>(n);
             Assert.Equal("Initial", n.text);
         });
     }
