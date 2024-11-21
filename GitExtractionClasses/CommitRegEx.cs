@@ -2,35 +2,40 @@ using System.ComponentModel.DataAnnotations;
 
 public class CommitNodeExtraction
 {
-    public Match commitTreeDetails { get; set; }
-    public MatchCollection commitParentDetails { get; set; }
-    public Match commitCommentDetails { get; set; }
-    public string commitContents { get; set; }
-
-    public CommitNodeExtraction(string commitHashCode)
-    {
-        RunRegExAgainstCommit(commitHashCode);
-    }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public Match CommitTreeDetails { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public MatchCollection CommitParentDetails { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public Match CommitCommentDetails { get; set; }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public string CommitContents { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     public List<string> GetParentCommits(string hashCode_determinedFrom_dir_and_first2charOfFilename)
     {
         List<string> commitParentHashes = new List<string>();
 
-        foreach (Match commitParentMatch in commitParentDetails)
+        if (CommitParentDetails != null)
         {
-            string parentHash = commitParentMatch.Groups[1].Value;
-            commitParentHashes.Add(parentHash);
-            StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
+            foreach (Match commitParentMatch in CommitParentDetails)
+            {
+                string parentHash = commitParentMatch.Groups[1].Value;
+                commitParentHashes.Add(parentHash);
+                StandardMessages.ParentCommitHashCode(hashCode_determinedFrom_dir_and_first2charOfFilename, parentHash);
+            }
         }
         return commitParentHashes;
     }
 
     public void RunRegExAgainstCommit(string commitHashCode)
     {
-        commitContents = FileType.GetContents(commitHashCode, GlobalVars.workingArea);
+        CommitContents = FileType.GetContents(commitHashCode, GlobalVars.workingArea);
 
-        commitTreeDetails = Regex.Match(commitContents, "tree ([0-9a-f]{4})");
-        commitParentDetails = Regex.Matches(commitContents, "parent ([0-9a-f]{4})");
-        commitCommentDetails = Regex.Match(commitContents, "\n\n(.+)\n");
+        CommitTreeDetails = Regex.Match(CommitContents, "tree ([0-9a-f]{4})");
+        CommitParentDetails = Regex.Matches(CommitContents, "parent ([0-9a-f]{4})");
+        CommitCommentDetails = Regex.Match(CommitContents, "\n\n(.+)\n");
     }
 }

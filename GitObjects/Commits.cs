@@ -1,4 +1,4 @@
-public abstract class CommitNodesList
+public abstract class GitCommits
 {
     public static List<CommitNode> CommitNodes = new List<CommitNode>();
 

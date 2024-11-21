@@ -23,20 +23,21 @@ public abstract class GitRepoExaminer
 
             if (fileType.Contains("commit"))
             {
-                CommitNodeExtraction CommitNodeExtract = new(hashCode_determinedFrom_dir_and_first2charOfFilename);
+                CommitNodeExtraction CommitNodeExtract = new();
+                CommitNodeExtract.RunRegExAgainstCommit(hashCode_determinedFrom_dir_and_first2charOfFilename);
 
-                if (CommitNodeExtract.commitTreeDetails.Success)
+                if (CommitNodeExtract.CommitTreeDetails.Success)
                 {
                     // Get details of the tree, parent and comment in this commit
-                    string treeHash = CommitNodeExtract.commitTreeDetails.Groups[1].Value;
-                    string commitComment = CommitNodeExtract.commitCommentDetails.Groups[1].Value.Trim();
+                    string treeHash = CommitNodeExtract.CommitTreeDetails.Groups[1].Value;
+                    string commitComment = CommitNodeExtract.CommitCommentDetails.Groups[1].Value.Trim();
 
                     Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtract);
 
                     TreeNodesList.AddTreeObjectToTreeNodeList(treeHash);
 
                     List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(hashCode_determinedFrom_dir_and_first2charOfFilename);
-                    CommitNodesList.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
+                    GitCommits.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
 
                     // Now we have a tree we can look at the blobs too and create link from the Tree to Blobs
                     BlobNodeExtraction BlobNode = new();
@@ -74,7 +75,7 @@ public abstract class GitRepoExaminer
                 BlobCode.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
-                    CommitNodesList.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, GitBranches.branches,
+                    GitCommits.CommitNodes, BlobCode.Blobs, TreeNodesList.TreeNodes, GitBranches.branches,
                         RemoteBranches.remoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
                              Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNodeDetails);
             }

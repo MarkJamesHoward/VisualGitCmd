@@ -2,7 +2,7 @@ using static MyLogging;
 
 public abstract class DebugMessages()
 {
-    public static void FileChanged(string filename)
+    public static void FileChanged(string? filename)
     {
         logger?.LogDebug($"File changed: {filename}");
     }

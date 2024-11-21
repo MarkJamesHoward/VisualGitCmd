@@ -5,7 +5,7 @@ public abstract class JSONGeneration
         if (GlobalVars.EmitJsonOnly)
         {
             BlobCode.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-            JSONGeneration.OutputNodesJson(CommitNodesList.CommitNodes, GlobalVars.CommitNodesJsonFile);
+            JSONGeneration.OutputNodesJson(GitCommits.CommitNodes, GlobalVars.CommitNodesJsonFile);
             JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
             JSONGeneration.OutputNodesJson(BlobCode.Blobs, GlobalVars.BlobNodesJsonFile);
             HEADJsonGeneration.OutputHEADJson(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);

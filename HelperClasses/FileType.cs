@@ -16,7 +16,7 @@ public abstract class FileType
 
         return greeting ?? false;
     }
-    public static string GetContents(string file, string workingArea)
+    public static string GetContents(string? file, string workingArea)
     {
         int count = 0;
         Process p = new Process();

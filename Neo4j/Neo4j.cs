@@ -10,7 +10,7 @@ public abstract class Neo4jHelper
 
     public static void ProcessCommitForNeo4j(string commitComment, string treeHash, string hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtraction CommitNode)
     {
-        Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.commitContents);
+        Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.CommitContents);
         Neo4jHelper.AddTreeToNeo(Neo4jHelper.session, treeHash, FileType.GetContents(treeHash, GlobalVars.workingArea));
         Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
     }
