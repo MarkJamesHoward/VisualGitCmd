@@ -10,7 +10,7 @@ public abstract class GitRepoExaminer
     {
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
-            Console.WriteLine("Examingin file " + file);
+            Console.WriteLine("Examining file " + file);
             if (file.Contains("pack-") || file.Contains(".idx"))
             {
                 break;
@@ -35,10 +35,10 @@ public abstract class GitRepoExaminer
 
                     Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtract);
 
-                    GitTrees.AddTreeObjectToTreeNodeList(treeHash);
+                    GitTrees.Add(treeHash);
 
                     List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(hashCode_determinedFrom_dir_and_first2charOfFilename);
-                    GitCommits.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
+                    GitCommits.Add(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
 
                     // Now we have a tree we can look at the blobs too and create link from the Tree to Blobs
                     BlobNodeExtraction.ProcessBlobsForSpecifiedTree(treeHash, CommitNodeExtract);
@@ -65,21 +65,18 @@ public abstract class GitRepoExaminer
             GitBranches.ProcessBranches(Neo4jHelper.session);
             GitRemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
             GitIndexFiles.ProcessIndexFiles(GlobalVars.workingArea);
-
+            GitWorkingFiles.ProcessWorkingFiles(GlobalVars.workingArea);
+            GitBlobs.Add(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             HEADNode HEADNodeDetails = HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
 
             Neo4jHelper.ProcessNeo4jOutput();
+
             JSONGeneration.ProcessJSONONLYOutput(GitBranches.Branches);
 
-            if (GlobalVars.EmitWeb)
-            {
-                GitBlobs.AddOrphanBlobsToBlobCollection(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-
-                JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
-                    GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
-                        GitRemoteBranches.RemoteBranches, GitIndexFiles.IndexFiles,
-                             Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNodeDetails);
-            }
+            JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
+                GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
+                    GitRemoteBranches.RemoteBranches, GitIndexFiles.IndexFiles,
+                         GitWorkingFiles.WorkingFiles, HEADNodeDetails);
 
             // Only run this on the first run
             Browser.OpenBrowser(ref firstRun);

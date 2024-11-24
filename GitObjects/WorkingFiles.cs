@@ -1,13 +1,13 @@
 using Neo4j.Driver;
-public class Nodes
+using OpenTelemetry.Trace;
+public abstract class GitWorkingFiles
 {
+    public static List<WorkingFile> WorkingFiles = new List<WorkingFile>();
 
-    public static List<WorkingFile> WorkingFilesNodes(string workingFolder)
+    public static List<WorkingFile> ProcessWorkingFiles(string workingFolder)
     {
-
         List<string> files = FileType.GetWorkingFiles(workingFolder);
-        List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
-
+        WorkingFiles = new List<WorkingFile>();
 
         foreach (string file in files)
         {
@@ -17,9 +17,9 @@ public class Nodes
             {
                 FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             }
-            WorkingFilesList.Add(FileObj);
+            WorkingFiles.Add(FileObj);
         }
-        return WorkingFilesList;
+        return WorkingFiles;
     }
 
 

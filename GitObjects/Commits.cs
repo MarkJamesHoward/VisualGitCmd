@@ -2,7 +2,7 @@ public abstract class GitCommits
 {
     public static List<Commit> Commits = new List<Commit>();
 
-    public static void AddCommitObjectToCommitNodeList(List<string> parentCommitHash, string comment, string hash, string treeHash)
+    public static void Add(List<string> parentCommitHash, string comment, string hash, string treeHash)
     {
         Commit n = new Commit();
         n.text = comment;

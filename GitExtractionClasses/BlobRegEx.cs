@@ -25,7 +25,7 @@ public abstract class BlobNodeExtraction
             }
             //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 
-            GitBlobs.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+            GitBlobs.Add(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
             if (GlobalVars.EmitNeo && !Neo4jHelper.DoesTreeToBlobLinkExist(Neo4jHelper.session, CommitNode.CommitTreeDetails.Groups[1].Value, blobHash))
             {

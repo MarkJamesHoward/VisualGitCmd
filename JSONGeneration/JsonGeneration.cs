@@ -4,7 +4,7 @@ public abstract class JSONGeneration
     {
         if (GlobalVars.EmitJsonOnly)
         {
-            GitBlobs.AddOrphanBlobsToBlobCollection(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            GitBlobs.Add(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             JSONGeneration.OutputNodesJson(GitCommits.Commits, GlobalVars.CommitNodesJsonFile);
             JSONGeneration.OutputNodesJson(GitTrees.Trees, GlobalVars.TreeNodesJsonFile);
             JSONGeneration.OutputNodesJson(GitBlobs.Blobs, GlobalVars.BlobNodesJsonFile);
@@ -37,24 +37,27 @@ public abstract class JSONGeneration
      List<Blob> BlobNodes, List<Tree> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
      List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEADNode HEADNodes)
     {
-        var Json = string.Empty;
-
-        var CommitJson = JsonSerializer.Serialize(CommitNodes);
-        var BlobJson = JsonSerializer.Serialize(BlobNodes);
-        var TreeJson = JsonSerializer.Serialize(TreeNodes);
-        var BranchJson = JsonSerializer.Serialize(BranchNodes);
-        DebugMessages.OutputBranchJson(BranchJson);
-
-        var RemoteBranchJson = JsonSerializer.Serialize(RemoteBranchNodes);
-        var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
-        var WorkingFilesJson = JsonSerializer.Serialize(WorkingFilesNodes);
-        var HEADJson = JsonSerializer.Serialize(HEADNodes);
-
-        HttpClient sharedClient = new()
+        if (GlobalVars.EmitWeb)
         {
-            BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
-        };
-        await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+            var Json = string.Empty;
+
+            var CommitJson = JsonSerializer.Serialize(CommitNodes);
+            var BlobJson = JsonSerializer.Serialize(BlobNodes);
+            var TreeJson = JsonSerializer.Serialize(TreeNodes);
+            var BranchJson = JsonSerializer.Serialize(BranchNodes);
+            DebugMessages.OutputBranchJson(BranchJson);
+
+            var RemoteBranchJson = JsonSerializer.Serialize(RemoteBranchNodes);
+            var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
+            var WorkingFilesJson = JsonSerializer.Serialize(WorkingFilesNodes);
+            var HEADJson = JsonSerializer.Serialize(HEADNodes);
+
+            HttpClient sharedClient = new()
+            {
+                BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
+            };
+            await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+        }
     }
 
 

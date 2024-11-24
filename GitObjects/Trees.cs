@@ -2,7 +2,7 @@ public abstract class GitTrees
 {
     public static List<Tree> Trees = new List<Tree>();
 
-    public static void AddTreeObjectToTreeNodeList(string treeHash)
+    public static void Add(string treeHash)
     {
         Tree tn = new Tree();
         tn.hash = treeHash;

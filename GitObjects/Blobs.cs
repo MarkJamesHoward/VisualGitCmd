@@ -4,7 +4,7 @@ public abstract class GitBlobs
     public static List<Blob> Blobs = new List<Blob>();
 
 
-    public static void AddOrphanBlobsToBlobCollection(string path, string workingArea, bool PerformTextExtraction)
+    public static void Add(string path, string workingArea, bool PerformTextExtraction)
     {
         TraceMessages.AddingOrphanBlobsToJson();
 
@@ -31,14 +31,14 @@ public abstract class GitBlobs
                         blobContents = FileType.GetContents(hashCode, workingArea);
                     }
 
-                    AddToBlobObjectCollection("", "", hashCode, blobContents);
+                    Add("", "", hashCode, blobContents);
                 }
             }
         }
     }
 
 
-    public static void AddToBlobObjectCollection(string treeHash, string filename, string hash, string contents)
+    public static void Add(string treeHash, string filename, string hash, string contents)
     {
         Blob b = new Blob();
         b.filename = filename;
