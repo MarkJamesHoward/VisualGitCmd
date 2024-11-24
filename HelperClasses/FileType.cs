@@ -18,25 +18,33 @@ public abstract class FileType
     }
     public static string GetContents(string? file, string workingArea)
     {
-        int count = 0;
-        Process p = new Process();
-        p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -p");
-        p.StartInfo.RedirectStandardOutput = true;
-        p.StartInfo.WorkingDirectory = workingArea;
-        p.StartInfo.UseShellExecute = false; //Import in Linux environments
-        p.Start();
 
-        while (!p.HasExited)
+        if (GlobalVars.PerformTextExtraction)
         {
-            System.Threading.Thread.Sleep(100);
-            count++;
-            if (count > 10)
+            int count = 0;
+            Process p = new Process();
+            p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -p");
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.WorkingDirectory = workingArea;
+            p.StartInfo.UseShellExecute = false; //Import in Linux environments
+            p.Start();
+
+            while (!p.HasExited)
             {
-                throw new Exception("Cat File did not return within a second");
+                System.Threading.Thread.Sleep(100);
+                count++;
+                if (count > 10)
+                {
+                    throw new Exception("Cat File did not return within a second");
+                }
             }
+            string contents = p.StandardOutput.ReadToEnd();
+            return contents;
         }
-        string contents = p.StandardOutput.ReadToEnd();
-        return contents;
+        else
+        {
+            return string.Empty;
+        }
     }
 
 

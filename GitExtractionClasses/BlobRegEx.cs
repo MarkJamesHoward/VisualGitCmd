@@ -12,18 +12,13 @@ public abstract class BlobNodeExtraction
             string blobHash = blobMatch.Groups[1].Value;
             string blobContents = string.Empty;
 
-            if (GlobalVars.PerformTextExtraction)
-            {
-                FileType.GetContents(blobHash, GlobalVars.workingArea);
-            }
+            FileType.GetContents(blobHash, GlobalVars.workingArea);
 
             //Console.WriteLine($"\t\t-> blob {blobHash} {blobMatch.Groups[2]}");
             if (GlobalVars.EmitNeo && !FileType.DoesNeo4jNodeExistAlready(Neo4jHelper.session, blobHash, "blob"))
             {
-                if (GlobalVars.EmitNeo)
-                    Neo4jHelper.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+                Neo4jHelper.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
             }
-            //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 
             GitBlobs.Add(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
