@@ -65,6 +65,7 @@ public abstract class GitRepoExaminer
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
             GitRemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
+            GitIndexFiles.ProcessIndexFiles(GlobalVars.workingArea);
 
             HEADNode HEADNodeDetails = HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
 
@@ -77,7 +78,7 @@ public abstract class GitRepoExaminer
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
                     GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
-                        GitRemoteBranches.RemoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
+                        GitRemoteBranches.RemoteBranches, GitIndexFiles.IndexFiles,
                              Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNodeDetails);
             }
 

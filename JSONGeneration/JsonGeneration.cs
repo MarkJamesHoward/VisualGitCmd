@@ -10,53 +10,15 @@ public abstract class JSONGeneration
             JSONGeneration.OutputNodesJson(GitBlobs.Blobs, GlobalVars.BlobNodesJsonFile);
             HEADJsonGeneration.OutputHEADJsonToFile(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);
             JSONGeneration.OutputBranchJson(branches, GitTrees.Trees, GitBlobs.Blobs, GlobalVars.BranchNodesJsonFile);
-            JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
+            IndexFilesJson.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
             WorkingAreaFilesJson.OutputWorkingFilesJsonToFile(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
         }
     }
 
 
 
-    public static List<IndexFile> IndexFilesJsonNodes(string workingArea)
-    {
-        var Json = string.Empty;
-        List<IndexFile> IndexFilesList = new List<IndexFile>();
 
-        string files = FileType.GetIndexFiles(GlobalVars.workingArea);
-        // Console.WriteLine(files);
-        List<string> fileList = files.Split("\n").ToList();
 
-        foreach (string file in fileList)
-        {
-            IndexFile FileObj = new IndexFile();
-            FileObj.filename = file;
-            IndexFilesList.Add(FileObj);
-        }
-
-        return IndexFilesList;
-
-    }
-    public static void OutputIndexFilesJson(string JsonPath)
-    {
-        var Json = string.Empty;
-        List<IndexFile> IndexFilesList = new List<IndexFile>();
-
-        string files = FileType.GetIndexFiles("");
-        //Console.WriteLine(files);
-        List<string> fileList = files.Split("\n").ToList();
-
-        foreach (string file in fileList)
-        {
-            IndexFile FileObj = new IndexFile();
-            FileObj.filename = file;
-            IndexFilesList.Add(FileObj);
-        }
-
-        Json = JsonSerializer.Serialize(IndexFilesList);
-
-        Console.WriteLine(JsonPath);
-        File.WriteAllText(JsonPath, Json);
-    }
 
 
     public static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
