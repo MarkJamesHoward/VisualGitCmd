@@ -41,8 +41,7 @@ public abstract class GitRepoExaminer
                     GitCommits.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
 
                     // Now we have a tree we can look at the blobs too and create link from the Tree to Blobs
-                    BlobNodeExtraction BlobNode = new();
-                    BlobNode.ProcessBlobsForSpecifiedTree(treeHash, CommitNodeExtract);
+                    BlobNodeExtraction.ProcessBlobsForSpecifiedTree(treeHash, CommitNodeExtract);
                 }
             }
         }

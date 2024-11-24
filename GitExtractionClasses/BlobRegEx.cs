@@ -1,6 +1,6 @@
-public class BlobNodeExtraction
+public abstract class BlobNodeExtraction
 {
-    public void ProcessBlobsForSpecifiedTree(string treeHash, CommitNodeExtraction CommitNode)
+    public static void ProcessBlobsForSpecifiedTree(string treeHash, CommitNodeExtraction CommitNode)
     {
         // Get the details of the Blobs in this Tree
         string tree = FileType.GetContents(CommitNode.CommitTreeDetails.Groups[1].Value, GlobalVars.workingArea);
