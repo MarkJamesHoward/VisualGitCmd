@@ -10,6 +10,7 @@ public abstract class GitRepoExaminer
     {
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
+            Console.WriteLine("Examingin file " + file);
             if (file.Contains("pack-") || file.Contains(".idx"))
             {
                 break;
@@ -34,7 +35,7 @@ public abstract class GitRepoExaminer
 
                     Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtract);
 
-                    TreeNodesList.AddTreeObjectToTreeNodeList(treeHash);
+                    GitTrees.AddTreeObjectToTreeNodeList(treeHash);
 
                     List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(hashCode_determinedFrom_dir_and_first2charOfFilename);
                     GitCommits.AddCommitObjectToCommitNodeList(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
@@ -75,7 +76,7 @@ public abstract class GitRepoExaminer
                 GitBlobs.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
-                    GitCommits.Commits, GitBlobs.Blobs, TreeNodesList.TreeNodes, GitBranches.Branches,
+                    GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
                         GitRemoteBranches.RemoteBranches, JSONGeneration.IndexFilesJsonNodes(GlobalVars.workingArea),
                              Nodes.WorkingFilesNodes(GlobalVars.workingArea), HEADNodeDetails);
             }

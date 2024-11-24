@@ -6,33 +6,16 @@ public abstract class JSONGeneration
         {
             GitBlobs.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             JSONGeneration.OutputNodesJson(GitCommits.Commits, GlobalVars.CommitNodesJsonFile);
-            JSONGeneration.OutputNodesJson(TreeNodesList.TreeNodes, GlobalVars.TreeNodesJsonFile);
+            JSONGeneration.OutputNodesJson(GitTrees.Trees, GlobalVars.TreeNodesJsonFile);
             JSONGeneration.OutputNodesJson(GitBlobs.Blobs, GlobalVars.BlobNodesJsonFile);
-            HEADJsonGeneration.OutputHEADJson(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);
-            JSONGeneration.OutputBranchJson(branches, TreeNodesList.TreeNodes, GitBlobs.Blobs, GlobalVars.BranchNodesJsonFile);
+            HEADJsonGeneration.OutputHEADJsonToFile(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);
+            JSONGeneration.OutputBranchJson(branches, GitTrees.Trees, GitBlobs.Blobs, GlobalVars.BranchNodesJsonFile);
             JSONGeneration.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
-            JSONGeneration.OutputWorkingFilesJson(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
+            WorkingAreaFilesJson.OutputWorkingFilesJsonToFile(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
         }
     }
 
-    public static void OutputWorkingFilesJson(string workingFolder, string JsonPath)
-    {
-        var Json = string.Empty;
-        List<WorkingFile> WorkingFilesList = new List<WorkingFile>();
 
-        List<string> files = FileType.GetWorkingFiles(workingFolder);
-
-        foreach (string file in files)
-        {
-            WorkingFile FileObj = new WorkingFile();
-            FileObj.filename = file;
-            FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
-            WorkingFilesList.Add(FileObj);
-        }
-
-        Json = JsonSerializer.Serialize(WorkingFilesList);
-        File.WriteAllText(JsonPath, Json);
-    }
 
     public static List<IndexFile> IndexFilesJsonNodes(string workingArea)
     {
@@ -82,14 +65,14 @@ public abstract class JSONGeneration
         File.WriteAllText(JsonPath, Json);
     }
 
-    public static void OutputBranchJson<T>(List<T> Nodes, List<TreeNode> TreeNodes, List<Blob> blobs, string JsonPath)
+    public static void OutputBranchJson<T>(List<T> Nodes, List<Tree> TreeNodes, List<Blob> blobs, string JsonPath)
     {
         var Json = JsonSerializer.Serialize(Nodes);
         File.WriteAllText(JsonPath, Json);
     }
 
     public static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<Commit> CommitNodes,
-     List<Blob> BlobNodes, List<TreeNode> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
+     List<Blob> BlobNodes, List<Tree> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
      List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEADNode HEADNodes)
     {
         var Json = string.Empty;

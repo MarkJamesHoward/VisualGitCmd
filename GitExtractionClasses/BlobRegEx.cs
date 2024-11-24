@@ -27,13 +27,13 @@ public class BlobNodeExtraction
 
             GitBlobs.AddToBlobObjectCollection(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
-            if (GlobalVars.EmitNeo && !Links.DoesTreeToBlobLinkExist(Neo4jHelper.session, CommitNode.CommitTreeDetails.Groups[1].Value, blobHash))
+            if (GlobalVars.EmitNeo && !Neo4jHelper.DoesTreeToBlobLinkExist(Neo4jHelper.session, CommitNode.CommitTreeDetails.Groups[1].Value, blobHash))
             {
                 if (GlobalVars.EmitNeo)
                     Neo4jHelper.CreateLinkNeo(Neo4jHelper.session, CommitNode.CommitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value, "", "");
             }
 
-            TreeNodesList.CreateTreeToBlobLink(CommitNode.CommitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
+            GitTrees.CreateTreeToBlobLink(CommitNode.CommitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
         }
     }
 }

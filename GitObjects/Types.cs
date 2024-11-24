@@ -24,7 +24,7 @@ public class HEADNode
     public string? hash { get; set; }
 }
 
-public class TreeNode
+public class Tree
 {
     public string? hash { get; set; }
     public List<string>? blobs { get; set; }

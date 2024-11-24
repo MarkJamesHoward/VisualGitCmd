@@ -8,6 +8,43 @@ public abstract class Neo4jHelper
     static string uri = "";
     static string username = "";
 
+    public static void AddCommitParentLinks(ISession? session, string path, string workingArea)
+    {
+        List<string> directories = Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList();
+
+        foreach (string dir in directories)
+        {
+            var files = Directory.GetFiles(dir).ToList();
+
+            foreach (string file in files)
+            {
+
+                string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
+                string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode, GlobalVars.workingArea);
+
+                if (fileType.Contains("commit"))
+                {
+                    string commitContents = FileType.GetContents(hashCode, GlobalVars.workingArea);
+                    var commitParent = Regex.Match(commitContents, "parent ([0-9a-f]{4})");
+
+                    if (commitParent.Success)
+                    {
+                        foreach (var item in commitParent.Groups.Values)
+                        {
+                            // string parentHash = commitParent.Groups[1].Value;
+                            string parentHash = item.Value;
+                            //Console.WriteLine($"\t-> parent commit {commitParent}");
+
+                            Neo4jHelper.CreateCommitTOCommitLinkNeo(session, hashCode, parentHash);
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+
     public static void ProcessCommitForNeo4j(string commitComment, string treeHash, string hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtraction CommitNode)
     {
         Neo4jHelper.AddCommitToNeo(Neo4jHelper.session, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNode.CommitContents);
@@ -15,11 +52,30 @@ public abstract class Neo4jHelper
         Neo4jHelper.CreateCommitLinkNeo(Neo4jHelper.session, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash, "", "");
     }
 
+    public static bool DoesTreeToBlobLinkExist(ISession? session, string treeHash, string blobHash)
+    {
+        string query = "MATCH (t:tree { hash: $treeHash })-[r:blob]->(b:blob {hash: $blobHash }) RETURN r, b";
+        var result = session?.Run(
+                query,
+                new { treeHash, blobHash });
+
+        if (result != null)
+        {
+            foreach (var record in result)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     public static void ProcessNeo4jOutput()
     {
         if (GlobalVars.EmitNeo)
         {
-            Links.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
+            Neo4jHelper.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
             GitBlobs.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             GetHEAD(Neo4jHelper.session, GlobalVars.headPath);
         }
