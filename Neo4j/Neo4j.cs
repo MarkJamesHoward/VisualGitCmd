@@ -44,6 +44,61 @@ public abstract class Neo4jHelper
         }
     }
 
+    public static void AddOrphanBlobs(ISession? session, string branchPath, string path, string workingArea, bool PerformTextExtraction)
+    {
+
+        List<string> branchFiles = Directory.GetFiles(branchPath).ToList();
+        List<string> directories = Directory.GetDirectories(path).ToList();
+        List<string> files = new List<string>();
+
+        foreach (string dir in directories)
+        {
+            files = Directory.GetFiles(dir).ToList();
+
+            foreach (string file in files)
+            {
+                string hashCode = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
+                string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode, workingArea);
+
+                if (fileType.Contains("blob"))
+                {
+                    string blobContents = string.Empty;
+
+                    if (PerformTextExtraction)
+                    {
+                        FileType.GetContents(hashCode, workingArea);
+                    }
+
+                    Console.WriteLine($"blob {hashCode}");
+                    if (!FileType.DoesNeo4jNodeExistAlready(session, hashCode, "blob"))
+                    {
+                        Neo4jHelper.AddBlobToNeo(session, hashCode, hashCode, blobContents);
+                    }
+                }
+            }
+        }
+    }
+
+
+    public static void AddBlobToNeo(ISession? session, string filename, string hash, string contents)
+    {
+        string filenameplushash = $"{filename} #{hash}";
+
+        var greeting = session?.ExecuteWrite(
+        tx =>
+        {
+            var result = tx.Run(
+                "CREATE (a:blob) " +
+                "SET a.filenameplushash = $filenameplushash " +
+                "SET a.hash = $hash " +
+                "SET a.filename = $filename " +
+                "SET a.contents = $contents " +
+                "RETURN a.name + ', from node ' + id(a)",
+                new { filenameplushash, hash, filename, contents });
+
+            return "created node";
+        });
+    }
 
     public static void ProcessCommitForNeo4j(string commitComment, string treeHash, string hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtraction CommitNode)
     {
@@ -76,7 +131,7 @@ public abstract class Neo4jHelper
         if (GlobalVars.EmitNeo)
         {
             Neo4jHelper.AddCommitParentLinks(Neo4jHelper.session, GlobalVars.GITobjectsPath, GlobalVars.workingArea);
-            GitBlobs.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            Neo4jHelper.AddOrphanBlobs(Neo4jHelper.session, GlobalVars.branchPath, GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             GetHEAD(Neo4jHelper.session, GlobalVars.headPath);
         }
     }

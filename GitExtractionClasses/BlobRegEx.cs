@@ -21,7 +21,7 @@ public class BlobNodeExtraction
             if (GlobalVars.EmitNeo && !FileType.DoesNeo4jNodeExistAlready(Neo4jHelper.session, blobHash, "blob"))
             {
                 if (GlobalVars.EmitNeo)
-                    GitBlobs.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+                    Neo4jHelper.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
             }
             //Console.WriteLine($"Adding non orphan blob {blobMatch.Groups[1].Value}");
 

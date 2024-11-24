@@ -73,7 +73,7 @@ public abstract class GitRepoExaminer
 
             if (GlobalVars.EmitWeb)
             {
-                GitBlobs.FindOrphanBlobs(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+                GitBlobs.AddOrphanBlobsToBlobCollection(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
 
                 JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
                     GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
