@@ -2,11 +2,13 @@ public abstract class GitTrees
 {
     public static List<Tree> Trees = new List<Tree>();
 
-    public static void Add(string treeHash)
+    public static void Add(string treeHash, string parentHash, string folderName)
     {
         Tree tn = new Tree();
         tn.hash = treeHash;
         tn.blobs = new List<string>();
+        tn.parent = parentHash;
+        tn.text = folderName;
 
         if (!Trees.Exists(i => i.hash == tn.hash))
         {
@@ -20,16 +22,12 @@ public abstract class GitTrees
         treeNode?.blobs?.Add(child);
     }
 
-    public static void CreateSubTreeToTreeLink(string parent, string child)
+    public static void CreateSubTreeToParentTreeLink(string parent, string child)
     {
-        var treeNode = Trees?.Find(i => i.hash == parent);
+        var treeNode = Trees?.Find(i => i.hash == child);
         if (treeNode != null)
         {
-            if (treeNode.subTrees == null)
-            {
-                treeNode.subTrees = new List<Tree>();
-            }
-            treeNode?.subTrees?.Add(new Tree { hash = child });
+            treeNode.parent = parent;
         }
     }
 }

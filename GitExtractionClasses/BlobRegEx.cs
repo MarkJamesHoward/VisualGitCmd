@@ -31,15 +31,12 @@ public abstract class BlobNodeExtraction
             GitTrees.CreateTreeToBlobLink(CommitNode.CommitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
         }
         // Any SubTrees in this Tree?
-        var TreesInTree = Regex.Matches(tree, @"tree ([0-9a-f]{4})");
+        var TreesInTree = Regex.Matches(tree, @"tree ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
         foreach (Match treeMatch in TreesInTree)
         {
             string subtreeHash = treeMatch.Groups[1].Value;
-            GitTrees.Add(subtreeHash);
-            //Create Tree to Tree link
-            GitTrees.CreateSubTreeToTreeLink(treeHash, subtreeHash);
-
-
+            string subTreeFolderName = treeMatch.Groups[2].Value;
+            GitTrees.Add(subtreeHash, treeHash, subTreeFolderName);
             BlobNodeExtraction.ProcessSubTeeesForSpecifiedTree(subtreeHash);
         }
     }

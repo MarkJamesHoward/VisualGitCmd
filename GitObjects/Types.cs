@@ -29,7 +29,7 @@ public class Tree
     public string? hash { get; set; }
     public List<string>? blobs { get; set; }
 
-    public List<Tree>? subTrees { get; set; }
+    public string? parent { get; set; }
 
     public string? text { get; set; }
 }
