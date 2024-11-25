@@ -23,6 +23,13 @@ public abstract class GitTrees
     public static void CreateSubTreeToTreeLink(string parent, string child)
     {
         var treeNode = Trees?.Find(i => i.hash == parent);
-        treeNode?.subTrees?.Add(child);
+        if (treeNode != null)
+        {
+            if (treeNode.subTrees == null)
+            {
+                treeNode.subTrees = new List<Tree>();
+            }
+            treeNode?.subTrees?.Add(new Tree { hash = child });
+        }
     }
 }

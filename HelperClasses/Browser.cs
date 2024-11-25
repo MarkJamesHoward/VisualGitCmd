@@ -5,7 +5,7 @@ public abstract class Browser
         try
         {
 
-            if (firstRun)
+            if (firstRun && GlobalVars.EmitWeb)
             {
                 firstRun = false;
                 Process.Start(new ProcessStartInfo($"https://visualgit.net/visualize?data={RandomName.Name.Replace(' ', 'x')}/1") { UseShellExecute = true });
