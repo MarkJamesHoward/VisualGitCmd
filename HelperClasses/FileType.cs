@@ -18,34 +18,27 @@ public abstract class FileType
     }
     public static string GetContents(string? file, string workingArea)
     {
+        int count = 0;
+        Process p = new Process();
+        p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -p");
+        p.StartInfo.RedirectStandardOutput = true;
+        p.StartInfo.WorkingDirectory = workingArea;
+        p.StartInfo.UseShellExecute = false; //Import in Linux environments
+        p.Start();
 
-        if (GlobalVars.PerformTextExtraction)
+        while (!p.HasExited)
         {
-            int count = 0;
-            Process p = new Process();
-            p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -p");
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.WorkingDirectory = workingArea;
-            p.StartInfo.UseShellExecute = false; //Import in Linux environments
-            p.Start();
-
-            while (!p.HasExited)
+            System.Threading.Thread.Sleep(100);
+            count++;
+            if (count > 10)
             {
-                System.Threading.Thread.Sleep(100);
-                count++;
-                if (count > 10)
-                {
-                    throw new Exception("Cat File did not return within a second");
-                }
+                throw new Exception("Cat File did not return within a second");
             }
-            string contents = p.StandardOutput.ReadToEnd();
-            return contents;
         }
-        else
-        {
-            return string.Empty;
-        }
+        string contents = p.StandardOutput.ReadToEnd();
+        return contents;
     }
+
 
 
     public static string GetFileType_UsingGitCatFileCmd_Param_T(string file, string workingArea)

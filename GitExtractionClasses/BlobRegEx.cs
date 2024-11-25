@@ -30,5 +30,38 @@ public abstract class BlobNodeExtraction
 
             GitTrees.CreateTreeToBlobLink(CommitNode.CommitTreeDetails.Groups[1].Value, blobMatch.Groups[1].Value);
         }
+        // Any SubTrees in this Tree?
+        var TreesInTree = Regex.Matches(tree, @"tree ([0-9a-f]{4})");
+        foreach (Match treeMatch in TreesInTree)
+        {
+            string subtreeHash = treeMatch.Groups[1].Value;
+            GitTrees.Add(subtreeHash);
+            //Create Tree to Tree link
+            GitTrees.CreateSubTreeToTreeLink(treeHash, subtreeHash);
+
+
+            BlobNodeExtraction.ProcessSubTeeesForSpecifiedTree(subtreeHash);
+        }
+    }
+
+
+    public static void ProcessSubTeeesForSpecifiedTree(string treeHash)
+    {
+        // Get the details of the Blobs in this Tree
+        string tree = FileType.GetContents(treeHash, GlobalVars.workingArea);
+
+        var blobsInTree = Regex.Matches(tree, @"blob ([0-9a-f]{4})[0-9a-f]{36}.([\w\.]+)");
+
+        foreach (Match blobMatch in blobsInTree)
+        {
+            string blobHash = blobMatch.Groups[1].Value;
+            string blobContents = string.Empty;
+
+            FileType.GetContents(blobHash, GlobalVars.workingArea);
+
+            GitBlobs.Add(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
+
+            GitTrees.CreateTreeToBlobLink(treeHash, blobMatch.Groups[1].Value);
+        }
     }
 }

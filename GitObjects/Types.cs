@@ -28,6 +28,9 @@ public class Tree
 {
     public string? hash { get; set; }
     public List<string>? blobs { get; set; }
+
+    public List<string>? subTrees { get; set; }
+
     public string? text { get; set; }
 }
 

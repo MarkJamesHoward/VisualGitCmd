@@ -19,4 +19,10 @@ public abstract class GitTrees
         var treeNode = Trees?.Find(i => i.hash == parent);
         treeNode?.blobs?.Add(child);
     }
+
+    public static void CreateSubTreeToTreeLink(string parent, string child)
+    {
+        var treeNode = Trees?.Find(i => i.hash == parent);
+        treeNode?.subTrees?.Add(child);
+    }
 }
