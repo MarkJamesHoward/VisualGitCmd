@@ -43,8 +43,14 @@ public abstract class GitBlobs
         Blob b = new Blob();
         b.filename = filename;
         b.hash = hash;
-        b.tree = treeHash;
         b.contents = contents;
+
+        if (b.trees == null)
+        {
+            b.trees = new List<string>();
+        }
+
+        b.trees.Add(treeHash);
 
         if (!Blobs.Exists(i => i.hash == b.hash))
         {
@@ -56,6 +62,10 @@ public abstract class GitBlobs
             // If filename is different then it has the same contents 
             // Combine the names so they are both displayed
             var existingBlob = Blobs.Find(i => i.hash == b.hash);
+            if (existingBlob?.trees.Contains(treeHash) == false)
+            {
+                existingBlob.trees.Add(treeHash);
+            }
             if (existingBlob?.filename?.Contains(b.filename) == false)
             {
                 StandardMessages.BlobSkippedAsSameContents(b.hash);

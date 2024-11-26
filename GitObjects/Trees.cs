@@ -7,12 +7,23 @@ public abstract class GitTrees
         Tree tn = new Tree();
         tn.hash = treeHash;
         tn.blobs = new List<string>();
-        tn.parent = parentHash;
         tn.text = folderName;
+        tn.parents = new List<string>();
+        tn.parents.Add(parentHash);
 
         if (!Trees.Exists(i => i.hash == tn.hash))
         {
             Trees.Add(tn);
+        }
+        else
+        {
+            var existingTree = Trees.Find(t => t.hash == tn.hash);
+
+            if (existingTree?.parents?.Contains(parentHash) == false)
+            {
+                existingTree.parents.Add(parentHash);
+            }
+
         }
     }
 
@@ -22,12 +33,4 @@ public abstract class GitTrees
         treeNode?.blobs?.Add(child);
     }
 
-    public static void CreateSubTreeToParentTreeLink(string parent, string child)
-    {
-        var treeNode = Trees?.Find(i => i.hash == child);
-        if (treeNode != null)
-        {
-            treeNode.parent = parent;
-        }
-    }
 }

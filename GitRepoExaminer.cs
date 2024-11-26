@@ -35,7 +35,7 @@ public abstract class GitRepoExaminer
 
                     Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtract);
 
-                    GitTrees.Add(treeHash, "", "Root");
+                    GitTrees.Add(treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, "Root");
 
                     List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(hashCode_determinedFrom_dir_and_first2charOfFilename);
                     GitCommits.Add(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
