@@ -30,8 +30,14 @@ dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true
 
 
 -- Installer - Inno
-The script is created and called InnoSetup.iss (inside public/application)
+-- Creating InnoSetup package
 
-Point the setup to the generated single file exe from the above (Single File Building)
+Open the pulbic\applications\innoSetup.iis files
+Run 'Compile'
+visualgit_setup.exe will be created in public\application\Output folder
+It pulls the visualgit.exe directly from our local folder here:
+    C:\github\VisualGit\public\application\Windows
+So need to copy over the published version from here first
+    C:\github\VisualGitCmd\bin\Release\net8.0\win-x64\publish
 
 InnoSetup was installed on local from https://jrsoftware.org/isinfo.php

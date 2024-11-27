@@ -4,10 +4,32 @@ public abstract class GitWorkingFiles
 {
     public static List<WorkingFile> WorkingFiles = new List<WorkingFile>();
 
-    public static List<WorkingFile> ProcessWorkingFiles(string workingFolder)
+
+    public static void ProcessWorkingFiles(string workingFolder)
     {
+        List<WorkingFile> files = InternalProcessWorkingFiles(workingFolder);
+        WorkingFiles = files;
+    }
+
+    private static List<WorkingFile> InternalProcessWorkingFiles(string workingFolder)
+    {
+        List<WorkingFile> LocalWorkingFiles = new List<WorkingFile>();
+
+        string[] directories = Directory.GetDirectories(workingFolder);
+
+        foreach (string folder in directories)
+        {
+            if (!folder.Contains(".git"))
+            {
+                List<WorkingFile> subFolderFiles = InternalProcessWorkingFiles(folder);
+                foreach (var file in subFolderFiles)
+                {
+                    LocalWorkingFiles.Add(file);
+                }
+            }
+        }
+
         List<string> files = FileType.GetWorkingFiles(workingFolder);
-        WorkingFiles = new List<WorkingFile>();
 
         foreach (string file in files)
         {
@@ -17,9 +39,9 @@ public abstract class GitWorkingFiles
             {
                 FileObj.contents = FileType.GetFileContents(Path.Combine(workingFolder, file));
             }
-            WorkingFiles.Add(FileObj);
+            LocalWorkingFiles.Add(FileObj);
         }
-        return WorkingFiles;
+        return LocalWorkingFiles;
     }
 
 
