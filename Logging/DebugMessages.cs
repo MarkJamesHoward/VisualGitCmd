@@ -14,6 +14,17 @@ public abstract class DebugMessages()
     {
         logger?.LogDebug($"Branch JSON: {data}");
     }
+
+    public static void OutputBlobJson(string data)
+    {
+        logger?.LogDebug($"Blob JSON: {data}");
+    }
+
+    public static void OutputTreeJson(string data)
+    {
+        logger?.LogDebug($"Tree JSON: {data}");
+    }
+
     public static void AddingRemoteBranchObject(string name, string hash)
     {
         logger?.LogDebug($"Creating Remote branch: name={name} hash={hash}");
@@ -25,6 +36,11 @@ public abstract class DebugMessages()
     public static void AddingBranchObject(string name, string hash)
     {
         logger?.LogDebug($"Adding Branch object to our list of BRANCH Nodes: Name={name} PointingTO={hash}");
+    }
+    public static void ExistingBlobObjectUpdate(string hash, string filename, string parentTree)
+    {
+        logger?.LogDebug($"Updating Blob object to our list of BLOB Nodes: hash={hash} name={filename} parentTree={parentTree}");
+
     }
     public static void AddingBlobObject(string hash, string name)
     {

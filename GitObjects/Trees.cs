@@ -30,7 +30,12 @@ public abstract class GitTrees
     public static void CreateTreeToBlobLink(string parent, string child)
     {
         var treeNode = Trees?.Find(i => i.hash == parent);
-        treeNode?.blobs?.Add(child);
+        if (treeNode?.blobs?.Contains(child) == false)
+        {
+            treeNode?.blobs?.Add(child);
+        }
+
+
     }
 
 }

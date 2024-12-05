@@ -1,3 +1,4 @@
+using System.Data;
 using Neo4j.Driver;
 public abstract class GitBlobs
 {
@@ -30,7 +31,7 @@ public abstract class GitBlobs
                     {
                         blobContents = FileType.GetContents(hashCode, workingArea);
                     }
-
+                    Console.WriteLine("Adding BLOB from AddingOrphanBlobsToJson");
                     Add("", "", hashCode, blobContents);
                 }
             }
@@ -50,7 +51,11 @@ public abstract class GitBlobs
             b.trees = new List<string>();
         }
 
-        b.trees.Add(treeHash);
+        if (treeHash != "")
+        {
+            Console.WriteLine("Tree for BLOB added " + treeHash);
+            b.trees.Add(treeHash);
+        }
 
         if (!Blobs.Exists(i => i.hash == b.hash))
         {
@@ -59,10 +64,17 @@ public abstract class GitBlobs
         }
         else
         {
+            DebugMessages.ExistingBlobObjectUpdate(b.hash, b.filename, treeHash);
+
             // If filename is different then it has the same contents 
             // Combine the names so they are both displayed
             var existingBlob = Blobs.Find(i => i.hash == b.hash);
-            if (existingBlob?.trees.Contains(treeHash) == false)
+            if (existingBlob?.trees == null)
+            {
+                existingBlob.trees = new List<string>();
+                existingBlob?.trees.Add(treeHash);
+            }
+            else if (existingBlob?.trees.Contains(treeHash) == false)
             {
                 existingBlob.trees.Add(treeHash);
             }

@@ -46,6 +46,10 @@ public abstract class JSONGeneration
             var TreeJson = JsonSerializer.Serialize(TreeNodes);
             var BranchJson = JsonSerializer.Serialize(BranchNodes);
             DebugMessages.OutputBranchJson(BranchJson);
+            DebugMessages.OutputBlobJson(BlobJson);
+            DebugMessages.OutputTreeJson(TreeJson);
+
+
 
             var RemoteBranchJson = JsonSerializer.Serialize(RemoteBranchNodes);
             var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
