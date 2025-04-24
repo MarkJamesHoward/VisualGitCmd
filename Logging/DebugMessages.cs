@@ -2,10 +2,35 @@ using static MyLogging;
 
 public abstract class DebugMessages()
 {
+    public static void IgnoreDirectory(string? dir)
+    {
+        logger?.LogDebug($"Ignoring directory: {dir}");
+    }
+
+    public static void IgnoringFile(string? file)
+    {
+        logger?.LogDebug($"Ignoring file: {file}");
+    }
+
     public static void FileChanged(string? filename)
     {
         logger?.LogDebug($"File changed: {filename}");
     }
+
+    public static void FileCreated(string? filename)
+    {
+        logger?.LogDebug($"File changed: {filename}");
+    }
+    public static void FileDeleted(string? filename)
+    {
+        logger?.LogDebug($"File deleted: {filename}");
+    }
+    public static void FileRenamed(string? filename, string? oldName)
+    {
+        logger?.LogDebug($"File renamed: {filename} oldName={oldName}");
+    }
+
+
     public static void FoundFileOfType(string type, string hash)
     {
         logger?.LogDebug($"Processing file of type {type.Replace('\n', ' ')} hashCode={hash}");
@@ -13,6 +38,22 @@ public abstract class DebugMessages()
     public static void OutputBranchJson(string data)
     {
         logger?.LogDebug($"Branch JSON: {data}");
+    }
+    public static void OutputCommitJson(string data)
+    {
+        logger?.LogDebug($"Commit JSON: {data}");
+    }
+    public static void OutputHEADJson(string data)
+    {
+        logger?.LogDebug($"HEAD JSON: {data}");
+    }
+    public static void OutputIndexFilesJson(string data)
+    {
+        logger?.LogDebug($"Index Files JSON: {data}");
+    }
+    public static void OutputWorkingFilesJson(string data)
+    {
+        logger?.LogDebug($"Working Files JSON: {data}");
     }
 
     public static void OutputBlobJson(string data)

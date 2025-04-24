@@ -8,12 +8,13 @@ public abstract class GitRepoExaminer
 
     public static void ProcessEachFileAndExtract_Commit_Tree_Blob(string dir)
     {
+        // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Starting " + dir);    
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
             Console.WriteLine("Examining file " + file);
             if (file.Contains("pack-") || file.Contains(".idx"))
             {
-                break;
+                continue;
             }
 
             string hashCode_determinedFrom_dir_and_first2charOfFilename = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
@@ -45,6 +46,8 @@ public abstract class GitRepoExaminer
                 }
             }
         }
+        // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Completed " + dir);    
+    
     }
     public static void Run()
     {
@@ -53,14 +56,20 @@ public abstract class GitRepoExaminer
         {
             Neo4jHelper.CheckIfNeoj4EmissionEnabled();
 
+            // Console.WriteLine("RUN Starting " + GlobalVars.GITobjectsPath);    
+
             foreach (string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList())
             {
                 if (dir.Contains("pack") || dir.Contains("info"))
                 {
-                    break;
+                    DebugMessages.IgnoreDirectory(dir);
+                    continue;
                 }
+                // Console.WriteLine("top level call ProcessEachFileAndExtract_Commit_Tree_Blob " + GlobalVars.GITobjectsPath);    
                 ProcessEachFileAndExtract_Commit_Tree_Blob(dir);
             }
+            // Console.WriteLine("RUN Completed " + GlobalVars.GITobjectsPath);    
+
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
             GitRemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);

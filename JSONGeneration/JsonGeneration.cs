@@ -45,9 +45,11 @@ public abstract class JSONGeneration
             var BlobJson = JsonSerializer.Serialize(BlobNodes);
             var TreeJson = JsonSerializer.Serialize(TreeNodes);
             var BranchJson = JsonSerializer.Serialize(BranchNodes);
+
             DebugMessages.OutputBranchJson(BranchJson);
-            DebugMessages.OutputBlobJson(BlobJson);
+            DebugMessages.OutputCommitJson(CommitJson);
             DebugMessages.OutputTreeJson(TreeJson);
+            DebugMessages.OutputBlobJson(BlobJson);
 
 
 
@@ -55,6 +57,10 @@ public abstract class JSONGeneration
             var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
             var WorkingFilesJson = JsonSerializer.Serialize(WorkingFilesNodes);
             var HEADJson = JsonSerializer.Serialize(HEADNodes);
+
+            DebugMessages.OutputHEADJson(HEADJson);
+            DebugMessages.OutputIndexFilesJson(IndexFilesJson);
+            DebugMessages.OutputWorkingFilesJson(WorkingFilesJson);
 
             HttpClient sharedClient = new()
             {
