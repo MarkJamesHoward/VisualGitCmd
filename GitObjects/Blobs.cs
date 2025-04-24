@@ -13,7 +13,7 @@ public abstract class GitBlobs
         {
             if (dir.Contains("info") || dir.Contains("pack"))
             {
-                break;
+                continue;
             }
 
             List<string> files = Directory.GetFiles(dir).ToList();
@@ -31,7 +31,7 @@ public abstract class GitBlobs
                     {
                         blobContents = FileType.GetContents(hashCode, workingArea);
                     }
-                    Console.WriteLine("Adding BLOB from AddingOrphanBlobsToJson");
+                    DebugMessages.GenericMessage("Adding BLOB from AddingOrphanBlobsToJson");
                     Add("", "", hashCode, blobContents);
                 }
             }
@@ -53,7 +53,7 @@ public abstract class GitBlobs
 
         if (treeHash != "")
         {
-            Console.WriteLine("Tree for BLOB added " + treeHash);
+            DebugMessages.GenericMessage("Tree for BLOB added " + treeHash);
             b.trees.Add(treeHash);
         }
 

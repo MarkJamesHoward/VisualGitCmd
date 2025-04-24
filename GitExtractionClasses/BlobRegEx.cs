@@ -20,7 +20,7 @@ public abstract class BlobNodeExtraction
                 Neo4jHelper.AddBlobToNeo(Neo4jHelper.session, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
             }
 
-            Console.WriteLine("Adding BLOB from ProcessBlobsForSpecifiedTree treeHash:" + treeHash);
+            DebugMessages.GenericMessage("Adding BLOB from ProcessBlobsForSpecifiedTree treeHash:" + treeHash);
             GitBlobs.Add(treeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
             if (GlobalVars.EmitNeo && !Neo4jHelper.DoesTreeToBlobLinkExist(Neo4jHelper.session, CommitNode.CommitTreeDetails.Groups[1].Value, blobHash))
@@ -58,7 +58,7 @@ public abstract class BlobNodeExtraction
 
             FileType.GetContents(blobHash, GlobalVars.workingArea);
 
-            Console.WriteLine("Adding BLOB from ProcessSubTeeesForSpecifiedTree");
+            DebugMessages.GenericMessage("Adding BLOB from ProcessSubTeeesForSpecifiedTree");
             GitBlobs.Add(subTreeHash, blobMatch.Groups[2].Value, blobMatch.Groups[1].Value, blobContents);
 
             GitTrees.CreateTreeToBlobLink(subTreeHash, blobMatch.Groups[1].Value);

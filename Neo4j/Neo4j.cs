@@ -69,7 +69,7 @@ public abstract class Neo4jHelper
                         FileType.GetContents(hashCode, workingArea);
                     }
 
-                    Console.WriteLine($"blob {hashCode}");
+                    DebugMessages.GenericMessage($"blob {hashCode}");
                     if (!FileType.DoesNeo4jNodeExistAlready(session, hashCode, "blob"))
                     {
                         Neo4jHelper.AddBlobToNeo(session, hashCode, hashCode, blobContents);

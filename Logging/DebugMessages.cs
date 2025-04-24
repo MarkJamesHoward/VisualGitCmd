@@ -2,6 +2,10 @@ using static MyLogging;
 
 public abstract class DebugMessages()
 {
+    public static void GenericMessage(string message)
+    {
+        logger?.LogDebug(message);
+    }
     public static void IgnoreDirectory(string? dir)
     {
         logger?.LogDebug($"Ignoring directory: {dir}");

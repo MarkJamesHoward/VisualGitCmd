@@ -11,7 +11,7 @@ public abstract class GitRepoExaminer
         // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Starting " + dir);    
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
-            Console.WriteLine("Examining file " + file);
+            DebugMessages.GenericMessage("Examining file " + file);
             if (file.Contains("pack-") || file.Contains(".idx"))
             {
                 continue;

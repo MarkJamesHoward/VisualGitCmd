@@ -18,7 +18,7 @@ public abstract class IndexFilesJson
 
         Json = JsonSerializer.Serialize(IndexFilesList);
 
-        Console.WriteLine(JsonPath);
+        DebugMessages.GenericMessage(JsonPath);
         File.WriteAllText(JsonPath, Json);
     }
 }
