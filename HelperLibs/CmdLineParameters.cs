@@ -5,12 +5,12 @@ public class CmdLineArguments
 {
     public static void ProcessCmdLineArguments(string[] args)
     {
-        GlobalVars.RepoPath = Environment.CurrentDirectory;
-        GlobalVars.workingArea = Path.Combine(GlobalVars.RepoPath, @"./");
-        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/");
-        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects\");
-        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
-        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
+        GlobalVars.RepoPath = Environment.CurrentDirectory.Trim();
+        GlobalVars.workingArea = Path.Combine(GlobalVars.RepoPath, @"./").Trim();
+        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/").Trim();
+        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects\").Trim();
+        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads").Trim();
+        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes").Trim();
 
         try
         {
@@ -27,10 +27,7 @@ public class CmdLineArguments
 
                     if (o.Bare)
                     {
-                        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".\");
-                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".\objects\");
-                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\heads");
-                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\remotes");
+                        GlobalVars.Bare = true;
                     }
 
                     if (o.Json != null)
@@ -38,13 +35,13 @@ public class CmdLineArguments
                         GlobalVars.EmitJsonOnly = true;
                         GlobalVars.EmitWeb = false;
 
-                        GlobalVars.CommitNodesJsonFile = Path.Combine(o.Json, "CommitGitInJson.json");
-                        GlobalVars.TreeNodesJsonFile = Path.Combine(o.Json, "TreeGitInJson.json");
-                        GlobalVars.BlobNodesJsonFile = Path.Combine(o.Json, "BlobGitInJson.json");
-                        GlobalVars.HeadNodesJsonFile = Path.Combine(o.Json, "HeadGitInJson.json");
-                        GlobalVars.BranchNodesJsonFile = Path.Combine(o.Json, "BranchGitInJson.json");
-                        GlobalVars.IndexFilesJsonFile = Path.Combine(o.Json, "IndexfilesGitInJson.json");
-                        GlobalVars.WorkingFilesJsonFile = Path.Combine(o.Json, "WorkingfilesGitInJson.json");
+                        GlobalVars.CommitNodesJsonFile = Path.Combine(o.Json, "CommitGitInJson.json").Trim();
+                        GlobalVars.TreeNodesJsonFile = Path.Combine(o.Json, "TreeGitInJson.json").Trim();
+                        GlobalVars.BlobNodesJsonFile = Path.Combine(o.Json, "BlobGitInJson.json").Trim();
+                        GlobalVars.HeadNodesJsonFile = Path.Combine(o.Json, "HeadGitInJson.json").Trim();
+                        GlobalVars.BranchNodesJsonFile = Path.Combine(o.Json, "BranchGitInJson.json").Trim();
+                        GlobalVars.IndexFilesJsonFile = Path.Combine(o.Json, "IndexfilesGitInJson.json").Trim();
+                        GlobalVars.WorkingFilesJsonFile = Path.Combine(o.Json, "WorkingfilesGitInJson.json").Trim();
                     }
 
                     if (o.Neo)
@@ -75,7 +72,7 @@ public class CmdLineArguments
                         // Check if the path to examine the repo of is provided on the command line
                         if (o.RepoPath != null)
                         {
-                            GlobalVars.RepoPath = Path.Combine(GlobalVars.RepoPath.Trim(), o.RepoPath.Trim());
+                            GlobalVars.RepoPath = Path.Combine(GlobalVars.RepoPath.Trim(), o.RepoPath.Trim()).Trim();
 
                             // Check if path exists
                             if (!Directory.Exists(GlobalVars.RepoPath))
@@ -94,31 +91,31 @@ public class CmdLineArguments
                         if (o.RepoPath == null)
                         {
                             GlobalVars.RepoPath = @"C:\dev\test";
-                            StandardMessages.UsingDebugHardCodedPath(GlobalVars.RepoPath);
+                            StandardMessages.UsingDebugHardCodedPath(GlobalVars.RepoPath.Trim());
                         }
                         else
                         {
-                            GlobalVars.RepoPath = o.RepoPath;
-                            StandardMessages.DebugSelectedAndAlsoRepoPathProvided(GlobalVars.RepoPath);
+                            GlobalVars.RepoPath = o.RepoPath.Trim();
+                            StandardMessages.DebugSelectedAndAlsoRepoPathProvided(GlobalVars.RepoPath.Trim());
                         }
                     }
 
 
-                    if (GlobalVars.debug)
+                    if (GlobalVars.Bare)
                     {
-                        GlobalVars.workingArea = GlobalVars.RepoPath;
-                        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/");
-                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
-                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
-                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
+                        GlobalVars.workingArea = GlobalVars.RepoPath.Trim();
+                        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".\").Trim();
+                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".\objects\").Trim();
+                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\heads").Trim();
+                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\remotes").Trim();
                     }
                     else
                     {
-                        GlobalVars.workingArea = GlobalVars.RepoPath;
-                        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/");
-                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
-                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
-                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
+                        GlobalVars.workingArea = GlobalVars.RepoPath.Trim();
+                        GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/").Trim();
+                        GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/").Trim();
+                        GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads").Trim();
+                        GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes").Trim();
                     }
 
                     if (o.UnpackRefs)

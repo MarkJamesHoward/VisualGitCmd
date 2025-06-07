@@ -58,7 +58,7 @@ public abstract class GitRepoExaminer
 
             // Console.WriteLine("RUN Starting " + GlobalVars.GITobjectsPath);    
 
-            foreach (string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath).ToList())
+            foreach (string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath.Trim()).ToList())
             {
                 if (dir.Contains("pack") || dir.Contains("info"))
                 {
@@ -74,7 +74,13 @@ public abstract class GitRepoExaminer
             GitBranches.ProcessBranches(Neo4jHelper.session);
             GitRemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
             GitIndexFiles.ProcessIndexFiles(GlobalVars.workingArea);
-            GitWorkingFiles.ProcessWorkingFiles(GlobalVars.workingArea);
+
+            // If this is a Bare Repo then we'll not have a working area
+            if (!GlobalVars.Bare)
+            {
+                GitWorkingFiles.ProcessWorkingFiles(GlobalVars.workingArea);
+            }
+            
             GitBlobs.Add(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
             HEADNode HEADNodeDetails = HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
 
