@@ -15,6 +15,8 @@ public abstract class GlobalVars
     public static string headPath = "";
     public static string GITobjectsPath = "";
     public static string branchPath = "";
+    public static string tagPath = "";
+
     public static string remoteBranchPath = "";
 
     public static string CommitNodesJsonFile = "";

@@ -15,12 +15,6 @@ public abstract class JSONGeneration
         }
     }
 
-
-
-
-
-
-
     public static void OutputNodesJson<T>(List<T> Nodes, string JsonPath)
     {
         var Json = JsonSerializer.Serialize(Nodes);
@@ -34,7 +28,7 @@ public abstract class JSONGeneration
     }
 
     public static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<Commit> CommitNodes,
-     List<Blob> BlobNodes, List<Tree> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes,
+     List<Blob> BlobNodes, List<Tree> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes, List<Tag> TagNodes,
      List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEADNode HEADNodes)
     {
         if (GlobalVars.EmitWeb)
@@ -45,8 +39,11 @@ public abstract class JSONGeneration
             var BlobJson = JsonSerializer.Serialize(BlobNodes);
             var TreeJson = JsonSerializer.Serialize(TreeNodes);
             var BranchJson = JsonSerializer.Serialize(BranchNodes);
+            var TagJson = JsonSerializer.Serialize(TagNodes);
+            
 
             DebugMessages.OutputBranchJson(BranchJson);
+            DebugMessages.OutputTagJson(TagJson);
             DebugMessages.OutputCommitJson(CommitJson);
             DebugMessages.OutputTreeJson(TreeJson);
             DebugMessages.OutputBlobJson(BlobJson);
@@ -64,9 +61,13 @@ public abstract class JSONGeneration
 
             HttpClient sharedClient = new()
             {
-                BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
+                // Local Debug 
+                BaseAddress = new Uri("https://localhost:7005/api/gitinternals"),
+
+                // Production version
+                //BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
             };
-            await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+            await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, TagJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
         }
     }
 

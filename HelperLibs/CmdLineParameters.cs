@@ -10,6 +10,7 @@ public class CmdLineArguments
         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/");
         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects\");
         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
+        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/tags");
         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
 
         try
@@ -30,6 +31,7 @@ public class CmdLineArguments
                         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".\");
                         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".\objects\");
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\heads");
+                        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".\refs\tags");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\remotes");
                     }
 
@@ -110,6 +112,7 @@ public class CmdLineArguments
                         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/");
                         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
+                        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/tags");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
                     }
                     else
@@ -118,6 +121,7 @@ public class CmdLineArguments
                         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/");
                         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/");
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads");
+                        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/tags");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes");
                     }
 

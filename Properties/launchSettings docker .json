@@ -1,0 +1,8 @@
+{
+  "profiles": {
+      "visual": {
+      "commandName": "Project",
+      "commandLineArgs": "-p /App/docker-test-folder -d"
+      }
+  }
+  }
