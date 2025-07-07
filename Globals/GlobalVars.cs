@@ -5,6 +5,7 @@ public abstract class GlobalVars
     public static string version = "1.1.0";
     public static bool EmitJsonOnly = false;
     public static bool EmitWeb = false;
+    public static bool LocalDebugAPI = false;
     public static bool UnPackRefs = false;
     public static bool EmitNeo = false;
     public static bool PerformTextExtraction = false;

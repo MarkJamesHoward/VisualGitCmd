@@ -26,6 +26,11 @@ public class CmdLineArguments
                         GlobalVars.EmitWeb = true;
                     }
 
+                     if (o.LocalDebugAPI)
+                    {
+                        GlobalVars.LocalDebugAPI = true;
+                    }
+
                     if (o.Bare)
                     {
                         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".\");

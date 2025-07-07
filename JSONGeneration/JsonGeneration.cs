@@ -59,13 +59,21 @@ public abstract class JSONGeneration
             DebugMessages.OutputIndexFilesJson(IndexFilesJson);
             DebugMessages.OutputWorkingFilesJson(WorkingFilesJson);
 
+            System.Uri BaseAddress;
+
+            if (GlobalVars.LocalDebugAPI)
+            {
+                BaseAddress = new Uri("https://localhost:7005/api/gitinternals");
+            }
+            else
+            {
+                BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals");
+            }   
+
             HttpClient sharedClient = new()
             {
                 // Local Debug 
-                BaseAddress = new Uri("https://localhost:7005/api/gitinternals"),
-
-                // Production version
-                //BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals"),
+                BaseAddress = BaseAddress,
             };
             await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, TagJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
         }
