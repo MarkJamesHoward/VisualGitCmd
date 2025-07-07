@@ -47,3 +47,9 @@ public class Branch
     public string? hash { get; set; }
     public string? name { get; set; }
 }
+
+public class Tag
+{
+    public string? hash { get; set; }
+    public string? name { get; set; }
+}

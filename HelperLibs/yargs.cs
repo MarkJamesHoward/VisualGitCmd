@@ -5,7 +5,7 @@ namespace Yargs
 {
     public class Options
     {
-      
+
         [Option('w', "web", Required = false, Default = true, HelpText = "Send Output to VisualGit Website - Default")]
         public bool Web { get; set; }
 
@@ -21,16 +21,21 @@ namespace Yargs
 
         [Option('d', "debug", Required = false, HelpText = "Enable debug mode")]
         public bool Debug { get; set; }
+        
+        [Option('l', "localdebugAPI", Required = false, HelpText = "Enable local debug of API")]
+        public bool LocalDebugAPI { get; set; }
 
         [Option('b', "bare", Required = false, HelpText = "Using Bare Repo")]
         public bool Bare { get; set; }
 
 
-         [Option('e', "extract", Required = false, Default = false, HelpText = "Extraction from the file contents will take place.")]
+        [Option('e', "extract", Required = false, Default = false, HelpText = "Extraction from the file contents will take place.")]
         public bool Extract { get; set; }
 
         [Option('r', "unpackrefs", Required = false, Default = false, HelpText = "Unpack Refs")]
         public bool UnpackRefs { get; set; }
+        
+
     }
 }
     

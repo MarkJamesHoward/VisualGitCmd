@@ -43,6 +43,10 @@ public abstract class DebugMessages()
     {
         logger?.LogDebug($"Branch JSON: {data}");
     }
+    public static void OutputTagJson(string data)
+    {
+        logger?.LogDebug($"Tag JSON: {data}");
+    }
     public static void OutputCommitJson(string data)
     {
         logger?.LogDebug($"Commit JSON: {data}");
@@ -82,6 +86,15 @@ public abstract class DebugMessages()
     {
         logger?.LogDebug($"Adding Branch object to our list of BRANCH Nodes: Name={name} PointingTO={hash}");
     }
+
+     public static void AddingTagsObject(string name, string hash)
+    {
+        logger?.LogDebug($"Adding Tag object to our list of Tag Nodes: Name={name} PointingTO={hash}");
+    }
+
+    
+
+
     public static void ExistingBlobObjectUpdate(string hash, string filename, string parentTree)
     {
         logger?.LogDebug($"Updating Blob object to our list of BLOB Nodes: hash={hash} name={filename} parentTree={parentTree}");

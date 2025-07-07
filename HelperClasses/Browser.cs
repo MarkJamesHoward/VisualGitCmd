@@ -17,7 +17,7 @@ public abstract class Browser
         }
     }
 
-    public static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
+    public static async Task PostAsync(bool firstrun, string name, int dataID, HttpClient httpClient, string commitjson, string blobjson, string treejson, string branchjson, string tagjson, string remotebranchjson, string indexfilesjson, string workingfilesjson, string HEADjson)
     {
         if (firstrun)
         {
@@ -34,6 +34,7 @@ public abstract class Browser
                 blobNodes = blobjson ?? "",
                 treeNodes = treejson ?? "",
                 branchNodes = branchjson ?? "",
+                tagNodes = tagjson ?? "",
                 remoteBranchNodes = remotebranchjson ?? "",
                 headNodes = HEADjson ?? "",
                 indexFilesNodes = indexfilesjson ?? "",

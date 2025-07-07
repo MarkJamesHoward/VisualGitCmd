@@ -72,6 +72,7 @@ public abstract class GitRepoExaminer
 
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
+            GitTags.ProcessTags(Neo4jHelper.session);
             GitRemoteBranches.ProcessRemoteBranches(Neo4jHelper.session);
             GitIndexFiles.ProcessIndexFiles(GlobalVars.workingArea);
 
@@ -90,7 +91,7 @@ public abstract class GitRepoExaminer
 
             JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
                 GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
-                    GitRemoteBranches.RemoteBranches, GitIndexFiles.IndexFiles,
+                    GitRemoteBranches.RemoteBranches, GitTags.Tags, GitIndexFiles.IndexFiles,
                          GitWorkingFiles.WorkingFiles, HEADNodeDetails);
 
             // Only run this on the first run

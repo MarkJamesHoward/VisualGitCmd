@@ -10,6 +10,7 @@ public class CmdLineArguments
         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/").Trim();
         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects\").Trim();
         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads").Trim();
+        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/tags");
         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes").Trim();
 
         try
@@ -23,6 +24,11 @@ public class CmdLineArguments
                     if (o.Web)
                     {
                         GlobalVars.EmitWeb = true;
+                    }
+
+                     if (o.LocalDebugAPI)
+                    {
+                        GlobalVars.LocalDebugAPI = true;
                     }
 
                     if (o.Bare)
@@ -107,6 +113,7 @@ public class CmdLineArguments
                         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".\").Trim();
                         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".\objects\").Trim();
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\heads").Trim();
+                        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/tags");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".\refs\remotes").Trim();
                     }
                     else
@@ -115,6 +122,7 @@ public class CmdLineArguments
                         GlobalVars.headPath = Path.Combine(GlobalVars.RepoPath, @".git/").Trim();
                         GlobalVars.GITobjectsPath = Path.Combine(GlobalVars.RepoPath, @".git/objects/").Trim();
                         GlobalVars.branchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/heads").Trim();
+                        GlobalVars.tagPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/tags");
                         GlobalVars.remoteBranchPath = Path.Combine(GlobalVars.RepoPath, @".git/refs/remotes").Trim();
                     }
 
