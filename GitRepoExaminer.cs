@@ -22,7 +22,7 @@ public abstract class GitRepoExaminer
             string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
 
             DebugMessages.FoundFileOfType(fileType, hashCode_determinedFrom_dir_and_first2charOfFilename);
-
+            
             if (fileType.Contains("commit"))
             {
                 CommitNodeExtraction CommitNodeExtract = new();
@@ -56,7 +56,12 @@ public abstract class GitRepoExaminer
         {
             Neo4jHelper.CheckIfNeoj4EmissionEnabled();
 
-            // Console.WriteLine("RUN Starting " + GlobalVars.GITobjectsPath);    
+            // Console.WriteLine("RUN Starting " + GlobalVars.GITobjectsPath);
+            // 
+            GitCommits.Commits.Clear();
+            GitBlobs.Blobs.Clear(); 
+            GitBranches.Branches.Clear();   
+            GitTrees.Trees.Clear(); 
 
             foreach (string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath.Trim()).ToList())
             {

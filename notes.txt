@@ -1,3 +1,8 @@
+-- running local debug
+This will use the launch.json in the .vscode folder. In particualr this line for the arguments:
+  "args": ["-pC:/dev/test", "-d"]
+
+
 -- Docker builds
 dotnet publish --os linux --arch x64 /t:PublishContainer
 

@@ -59,8 +59,7 @@ public abstract class FileType
             System.Threading.Thread.Sleep(100);
             if (tries++ > 10)
             {
-                exit = true;
-                throw new Exception("Cat File did not return within a second");
+               throw new Exception("Git cat-file process hung.. please restart the application.");
             }
         }
         return p.StandardOutput.ReadToEnd();
