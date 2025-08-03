@@ -2,7 +2,7 @@
 public abstract class GlobalVars
 {
     public static string? exePath { get; set; }
-    public static string version = "1.1.0";
+    public static string version = "1.3.0";
     public static bool EmitJsonOnly = false;
     public static bool EmitWeb = false;
     public static bool Bare = false;
