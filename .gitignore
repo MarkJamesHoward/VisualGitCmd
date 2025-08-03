@@ -1,7 +1,6 @@
 appsettings.json
 bin 
 obj
-.vscode
 parcel-cache
 .parcel-cache
 .vs
