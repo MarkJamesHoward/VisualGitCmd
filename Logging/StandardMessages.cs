@@ -46,7 +46,7 @@ public abstract class StandardMessages()
 
     public static void SameFolderMessage()
     {
-        logger?.LogInformation("VisualGit should not be run in the same folder as the Repository to be examined");
+        logger?.LogInformation("VisualGit should not be run in the same folder as the Repository to be examined when text extraction is enabled");
         logger?.LogInformation("Option1: Place visual.exe into another folder and run with -p pointing to this folder");
         logger?.LogInformation("Option2: Place the visual.exe application into a folder on your PATH. Then just run Visual from within the Repository as you just did");
     }
