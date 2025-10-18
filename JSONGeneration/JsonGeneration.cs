@@ -67,7 +67,10 @@ public abstract class JSONGeneration
             }
             else
             {
-                BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals");
+                //Azure version
+                //BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals");
+                // Google CLoud version
+                BaseAddress = new Uri("https://vgit-api-729645510879.australia-southeast1.run.app/api/gitinternals");
             }   
 
             HttpClient sharedClient = new()
