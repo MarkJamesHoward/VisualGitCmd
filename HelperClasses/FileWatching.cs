@@ -34,7 +34,7 @@ public static bool IgnoreFiles(string filename) {
             return false;
         }
 }
-public static void ProcessUpdates(object sender, FileSystemEventArgs e)
+public static void ProcessUpdates(object sender, FileSystemEventArgs? e)
 {
          if (!BatchingUpFileChanges)
         {
@@ -63,57 +63,54 @@ public static void ProcessUpdates(object sender, FileSystemEventArgs e)
 }
   public static void OnCreated(object sender, FileSystemEventArgs e)
     {
-        if (IgnoreFiles(e?.Name) == false)
-        {       
-                    DebugMessages.FileCreated(e?.Name);
-                    ProcessUpdates(sender, e);
+        if (IgnoreFiles(e?.Name ?? "") == false)
+        {
+            DebugMessages.FileCreated(e?.Name);
+            ProcessUpdates(sender, e);
         }
-         else
-                    {
-                        DebugMessages.IgnoringFile(e?.Name);
-                    }
-       
+        else
+        {
+            DebugMessages.IgnoringFile(e?.Name);
+        }               
     }
 
     public static void OnChanged(object sender, FileSystemEventArgs e)
-    {
-       
-                    if (IgnoreFiles(e?.Name) == false)
-                    {
-                        DebugMessages.FileChanged(e?.Name);
-                        ProcessUpdates(sender, e);  
-                    }
-                    else
-                    {
-                        DebugMessages.IgnoringFile(e?.Name);
-                    }
+    {       
+        if (IgnoreFiles(e?.Name ?? "") == false)
+        {
+            DebugMessages.FileChanged(e?.Name);
+            ProcessUpdates(sender, e);  
+        }
+        else
+        {
+            DebugMessages.IgnoringFile(e?.Name);
+        }
 
     }
 
     public static void OnDeleted(object sender, FileSystemEventArgs e)
     {
-                    if (IgnoreFiles(e?.Name) == false)
-                    {
-                    DebugMessages.FileDeleted(e?.Name);
-                    ProcessUpdates(sender, e);  
-                    }
-                     else
-                    {
-                        DebugMessages.IgnoringFile(e?.Name);
-                    }
+        if (IgnoreFiles(e?.Name ?? "") == false)
+        {
+        DebugMessages.FileDeleted(e?.Name);
+        ProcessUpdates(sender, e);  
+        }
+            else
+        {
+            DebugMessages.IgnoringFile(e?.Name);
+        }
     }
     public static void OnRenamed(object sender, RenamedEventArgs  e)
-    {
-        
-                    if (IgnoreFiles(e?.Name) == false)
-                    {
-                    DebugMessages.FileRenamed(e?.Name, e?.OldName);
-                    ProcessUpdates(sender, e);  
-                    }
-                     else
-                    {
-                        DebugMessages.IgnoringFile(e?.Name);
-                    }
+    {        
+        if (IgnoreFiles(e?.Name ?? "") == false)
+        {
+        DebugMessages.FileRenamed(e?.Name, e?.OldName);
+        ProcessUpdates(sender, e);  
+        }
+            else
+        {
+            DebugMessages.IgnoringFile(e?.Name);
+        }
     }
     public delegate void OnChangedDelegate(object sender, FileSystemEventArgs e);
     public delegate void OnCreatedDelegate(object sender, FileSystemEventArgs e);

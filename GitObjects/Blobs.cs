@@ -41,15 +41,11 @@ public abstract class GitBlobs
 
     public static void Add(string treeHash, string filename, string hash, string contents)
     {
-        Blob b = new Blob();
+        Blob b = new Blob { trees = new List<string>() };
+
         b.filename = filename;
         b.hash = hash;
         b.contents = contents;
-
-        if (b.trees == null)
-        {
-            b.trees = new List<string>();
-        }
 
         if (treeHash != "")
         {
@@ -71,8 +67,11 @@ public abstract class GitBlobs
             var existingBlob = Blobs.Find(i => i.hash == b.hash);
             if (existingBlob?.trees == null)
             {
-                existingBlob.trees = new List<string>();
-                existingBlob?.trees.Add(treeHash);
+                if (existingBlob != null)
+                {
+                    existingBlob.trees = new List<string>();
+                    existingBlob?.trees.Add(treeHash);
+                }
             }
             else if (existingBlob?.trees.Contains(treeHash) == false)
             {

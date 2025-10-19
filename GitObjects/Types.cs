@@ -37,9 +37,13 @@ public class Tree
 
 public class Blob
 {
+    public Blob()
+    {
+        trees = new List<string>();
+    }
     public string? filename { get; set; }
     public string? hash { get; set; }
-    public List<string> trees { get; set; }
+    public required List<string> trees { get; set; } 
     public string? contents { get; set; }
 }
 public class Branch
