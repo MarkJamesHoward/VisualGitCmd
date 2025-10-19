@@ -6,11 +6,7 @@ public abstract class GitBranches
 
     public static void CreateBranchObject(string name, string hash)
     {
-        Branch b = new Branch
-        {
-            hash = hash,
-            name = name
-        };
+        Branch b = new Branch { hash = hash, name = name };
 
         if (!Branches.Exists(i => i.name == b.name))
         {
@@ -32,7 +28,11 @@ public abstract class GitBranches
             if (GlobalVars.EmitNeo)
             {
                 Neo4jHelper.AddBranchToNeo(session, Path.GetFileName(file), branchHash);
-                Neo4jHelper.CreateBranchLinkNeo(session, Path.GetFileName(file), branchHash.Substring(0, 4));
+                Neo4jHelper.CreateBranchLinkNeo(
+                    session,
+                    Path.GetFileName(file),
+                    branchHash.Substring(0, 4)
+                );
             }
             CreateBranchObject(Path.GetFileName(file), branchHash.Substring(0, 4));
         }
