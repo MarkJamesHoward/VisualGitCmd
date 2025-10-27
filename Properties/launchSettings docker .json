@@ -2,7 +2,7 @@
   "profiles": {
       "visual": {
       "commandName": "Project",
-      "commandLineArgs": "-p /App/docker-test-folder -d"
+      "commandLineArgs": "-p /App/docker-test-folder -j /App/docker-test-folder/output"
       }
   }
   }

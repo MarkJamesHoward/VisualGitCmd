@@ -33,6 +33,9 @@ dotnet publish --os linux --arch x64 /t:PublishContainer
 
         'git add .'
 
+    --OR to run the container from the command line rather than going to Docker Desktop and using the using
+    docker run -it --volume c:\dev\output:/App/docker-test-folder/output visual-git 
+
 -----------------------------------------------------------------
 
 
