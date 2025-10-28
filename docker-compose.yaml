@@ -1,0 +1,5 @@
+services:
+  visualgit:
+    image: 'visual-git'
+    volumes:
+      - 'c:\dev\output:/App/docker-test-folder/output'
