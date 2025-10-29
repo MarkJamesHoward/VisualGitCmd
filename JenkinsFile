@@ -1,6 +1,17 @@
 pipeline {
     agent any
     stages {
+        stage('Pull latest for VisualGit Cli and Website') {
+            steps {
+                /*
+                dir('C:\\github\\visualgitcmd') {
+                    bat 'git pull'
+                }
+                 dir('C:\\github\\visualgit') {
+                    bat 'git pull'
+                }*/
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 dir('c:\\github\\visualgitcmd') {
