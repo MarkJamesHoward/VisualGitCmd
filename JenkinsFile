@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                dir('c:\\github\\visualgitcmd') {
+                    bat 'dotnet restore'
+                    bat 'dotnet build'
+
+                    bat 'dotnet publish --os linux --self-contained true -p:PublishSingleFile=true'
+                    bat 'dotnet publish --os osx  --self-contained true -p:PublishSingleFile=true'
+                    bat 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true'
+
+                    bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\Windows'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOS'
+                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\Linux'
+                }
+            }
+        }
+        stage('Create Install Wizard') {
+            steps {
+                bat 'iscc /Qp /O"C:\\github\\visualgit\\public\\application\\Output" /F"visualgit_setup" "C:\\github\\visualgit\\public\\application\\InnoSetup.iss"'
+            }
+        }
+        stage('Build VisualGit CLI') {
+            steps {
+                dir ('C:\\github\\visualgit') {
+                    bat 'npm run build'
+                }
+            }
+        }
+        stage('Push VisualGit Website to Netlify') {
+            steps {
+                dir('C:\\github\\visualgit') {                
+                    bat 'netlify logout'
+                    bat 'netlify login --auth $NETLIFY_SECRET_VISUALGIT'
+                    bat 'netlify unlink'
+                    bat 'netlify link --id f9cb3e1c-f0dc-4c23-8815-d178cbf822ae'
+                    bat 'netlify deploy --prod -d dist'
+                }
+            }
+        }
+    }
+}
