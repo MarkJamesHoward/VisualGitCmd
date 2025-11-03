@@ -3,6 +3,7 @@ pipeline {
     stages {
         stage('Pull latest for VisualGit Cli and Website') {
             steps {
+                echo 'remove for now'
                 /*
                 dir('C:\\github\\visualgitcmd') {
                     bat 'git pull'
@@ -19,18 +20,24 @@ pipeline {
                     bat 'dotnet build'
 
                     bat 'dotnet publish --os linux --self-contained true -p:PublishSingleFile=true'
-                    bat 'dotnet publish --os osx  --self-contained true -p:PublishSingleFile=true'
+                    bat 'dotnet publish -r osx-arm64  --self-contained true -p:PublishSingleFile=true'
+                    bat 'dotnet publish -r osx-x64  --self-contained true -p:PublishSingleFile=true'
                     bat 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true'
+                    bat 'dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true'
+                                        
 
-                    bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\Windows'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOS'
+                    bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\Windowsx64'
+                    bat 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\WindowsARM'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSx64'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSARM'
                     bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\Linux'
                 }
             }
         }
         stage('Create Install Wizard') {
             steps {
-                bat 'iscc /Qp /O"C:\\github\\visualgit\\public\\application\\Output" /F"visualgit_setup" "C:\\github\\visualgit\\public\\application\\InnoSetup.iss"'
+                bat 'iscc /Qp /O"C:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "C:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
+                bat 'iscc /Qp /O"C:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "C:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
             }
         }
         stage('Build VisualGit CLI') {
