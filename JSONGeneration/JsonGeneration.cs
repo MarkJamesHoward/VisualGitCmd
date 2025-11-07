@@ -74,7 +74,7 @@ public abstract class JSONGeneration
                 BaseAddress = new Uri("https://vgit-api-729645510879.australia-southeast1.run.app/api/gitinternals");
 
                 // Azure Container Cloud version
-                //BaseAddress = new Uri("http://visualgitapi.dwekhsgffdh0bhf6.australiaeast.azurecontainer.io:5078/api/gitinternals");
+                //BaseAddress = new Uri("https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals");
             }   
 
             HttpClient sharedClient = new()
