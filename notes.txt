@@ -1,3 +1,7 @@
+-- The URL for the API that is in use is defined in JSONGeneration/JSONGeneration.cs
+-- So this can be either Azure AppService/GoogleCloudRun/Azure Container App
+
+
 -- running local debug
 This will use the launch.json in the .vscode folder. In particualr this line for the arguments:
   "args": ["-pC:/dev/test", "-d"]
