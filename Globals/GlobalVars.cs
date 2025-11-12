@@ -1,3 +1,5 @@
+using System.Reflection;
+
 public abstract class GlobalVars
 {
     public static bool LocalDebugWebsite = false;
@@ -42,25 +44,26 @@ public abstract class GlobalVars
     {
         try
         {
-            // First try to get from assembly version
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var version = assembly.GetName().Version;
-            if (version != null)
+            // Try to get version from assembly directly
+            var assembly = Assembly.GetEntryAssembly();
+            var version = assembly
+                ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion;
+
+            if (!string.IsNullOrEmpty(version))
             {
-                return $"{version.Major}.{version.Minor}.{version.Build}";
+                // Remove git hash (everything after '+' character)
+                var plusIndex = version.IndexOf('+');
+                return plusIndex >= 0 ? version.Substring(0, plusIndex) : version;
             }
 
-            // Fallback to configuration if available
-            var config = ApiConfigurationProvider.Instance;
-            // This would need to be implemented in ApiConfiguration if we want config-based version
-
             // Final fallback
-            return "1.3.0";
+            return "1.0.0-unknown";
         }
         catch
         {
             // If anything fails, return default
-            return "1.3.0";
+            return "1.0.0-unknown";
         }
     }
 }

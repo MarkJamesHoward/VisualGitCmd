@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 
 public class ApiConfiguration
@@ -39,7 +40,21 @@ public class ApiConfiguration
     /// <summary>
     /// Application version from configuration
     /// </summary>
-    public string Version => _configuration["ApplicationSettings:Version"] ?? "not found";
+    public string Version
+    {
+        get
+        {
+            var fullVersion =
+                Assembly
+                    .GetEntryAssembly()
+                    ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                    ?.InformationalVersion ?? "1.0.0-unknown";
+
+            // Remove git hash (everything after '+' character)
+            var plusIndex = fullVersion.IndexOf('+');
+            return plusIndex >= 0 ? fullVersion.Substring(0, plusIndex) : fullVersion;
+        }
+    }
 
     /// <summary>
     /// Application name from configuration

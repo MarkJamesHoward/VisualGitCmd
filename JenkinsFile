@@ -19,11 +19,11 @@ pipeline {
                     bat 'dotnet restore'
                     bat 'dotnet build'
 
-                    bat 'dotnet publish --os linux --self-contained true -p:PublishSingleFile=true -c release'
-                    bat 'dotnet publish -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release'
-                    bat 'dotnet publish -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release'
-                    bat 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true -c release'
-                    bat 'dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release'
+                    bat 'dotnet publish --os linux --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    bat 'dotnet publish -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    bat 'dotnet publish -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    bat 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    bat 'dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
 
 
                     bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\Windowsx64'
@@ -43,7 +43,7 @@ pipeline {
         stage('Build VisualGit CLI') {
             steps {
                 dir ('C:\\github\\visualgit') {
-                    bat 'npm run build'
+                    bat 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
                 }
             }
         }
