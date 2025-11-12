@@ -78,8 +78,8 @@ public class ApiConfiguration
         }
         else
         {
-            // Default to Google Cloud version
-            return new Uri(GoogleCloudUrl);
+            // Default to Azure Cloud version
+            return new Uri(AzureContainerAppsUrl);
         }
     }
 
