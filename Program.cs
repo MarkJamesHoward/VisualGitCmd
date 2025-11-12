@@ -1,5 +1,14 @@
 ﻿SentryMethods.ConfigureSentry();
 
+// Initialize configuration
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(AppContext.BaseDirectory)
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("Properties/launchSettings.json", optional: true, reloadOnChange: true)
+    .Build();
+
+ApiConfigurationProvider.Initialize(configuration);
+
 // Determine where we are running
 FilePath.GetExeFilePath();
 
@@ -22,6 +31,3 @@ GitRepoExaminer.Run();
 
 /// Now setup event handler for checking when files are modified
 FileWatching.CreateFileWatcher();
-
-
-

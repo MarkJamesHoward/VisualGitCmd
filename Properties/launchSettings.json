@@ -2,7 +2,13 @@
   "profiles": {
     "visual": {
       "commandName": "Project",
-      "commandLineArgs": "-p c:\\dev\\test -ld"
-      }
+      "commandLineArgs": "-p c:\\dev\\test -h -a https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals"
+    }
+  },
+  "ApiEndpoints": {
+    "LocalDebug": "https://localhost:5078/api/gitinternals",
+    "AzureAppService": "https://gitvisualiserapi.azurewebsites.net/api/gitinternals",
+    "GoogleCloud": "https://vgit-api-729645510879.australia-southeast1.run.app/api/gitinternals",
+    "AzureContainerApps": "https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals"
   }
 }

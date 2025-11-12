@@ -8,7 +8,7 @@ public abstract class GitRepoExaminer
 
     public static void ProcessEachFileAndExtract_Commit_Tree_Blob(string dir)
     {
-        // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Starting " + dir);    
+        // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Starting " + dir);
         foreach (string file in Directory.GetFiles(dir).ToList())
         {
             DebugMessages.GenericMessage("Examining file " + file);
@@ -17,38 +17,65 @@ public abstract class GitRepoExaminer
                 continue;
             }
 
-            string hashCode_determinedFrom_dir_and_first2charOfFilename = Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
+            string hashCode_determinedFrom_dir_and_first2charOfFilename =
+                Path.GetFileName(dir) + Path.GetFileName(file).Substring(0, 2);
 
-            string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(hashCode_determinedFrom_dir_and_first2charOfFilename, GlobalVars.workingArea);
+            string fileType = FileType.GetFileType_UsingGitCatFileCmd_Param_T(
+                hashCode_determinedFrom_dir_and_first2charOfFilename,
+                GlobalVars.workingArea
+            );
 
-            DebugMessages.FoundFileOfType(fileType, hashCode_determinedFrom_dir_and_first2charOfFilename);
-            
+            DebugMessages.FoundFileOfType(
+                fileType,
+                hashCode_determinedFrom_dir_and_first2charOfFilename
+            );
+
             if (fileType.Contains("commit"))
             {
                 CommitNodeExtraction CommitNodeExtract = new();
-                CommitNodeExtract.RunRegExAgainstCommit(hashCode_determinedFrom_dir_and_first2charOfFilename);
+                CommitNodeExtract.RunRegExAgainstCommit(
+                    hashCode_determinedFrom_dir_and_first2charOfFilename
+                );
 
                 if (CommitNodeExtract.CommitTreeDetails.Success)
                 {
                     // Get details of the tree, parent and comment in this commit
                     string treeHash = CommitNodeExtract.CommitTreeDetails.Groups[1].Value;
-                    string commitComment = CommitNodeExtract.CommitCommentDetails.Groups[1].Value.Trim();
+                    string commitComment = CommitNodeExtract
+                        .CommitCommentDetails.Groups[1]
+                        .Value.Trim();
 
-                    Neo4jHelper.ProcessCommitForNeo4j(commitComment, treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, CommitNodeExtract);
+                    Neo4jHelper.ProcessCommitForNeo4j(
+                        commitComment,
+                        treeHash,
+                        hashCode_determinedFrom_dir_and_first2charOfFilename,
+                        CommitNodeExtract
+                    );
 
-                    GitTrees.Add(treeHash, hashCode_determinedFrom_dir_and_first2charOfFilename, "Root");
+                    GitTrees.Add(
+                        treeHash,
+                        hashCode_determinedFrom_dir_and_first2charOfFilename,
+                        "Root"
+                    );
 
-                    List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(hashCode_determinedFrom_dir_and_first2charOfFilename);
-                    GitCommits.Add(commitParentHashes, commitComment, hashCode_determinedFrom_dir_and_first2charOfFilename, treeHash);
+                    List<string> commitParentHashes = CommitNodeExtract.GetParentCommits(
+                        hashCode_determinedFrom_dir_and_first2charOfFilename
+                    );
+                    GitCommits.Add(
+                        commitParentHashes,
+                        commitComment,
+                        hashCode_determinedFrom_dir_and_first2charOfFilename,
+                        treeHash
+                    );
 
                     // Now we have a tree we can look at the blobs too and create link from the Tree to Blobs
                     BlobNodeExtraction.ProcessBlobsForSpecifiedTree(treeHash, CommitNodeExtract);
                 }
             }
         }
-        // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Completed " + dir);    
-    
+        // Console.WriteLine("ProcessEachFileAndExtract_Commit_Tree_Blob Completed " + dir);
     }
+
     public static void Run()
     {
         // Get all the files in the .git/objects folder
@@ -57,24 +84,25 @@ public abstract class GitRepoExaminer
             Neo4jHelper.CheckIfNeoj4EmissionEnabled();
 
             // Console.WriteLine("RUN Starting " + GlobalVars.GITobjectsPath);
-            // 
+            //
             GitCommits.Commits.Clear();
-            GitBlobs.Blobs.Clear(); 
-            GitBranches.Branches.Clear();   
-            GitTrees.Trees.Clear(); 
+            GitBlobs.Blobs.Clear();
+            GitBranches.Branches.Clear();
+            GitTrees.Trees.Clear();
 
-            foreach (string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath.Trim()).ToList())
+            foreach (
+                string dir in Directory.GetDirectories(GlobalVars.GITobjectsPath.Trim()).ToList()
+            )
             {
                 if (dir.Contains("pack") || dir.Contains("info"))
                 {
                     DebugMessages.IgnoreDirectory(dir);
                     continue;
                 }
-                // Console.WriteLine("top level call ProcessEachFileAndExtract_Commit_Tree_Blob " + GlobalVars.GITobjectsPath);    
+                // Console.WriteLine("top level call ProcessEachFileAndExtract_Commit_Tree_Blob " + GlobalVars.GITobjectsPath);
                 ProcessEachFileAndExtract_Commit_Tree_Blob(dir);
             }
-            // Console.WriteLine("RUN Completed " + GlobalVars.GITobjectsPath);    
-
+            // Console.WriteLine("RUN Completed " + GlobalVars.GITobjectsPath);
 
             GitBranches.ProcessBranches(Neo4jHelper.session);
             GitTags.ProcessTags(Neo4jHelper.session);
@@ -86,18 +114,33 @@ public abstract class GitRepoExaminer
             {
                 GitWorkingFiles.ProcessWorkingFiles(GlobalVars.workingArea);
             }
-            
-            GitBlobs.Add(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
-            HEADNode HEADNodeDetails = HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
+
+            GitBlobs.Add(
+                GlobalVars.GITobjectsPath,
+                GlobalVars.workingArea,
+                GlobalVars.PerformTextExtraction
+            );
+            HEADNode HEADNodeDetails =
+                HEADNodeExtractionRegEx.GetHeadNodeFromPathAndDetermineWhereItPoints();
 
             Neo4jHelper.ProcessNeo4jOutput();
 
             JSONGeneration.ProcessJSONONLYOutput(GitBranches.Branches);
 
-            JSONGeneration.OutputNodesJsonToAPI(firstRun, RandomName.Name, dataID++,
-                GitCommits.Commits, GitBlobs.Blobs, GitTrees.Trees, GitBranches.Branches,
-                    GitRemoteBranches.RemoteBranches, GitTags.Tags, GitIndexFiles.IndexFiles,
-                         GitWorkingFiles.WorkingFiles, HEADNodeDetails);
+            JSONGeneration.OutputNodesJsonToAPI(
+                firstRun,
+                RandomName.Name,
+                dataID++,
+                GitCommits.Commits,
+                GitBlobs.Blobs,
+                GitTrees.Trees,
+                GitBranches.Branches,
+                GitRemoteBranches.RemoteBranches,
+                GitTags.Tags,
+                GitIndexFiles.IndexFiles,
+                GitWorkingFiles.WorkingFiles,
+                HEADNodeDetails
+            );
 
             // Only run this on the first run
             Browser.OpenBrowser(ref firstRun);
@@ -119,9 +162,10 @@ public abstract class GitRepoExaminer
             }
             else
             {
-                Console.WriteLine($"Error while getting files in {GlobalVars.GITobjectsPath} {e.Message} {e}");
+                Console.WriteLine(
+                    $"Error while getting files in {GlobalVars.GITobjectsPath} {e.Message} {e}"
+                );
             }
         }
     }
 }
-

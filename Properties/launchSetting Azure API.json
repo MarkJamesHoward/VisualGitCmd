@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "visual": {
+      "commandName": "Project",
+      "commandLineArgs": "-p c:\\dev\\test -a https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals"
+      }
+  }
+}

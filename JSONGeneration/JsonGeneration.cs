@@ -1,17 +1,34 @@
+using System.Text.Encodings.Web;
+
 public abstract class JSONGeneration
 {
     public static void ProcessJSONONLYOutput(List<Branch> branches)
     {
         if (GlobalVars.EmitJsonOnly)
         {
-            GitBlobs.Add(GlobalVars.GITobjectsPath, GlobalVars.workingArea, GlobalVars.PerformTextExtraction);
+            GitBlobs.Add(
+                GlobalVars.GITobjectsPath,
+                GlobalVars.workingArea,
+                GlobalVars.PerformTextExtraction
+            );
             JSONGeneration.OutputNodesJson(GitCommits.Commits, GlobalVars.CommitNodesJsonFile);
             JSONGeneration.OutputNodesJson(GitTrees.Trees, GlobalVars.TreeNodesJsonFile);
             JSONGeneration.OutputNodesJson(GitBlobs.Blobs, GlobalVars.BlobNodesJsonFile);
-            HEADJsonGeneration.OutputHEADJsonToFile(GlobalVars.HeadNodesJsonFile, GlobalVars.headPath);
-            JSONGeneration.OutputBranchJson(branches, GitTrees.Trees, GitBlobs.Blobs, GlobalVars.BranchNodesJsonFile);
+            HEADJsonGeneration.OutputHEADJsonToFile(
+                GlobalVars.HeadNodesJsonFile,
+                GlobalVars.headPath
+            );
+            JSONGeneration.OutputBranchJson(
+                branches,
+                GitTrees.Trees,
+                GitBlobs.Blobs,
+                GlobalVars.BranchNodesJsonFile
+            );
             IndexFilesJson.OutputIndexFilesJson(GlobalVars.IndexFilesJsonFile);
-            WorkingAreaFilesJson.OutputWorkingFilesJsonToFile(GlobalVars.workingArea, GlobalVars.WorkingFilesJsonFile);
+            WorkingAreaFilesJson.OutputWorkingFilesJsonToFile(
+                GlobalVars.workingArea,
+                GlobalVars.WorkingFilesJsonFile
+            );
         }
     }
 
@@ -21,15 +38,31 @@ public abstract class JSONGeneration
         File.WriteAllText(JsonPath, Json);
     }
 
-    public static void OutputBranchJson<T>(List<T> Nodes, List<Tree> TreeNodes, List<Blob> blobs, string JsonPath)
+    public static void OutputBranchJson<T>(
+        List<T> Nodes,
+        List<Tree> TreeNodes,
+        List<Blob> blobs,
+        string JsonPath
+    )
     {
         var Json = JsonSerializer.Serialize(Nodes);
         File.WriteAllText(JsonPath, Json);
     }
 
-    public static async void OutputNodesJsonToAPI(bool firstrun, string name, int dataID, List<Commit> CommitNodes,
-     List<Blob> BlobNodes, List<Tree> TreeNodes, List<Branch> BranchNodes, List<Branch> RemoteBranchNodes, List<Tag> TagNodes,
-     List<IndexFile> IndexFilesNodes, List<WorkingFile> WorkingFilesNodes, HEADNode HEADNodes)
+    public static async void OutputNodesJsonToAPI(
+        bool firstrun,
+        string name,
+        int dataID,
+        List<Commit> CommitNodes,
+        List<Blob> BlobNodes,
+        List<Tree> TreeNodes,
+        List<Branch> BranchNodes,
+        List<Branch> RemoteBranchNodes,
+        List<Tag> TagNodes,
+        List<IndexFile> IndexFilesNodes,
+        List<WorkingFile> WorkingFilesNodes,
+        HEADNode HEADNodes
+    )
     {
         if (GlobalVars.EmitWeb)
         {
@@ -40,15 +73,12 @@ public abstract class JSONGeneration
             var TreeJson = JsonSerializer.Serialize(TreeNodes);
             var BranchJson = JsonSerializer.Serialize(BranchNodes);
             var TagJson = JsonSerializer.Serialize(TagNodes);
-            
 
             DebugMessages.OutputBranchJson(BranchJson);
             DebugMessages.OutputTagJson(TagJson);
             DebugMessages.OutputCommitJson(CommitJson);
             DebugMessages.OutputTreeJson(TreeJson);
             DebugMessages.OutputBlobJson(BlobJson);
-
-
 
             var RemoteBranchJson = JsonSerializer.Serialize(RemoteBranchNodes);
             var IndexFilesJson = JsonSerializer.Serialize(IndexFilesNodes);
@@ -59,33 +89,28 @@ public abstract class JSONGeneration
             DebugMessages.OutputIndexFilesJson(IndexFilesJson);
             DebugMessages.OutputWorkingFilesJson(WorkingFilesJson);
 
-            System.Uri BaseAddress;
-
-            if (GlobalVars.LocalDebugAPI)
-            {
-                BaseAddress = new Uri("https://localhost:7005/api/gitinternals");
-            }
-            else
-            {
-                //Azure App Service version
-                //BaseAddress = new Uri("https://gitvisualiserapi.azurewebsites.net/api/gitinternals");
-
-                // Google Cloud version
-                BaseAddress = new Uri("https://vgit-api-729645510879.australia-southeast1.run.app/api/gitinternals");
-
-                // Azure Container Cloud version
-                //BaseAddress = new Uri("https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals");
-            }   
+            System.Uri BaseAddress = ApiConfigurationProvider.Instance.GetBaseAddress();
 
             HttpClient sharedClient = new()
             {
-                // Local Debug 
+                // Local Debug
                 BaseAddress = BaseAddress,
             };
-            await Browser.PostAsync(firstrun, name, dataID, sharedClient, CommitJson, BlobJson, TreeJson, BranchJson, TagJson, RemoteBranchJson, IndexFilesJson, WorkingFilesJson, HEADJson);
+            await Browser.PostAsync(
+                firstrun,
+                name,
+                dataID,
+                sharedClient,
+                CommitJson,
+                BlobJson,
+                TreeJson,
+                BranchJson,
+                TagJson,
+                RemoteBranchJson,
+                IndexFilesJson,
+                WorkingFilesJson,
+                HEADJson
+            );
         }
     }
-
-
 }
-
