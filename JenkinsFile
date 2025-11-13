@@ -36,8 +36,8 @@ pipeline {
         }
         stage('Create Install Wizard') {
             steps {
-                bat 'iscc /Qp /O"C:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "C:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
-                bat 'iscc /Qp /O"C:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "C:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
+                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"C:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "C:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
+                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"C:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "C:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
             }
         }
         stage('Build VisualGit CLI') {

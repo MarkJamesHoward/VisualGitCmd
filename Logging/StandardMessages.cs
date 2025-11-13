@@ -9,6 +9,11 @@ public abstract class StandardMessages()
         );
     }
 
+    public static void UsingAPIUrl(string url)
+    {
+        logger?.LogInformation($"Using API URL: {url}");
+    }
+
     public static void InvalidRepoPath(string value)
     {
         logger?.LogInformation($"Invalid Repo Path{value}");

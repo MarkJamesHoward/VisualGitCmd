@@ -89,7 +89,7 @@ public abstract class JSONGeneration
             DebugMessages.OutputIndexFilesJson(IndexFilesJson);
             DebugMessages.OutputWorkingFilesJson(WorkingFilesJson);
 
-            System.Uri BaseAddress = ApiConfigurationProvider.Instance.GetBaseAddress();
+            System.Uri BaseAddress = ApiConfigurationProvider.Instance.GetAPIURL();
 
             HttpClient sharedClient = new()
             {

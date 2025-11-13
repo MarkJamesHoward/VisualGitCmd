@@ -66,7 +66,7 @@ public class ApiConfiguration
     /// Gets the appropriate base address URI based on current configuration
     /// </summary>
     /// <returns>The base address URI to use for API calls</returns>
-    public Uri GetBaseAddress()
+    public Uri GetAPIURL()
     {
         if (GlobalVars.LocalDebugAPI)
         {
@@ -83,7 +83,7 @@ public class ApiConfiguration
         }
     }
 
-    public string GetBaseAddressUrlEncoded()
+    public string GetAPIRLUrlEncoded()
     {
         if (GlobalVars.LocalDebugAPI)
         {
@@ -95,8 +95,8 @@ public class ApiConfiguration
         }
         else
         {
-            // Default to Google Cloud version
-            return System.Net.WebUtility.UrlEncode(GoogleCloudUrl);
+            // Default to Azure Container App version
+            return System.Net.WebUtility.UrlEncode(AzureContainerAppsUrl);
         }
     }
 

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 public abstract class Browser
 {
     public static void OpenBrowser(ref bool firstRun)
@@ -6,14 +8,19 @@ public abstract class Browser
         {
             if (firstRun && GlobalVars.EmitWeb)
             {
-                string url = ApiConfigurationProvider.Instance.GetBaseAddressUrlEncoded();
+                string http = GlobalVars.LocalDebugWebsite ? "http" : "https";
+                string url = ApiConfigurationProvider.Instance.GetAPIRLUrlEncoded();
                 string cmdversion = ApiConfigurationProvider.Instance.Version;
                 string webDNS = GlobalVars.LocalDebugWebsite ? "localhost:1234" : "visualgit.net";
+
+                StandardMessages.UsingAPIUrl(
+                    ApiConfigurationProvider.Instance.GetAPIURL().ToString()
+                );
 
                 firstRun = false;
                 Process.Start(
                     new ProcessStartInfo(
-                        $"https://{webDNS}/visualize?cmdversion={cmdversion}&url={url}&data={RandomName.Name.Replace(' ', 'x')}/1"
+                        $"{http}://{webDNS}/visualize?cmdversion={cmdversion}&url={url}&data={RandomName.Name.Replace(' ', 'x')}/1"
                     )
                     {
                         UseShellExecute = true,
