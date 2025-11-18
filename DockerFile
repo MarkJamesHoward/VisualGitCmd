@@ -14,5 +14,5 @@ RUN git commit -m "initial commit"
 RUN git branch feature
 
 WORKDIR /App
-ENTRYPOINT ["dotnet", "run"]
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
+#ENTRYPOINT ["dotnet", "run"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]
