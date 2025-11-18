@@ -11,7 +11,7 @@ public abstract class Browser
                 string http = GlobalVars.LocalDebugWebsite ? "http" : "https";
                 string url = ApiConfigurationProvider.Instance.GetAPIRLUrlEncoded();
                 string cmdversion = ApiConfigurationProvider.Instance.Version;
-                string webDNS = GlobalVars.LocalDebugWebsite ? "localhost:1234" : "visualgit.net";
+                string webDNS = GlobalVars.LocalDebugWebsite ? "localhost:4321" : "visualgit.net";
 
                 StandardMessages.UsingAPIUrl(
                     ApiConfigurationProvider.Instance.GetAPIURL().ToString()

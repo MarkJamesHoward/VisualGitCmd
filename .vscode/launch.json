@@ -12,7 +12,8 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/bin/Debug/net9.0/visual.dll",
             //"args": ["-pC:/dev/remote", "-d", "-b"],
-            "args": ["-pC:/dev/test", "-h" "-a https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals"],
+            //"args": ["-pC:/dev/test", "-h" "-a https://visual-git-api.livelyforest-4bf24ad1.australiasoutheast.azurecontainerapps.io/api/gitinternals"],
+            "args": ["-pC:/dev/test", "-h" "-a http://localhost:5078/api/gitinternals"],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
