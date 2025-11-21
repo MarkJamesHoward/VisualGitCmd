@@ -31,6 +31,17 @@ public abstract class Browser
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            if (GlobalVars.debug)
+            {
+                var stackTrace = new System.Diagnostics.StackTrace(ex, true);
+                var frame = stackTrace.GetFrame(0);
+                if (frame != null)
+                {
+                    Console.WriteLine(
+                        $"File: {frame.GetFileName()}, Line: {frame.GetFileLineNumber()}"
+                    );
+                }
+            }
         }
     }
 
@@ -90,6 +101,17 @@ public abstract class Browser
         {
             Console.WriteLine(ex.Message);
             Console.WriteLine("Please restart VisualGit...");
+            if (GlobalVars.debug)
+            {
+                var stackTrace = new System.Diagnostics.StackTrace(ex, true);
+                var frame = stackTrace.GetFrame(0);
+                if (frame != null)
+                {
+                    Console.WriteLine(
+                        $"File: {frame.GetFileName()}, Line: {frame.GetFileLineNumber()}"
+                    );
+                }
+            }
         }
     }
 }

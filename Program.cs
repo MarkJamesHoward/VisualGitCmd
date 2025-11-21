@@ -1,5 +1,8 @@
 ﻿SentryMethods.ConfigureSentry();
 
+// Initialize global exception handler
+GlobalExceptionHandler.Initialize();
+
 // Initialize configuration
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)

@@ -231,6 +231,14 @@ public class CmdLineArguments
             if (GlobalVars.debug)
             {
                 Console.WriteLine(ex.Message);
+                var stackTrace = new System.Diagnostics.StackTrace(ex, true);
+                var frame = stackTrace.GetFrame(0);
+                if (frame != null)
+                {
+                    Console.WriteLine(
+                        $"File: {frame.GetFileName()}, Line: {frame.GetFileLineNumber()}"
+                    );
+                }
             }
         }
     }

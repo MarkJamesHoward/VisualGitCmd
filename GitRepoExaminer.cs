@@ -154,6 +154,14 @@ public abstract class GitRepoExaminer
                 if (GlobalVars.debug)
                 {
                     Console.WriteLine($"Details: {e.Message}");
+                    var stackTrace = new System.Diagnostics.StackTrace(e, true);
+                    var frame = stackTrace.GetFrame(0);
+                    if (frame != null)
+                    {
+                        Console.WriteLine(
+                            $"File: {frame.GetFileName()}, Line: {frame.GetFileLineNumber()}"
+                        );
+                    }
                 }
                 else
                 {
@@ -162,9 +170,26 @@ public abstract class GitRepoExaminer
             }
             else
             {
-                Console.WriteLine(
-                    $"Error while getting files in {GlobalVars.GITobjectsPath} {e.Message} {e}"
-                );
+                if (GlobalVars.debug)
+                {
+                    Console.WriteLine(
+                        $"Error while getting files in {GlobalVars.GITobjectsPath} {e.Message} {e}"
+                    );
+                    var stackTrace = new System.Diagnostics.StackTrace(e, true);
+                    var frame = stackTrace.GetFrame(0);
+                    if (frame != null)
+                    {
+                        Console.WriteLine(
+                            $"File: {frame.GetFileName()}, Line: {frame.GetFileLineNumber()}"
+                        );
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"Error while getting files in {GlobalVars.GITobjectsPath} {e.Message} {e}"
+                    );
+                }
             }
         }
     }

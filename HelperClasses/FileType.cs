@@ -4,24 +4,26 @@ public abstract class FileType
 {
     public static bool DoesNeo4jNodeExistAlready(ISession? session, string hash, string type)
     {
-        var greeting = session?.ExecuteWrite(
-        tx =>
+        var greeting = session?.ExecuteWrite(tx =>
         {
             var result = tx.Run(
                 $"MATCH (a:{type}) WHERE a.hash = '{hash}' RETURN a.name + ', from node ' + id(a)",
-                new { });
+                new { }
+            );
 
             return result.Count() > 0 ? true : false;
         });
 
         return greeting ?? false;
     }
+
     public static string GetContents(string? file, string workingArea)
     {
         int count = 0;
         Process p = new Process();
         p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -p");
         p.StartInfo.RedirectStandardOutput = true;
+        p.StartInfo.RedirectStandardError = true;
         p.StartInfo.WorkingDirectory = workingArea;
         p.StartInfo.UseShellExecute = false; //Import in Linux environments
         p.Start();
@@ -36,10 +38,19 @@ public abstract class FileType
             }
         }
         string contents = p.StandardOutput.ReadToEnd();
+        string error = p.StandardError.ReadToEnd();
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            if (GlobalVars.debug)
+            {
+                Console.WriteLine($"Git error: {error}");
+            }
+            throw new Exception($"Git cat-file error: {error}");
+        }
+
         return contents;
     }
-
-
 
     public static string GetFileType_UsingGitCatFileCmd_Param_T(string file, string workingArea)
     {
@@ -51,6 +62,7 @@ public abstract class FileType
         TraceMessages.RunningCatFile(file);
         p.StartInfo = new ProcessStartInfo("git", $"cat-file {file} -t");
         p.StartInfo.RedirectStandardOutput = true;
+        p.StartInfo.RedirectStandardError = true;
         p.StartInfo.WorkingDirectory = workingArea;
         p.Start();
 
@@ -59,12 +71,24 @@ public abstract class FileType
             System.Threading.Thread.Sleep(100);
             if (tries++ > 10)
             {
-               throw new Exception("Git cat-file process hung.. please restart the application.");
+                throw new Exception("Git cat-file process hung.. please restart the application.");
             }
         }
-        return p.StandardOutput.ReadToEnd();
-    }
 
+        string output = p.StandardOutput.ReadToEnd();
+        string error = p.StandardError.ReadToEnd();
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            if (GlobalVars.debug)
+            {
+                Console.WriteLine($"Git error: {error}");
+            }
+            throw new Exception($"Git cat-file error: {error}");
+        }
+
+        return output;
+    }
 
     public static string GetIndexFiles(string workingArea)
     {
@@ -73,6 +97,7 @@ public abstract class FileType
         Process p = new Process();
         p.StartInfo = new ProcessStartInfo("git", $"ls-files -s");
         p.StartInfo.RedirectStandardOutput = true;
+        p.StartInfo.RedirectStandardError = true;
         p.StartInfo.WorkingDirectory = workingArea;
         p.Start();
 
@@ -84,7 +109,20 @@ public abstract class FileType
                 throw new Exception("git ls-files failed to return..");
             }
         }
-        return p.StandardOutput.ReadToEnd();
+
+        string output = p.StandardOutput.ReadToEnd();
+        string error = p.StandardError.ReadToEnd();
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            if (GlobalVars.debug)
+            {
+                Console.WriteLine($"Git error: {error}");
+            }
+            throw new Exception($"Git ls-files error: {error}");
+        }
+
+        return output;
     }
 
     public static List<string> GetWorkingFiles(string dir)
@@ -103,7 +141,6 @@ public abstract class FileType
 
     public static string GetFileContents(string filename)
     {
-
         string contents = File.ReadAllText(filename);
         //Console.WriteLine("Reading File contents " + filename);
         return contents;
