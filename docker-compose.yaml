@@ -1,9 +1,0 @@
-services:
-  linux-visualgit1:
-    image: 'visual-git'
-    volumes:
-      - 'c:\dev\output:/App/docker-test-folder/output'
-  linux-visualgit2:
-    image: 'visual-git'
-    volumes:
-      - 'c:\dev\output2:/App/docker-test-folder/output' 

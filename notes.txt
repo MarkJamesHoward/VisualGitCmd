@@ -16,7 +16,7 @@ dotnet publish --os linux --arch x64 /t:PublishContainer
     -- this Docker File copies over the source so we can run 'dotnet run' on the bash in docker
 
         dotnet build
-        docker build -t visual-git -f DockerFile .
+        docker build -t visualgit -f Docker/DockerFileLinuxTest .
 
     --Then update the launch settings in Properties/LaunchSettings.json
 
@@ -52,8 +52,6 @@ dotnet publish -r osx-x64  --self-contained true -p:PublishSingleFile=true -c re
 dotnet publish -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release
 dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true  -c release
 dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true  -c release
-
-
 
 -- Installer - Inno
 -- Creating InnoSetup package

@@ -1,21 +1,18 @@
 FROM  mcr.microsoft.com/dotnet/sdk:9.0-alpine
 WORKDIR /App
-COPY ./bin/Release/net9.0/linux-x64/ ./ 
-WORKDIR /MyBin
-COPY ./bin/Release/net9.0/linux-x64/publish/ ./ 
-WORKDIR /WORK
-
+COPY ../ ./ 
 
 RUN apk update
 RUN apk add git
-RUN apk add aspnetcore9-runtime
-RUN apk add dotnet9-sdk
 
 WORKDIR /App/docker-test-folder
 RUN git init
 RUN git config --global user.email "markjameshoward@hotmail.co.uk"
 RUN git config --global user.name "Mark Howard"
+RUN git add .
+RUN git commit -m "initial commit"
+RUN git branch feature
 
 WORKDIR /App
+#ENTRYPOINT ["dotnet", "run"]
 ENTRYPOINT ["tail", "-f", "/dev/null"]
-

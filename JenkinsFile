@@ -43,6 +43,7 @@ pipeline {
         stage('Build VisualGit CLI') {
             steps {
                 dir ('C:\\github\\visualgit') {
+                    bat 'npm run test'
                     bat 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
                 }
             }

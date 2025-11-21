@@ -1,0 +1,13 @@
+services:
+  linux-visualgit1:
+    image: 'visual-git-linux-test1'
+    volumes:
+      - 'c:\dev\output:/App/docker-test-folder/output'
+  linux-visualgit2:
+    image: 'visual-git-linux-test2'
+    volumes:
+      - 'c:\dev\output2:/App/docker-test-folder/output' 
+  visualgit:
+    image: 'visualgit'
+    volumes:
+      - 'c:\dev\output2:/App/docker-test-folder/output' 
