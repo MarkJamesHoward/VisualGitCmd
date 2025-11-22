@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 public class ApiConfiguration
 {
     private readonly IConfiguration _configuration;
+    private readonly string DefaultAPIUrl =
+        "https://gitvisualiserapi.azurewebsites.net/api/gitinternals";
 
     public ApiConfiguration(IConfiguration configuration)
     {
@@ -79,7 +81,7 @@ public class ApiConfiguration
         else
         {
             // Default to Azure Cloud version
-            return new Uri(AzureAppServiceUrl);
+            return new Uri(DefaultAPIUrl);
         }
     }
 
@@ -96,7 +98,7 @@ public class ApiConfiguration
         else
         {
             // Default to Azure Container App version
-            return System.Net.WebUtility.UrlEncode(AzureAppServiceUrl);
+            return System.Net.WebUtility.UrlEncode(DefaultAPIUrl);
         }
     }
 
