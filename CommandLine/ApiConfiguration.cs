@@ -79,7 +79,7 @@ public class ApiConfiguration
         else
         {
             // Default to Azure Cloud version
-            return new Uri(AzureContainerAppsUrl);
+            return new Uri(AzureAppServiceUrl);
         }
     }
 
