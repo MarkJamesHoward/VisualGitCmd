@@ -1,16 +1,25 @@
 pipeline {
     agent any
     stages {
-        stage('Pull latest for VisualGit Cli and Website') {
+        stage('Pull latest for VisualGit Cli, API, and Website') {
             steps {
-                echo 'remove for now'
-                /*
+                
                 dir('C:\\github\\visualgitcmd') {
-                    bat 'git pull'
+                    bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit'
                 }
                  dir('C:\\github\\visualgit') {
-                    bat 'git pull'
-                }*/
+                    bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
+                 }
+                  dir('C:\\github\\visualgitapi') {
+                    bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
+                 }
+            }
+        }
+        stage('Run VisuaGitCMD Integration Tests on JSON from Docker') {
+            steps {
+                dir('C:\\github\\visualgitcmd') {
+                    bat 'dotnet test --filter "DockerOutputIntegrationTests"'
+                 }
             }
         }
         stage('Build Docker Image') {
@@ -51,10 +60,10 @@ pipeline {
         stage('Push VisualGit Website to Netlify') {
             steps {
                 dir('C:\\github\\visualgit') {                
-                    bat 'netlify logout'
+                    // bat 'netlify logout'
                     bat 'netlify login --auth $NETLIFY_SECRET_VISUALGIT'
-                    bat 'netlify unlink'
-                    bat 'netlify link --id f9cb3e1c-f0dc-4c23-8815-d178cbf822ae'
+                    // bat 'netlify unlink'
+                    // bat 'netlify link --id f9cb3e1c-f0dc-4c23-8815-d178cbf822ae'
                     bat 'netlify deploy --prod -d dist'
                 }
             }
