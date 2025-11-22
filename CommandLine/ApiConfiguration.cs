@@ -79,7 +79,7 @@ public class ApiConfiguration
         else
         {
             // Default to Azure Cloud version
-            return new Uri(AzureContainerAppsUrl);
+            return new Uri(AzureAppServiceUrl);
         }
     }
 
@@ -96,7 +96,7 @@ public class ApiConfiguration
         else
         {
             // Default to Azure Container App version
-            return System.Net.WebUtility.UrlEncode(AzureContainerAppsUrl);
+            return System.Net.WebUtility.UrlEncode(AzureAppServiceUrl);
         }
     }
 
