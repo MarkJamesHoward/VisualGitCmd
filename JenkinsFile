@@ -15,6 +15,16 @@ pipeline {
                  }
             }
         }
+        stage('Build and run Docker Image of VisualGitCMD for integration tests') {
+            steps {
+                dir('C:\\github\\visualgitcmd') {
+                    bat 'docker build -t visualgitcmd:test -f Docker/DockerFileLinuxTest .'
+                }
+                 dir('C:\\github\\visualgitcmd\\Docker') {
+                    bat 'docker-compose up'
+                }
+            }
+        }
         stage('Run VisuaGitCMD Integration Tests on JSON from Docker') {
             steps {
                 dir('C:\\github\\visualgitcmd') {

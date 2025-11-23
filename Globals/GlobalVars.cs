@@ -11,6 +11,7 @@ public abstract class GlobalVars
     public static bool EmitJsonOnly = false;
     public static bool EmitWeb = false;
     public static bool Bare = false;
+    public static bool SingleRun = false;
     public static bool LocalDebugAPI = false;
     public static bool UnPackRefs = false;
     public static bool EmitNeo = false;

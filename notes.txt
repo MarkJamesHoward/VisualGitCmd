@@ -1,6 +1,9 @@
 -- The URL for the API that is in use is defined in JSONGeneration/JSONGeneration.cs
 -- So this can be either Azure AppService/GoogleCloudRun/Azure Container App
 
+-- Build Docker for integration testing
+docker build -t visualgit:test -f Docker/DockerFile .
+docker run -it --volume c:\dev\output:/App/docker-test-folder/output visual-git 
 
 -- running local debug
 This will use the launch.json in the .vscode folder. In particualr this line for the arguments:

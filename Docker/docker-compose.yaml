@@ -2,5 +2,5 @@ services:
   visualgit-test:
     image: 'visualgit:test'
     volumes:
-      - 'c:\dev\output:/App/docker-test-folder/output'
+      - 'c:\dev\output:/App/Test/ActualJson'
 

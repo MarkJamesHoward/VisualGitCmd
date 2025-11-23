@@ -38,6 +38,11 @@ public class CmdLineArguments
                             GlobalVars.EmitWeb = true;
                         }
 
+                        if (o.SingleRun)
+                        {
+                            GlobalVars.SingleRun = true;
+                        }
+
                         if (o.LocalDebugAPI)
                         {
                             GlobalVars.LocalDebugAPI = true;

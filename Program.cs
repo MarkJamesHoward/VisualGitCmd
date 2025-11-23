@@ -32,5 +32,11 @@ RandomName.GenerateRandomName();
 // Perform intial check of files
 GitRepoExaminer.Run();
 
+if (GlobalVars.SingleRun)
+{
+    Console.WriteLine("Single run mode enabled, exiting after initial processing.");
+    return;
+}
+
 /// Now setup event handler for checking when files are modified
 FileWatching.CreateFileWatcher();

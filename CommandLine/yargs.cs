@@ -34,6 +34,9 @@ namespace Yargs
         [Option('d', "debug", Required = false, HelpText = "Enable debug mode")]
         public bool Debug { get; set; }
 
+        [Option('s', "singlerun", Required = false, HelpText = "Enable single run mode")]
+        public bool SingleRun { get; set; }
+
         [Option('l', "localdebugAPI", Required = false, HelpText = "Enable local debug of API")]
         public bool LocalDebugAPI { get; set; }
 
