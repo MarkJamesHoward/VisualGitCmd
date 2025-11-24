@@ -15,4 +15,4 @@ RUN git branch feature
 
 WORKDIR /App
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
-ENTRYPOINT ["dotnet", "run", "--no-launch-profile", "--", "-s", "-p", "/App/docker-test-folder", "-j", "/App/Test/ActualJsondock"]
+ENTRYPOINT ["dotnet", "run", "--no-launch-profile", "--", "-s", "-p", "/App/docker-test-folder", "-j", "/App/Test/ActualJson"]

@@ -123,9 +123,12 @@ public class CmdLineArguments
                             // Check if the path to examine the repo of is provided on the command line
                             if (o.RepoPath != null)
                             {
+                                // Expand tilde path for Linux/macOS compatibility
+                                string expandedPath = FilePath.ExpandTildePath(o.RepoPath.Trim());
+
                                 GlobalVars.RepoPath = Path.Combine(
                                         GlobalVars.RepoPath.Trim(),
-                                        o.RepoPath.Trim()
+                                        expandedPath
                                     )
                                     .Trim();
 
@@ -152,7 +155,8 @@ public class CmdLineArguments
                             }
                             else
                             {
-                                GlobalVars.RepoPath = o.RepoPath.Trim();
+                                // Expand tilde path for Linux/macOS compatibility
+                                GlobalVars.RepoPath = FilePath.ExpandTildePath(o.RepoPath.Trim());
                                 StandardMessages.DebugSelectedAndAlsoRepoPathProvided(
                                     GlobalVars.RepoPath.Trim()
                                 );
