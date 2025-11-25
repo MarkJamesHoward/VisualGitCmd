@@ -20,6 +20,15 @@ namespace Yargs
         [Option('n', "neo", Required = false, HelpText = "Send Output to Neo4j - Experimental")]
         public bool Neo { get; set; }
 
+        [Option(
+            'w',
+            "wsl",
+            Required = false,
+            Default = false,
+            HelpText = "Running in WSL environment"
+        )]
+        public bool IsWSL { get; set; }
+
         [Option('j', "jsonPath", Required = false, HelpText = "Folder to send JSON")]
         public string? Json { get; set; }
 

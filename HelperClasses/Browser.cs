@@ -11,6 +11,7 @@ public abstract class Browser
                 string http = GlobalVars.LocalDebugWebsite ? "http" : "https";
                 string url = ApiConfigurationProvider.Instance.GetAPIRLUrlEncoded();
                 string cmdversion = ApiConfigurationProvider.Instance.Version;
+
                 string webDNS = GlobalVars.LocalDebugWebsite ? "localhost:4321" : "visualgit.net";
 
                 StandardMessages.UsingAPIUrl(
@@ -18,6 +19,18 @@ public abstract class Browser
                 );
 
                 firstRun = false;
+
+                if (GlobalVars.IsWSL)
+                {
+                    Process.Start(
+                        new ProcessStartInfo(
+                            $"explorer.exe \"{http}://{webDNS}/visualize?cmdversion={cmdversion}&url={url}&data={RandomName.Name.Replace(' ', 'x')}/1\""
+                        )
+                        {
+                            UseShellExecute = true,
+                        }
+                    );
+                }
                 Process.Start(
                     new ProcessStartInfo(
                         $"{http}://{webDNS}/visualize?cmdversion={cmdversion}&url={url}&data={RandomName.Name.Replace(' ', 'x')}/1"

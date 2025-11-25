@@ -5,6 +5,7 @@ public abstract class GlobalVars
     public static bool LocalDebugWebsite = false;
     public static string? Api { get; set; }
     public static string? exePath { get; set; }
+    public static bool IsWSL { get; set; }
 
     // Version will be loaded from configuration or assembly
     public static string version = GetVersion();

@@ -24,6 +24,11 @@ public abstract class StandardMessages()
         logger?.LogInformation($"User suplied API URL: {url}");
     }
 
+    public static void RunningInWSL()
+    {
+        logger?.LogInformation($"Running in WSL environment");
+    }
+
     public static void WebEmissionEnabled()
     {
         logger?.LogInformation("Web emission enabled");
@@ -84,5 +89,10 @@ public abstract class StandardMessages()
     public static void ExePath(string path)
     {
         logger?.LogInformation($"Exe Path {path}");
+    }
+
+    internal static void SingleRunMode()
+    {
+        throw new NotImplementedException();
     }
 }

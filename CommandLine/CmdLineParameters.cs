@@ -27,6 +27,12 @@ public class CmdLineArguments
                             GlobalVars.LocalDebugWebsite = true;
                         }
 
+                        if (o.IsWSL)
+                        {
+                            GlobalVars.IsWSL = true;
+                            StandardMessages.RunningInWSL();
+                        }
+
                         if (o.Api != null)
                         {
                             GlobalVars.Api = o.Api.Trim();
