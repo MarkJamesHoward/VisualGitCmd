@@ -48,8 +48,12 @@ pipeline {
                     bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\Windowsx64'
                     bat 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\WindowsARM'
                     bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSx64'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSx64\\visual.bin'
                     bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSARM'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSARM\\visual.bin'
                     bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\Linux'
+                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\Linux\\visual.bin'
+
                 }
             }
         }
