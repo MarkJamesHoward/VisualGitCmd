@@ -8,7 +8,7 @@ RUN apk add git
 WORKDIR /App/docker-test-folder
 RUN git init
 RUN git config --global user.email "markjameshoward@hotmail.co.uk"
-RUN git config --global user.name "Mark Howard"
+RUN git config --global user.name "MarkHoward"
 RUN git add .
 RUN git commit -m "initial commit"
 RUN git branch feature

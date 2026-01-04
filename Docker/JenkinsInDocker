@@ -1,0 +1,27 @@
+FROM jenkins/jenkins:lts
+
+USER root
+
+RUN apt-get update
+RUN apt-get install -y git
+
+# Install required packages: wget, and libicu-dev (essential for .NET globalization features)
+RUN apt-get update && \
+    apt-get install -y wget libicu-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add the Microsoft package signing key and repository
+RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb
+
+# Update apt-get again to recognize the new repository and install the .NET 8.0 SDK
+RUN apt-get update && \
+    apt-get install -y dotnet-sdk-9.0
+
+
+WORKDIR /App
+RUN git clone https://github.com/MarkJamesHoward/VisualGitCmd.git
+RUN git clone https://github.com/MarkJamesHoward/VisualGitAPI.git
+RUN git clone https://github.com/MarkJamesHoward/VisualGit.git
+
