@@ -33,6 +33,8 @@ RUN apt-get update && \
 
 WORKDIR /App
 
+RUN mkdir docker-test-folder
+
 ARG GIT_TOKEN
 
 RUN git clone https://${GIT_TOKEN}@github.com/MarkJamesHoward/VisualGitAPI.git
