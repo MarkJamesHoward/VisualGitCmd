@@ -9,7 +9,7 @@ namespace VisualGit.Tests;
 /// </summary>
 public class DockerOutputIntegrationTests
 {
-    private const string ActualOutputPath = @"d:\github\visualgitcmd\Test\ActualJson";
+    private const string ActualOutputPath = @"/App/VisualGitCmd/Test/ActualJson";
 
     private readonly string[] _jsonFilesToCompare =
     {
