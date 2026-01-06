@@ -18,6 +18,7 @@ pipeline {
         stage('Build and run Docker Image of VisualGitCMD for integration tests') {
             steps {
                 dir('/App/VisualGitCmd/docker-test-folder') {
+                    sh 'rm -rf .git'
                     sh 'git init'
                     sh 'git config --global user.email "markjameshoward@hotmail.co.uk"'
                     sh 'git config --global user.name "Mark Howard"'
