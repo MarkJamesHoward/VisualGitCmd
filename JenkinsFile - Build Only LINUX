@@ -17,7 +17,15 @@ pipeline {
         }
         stage('Build and run Docker Image of VisualGitCMD for integration tests') {
             steps {
+                
+                    dir('/App') {
+                        sh 'mkdir -p ActualJson'
+                        sh 'mkdir -p ExpectedJson'
+                        sh 'cp -r /App/VisualGitCmd/Test/ExpectedJson/. /App/ExpectedJson/'
+                    }
+                
                 dir('/App/docker-test-folder') {
+                    
                     sh 'rm -rf .git'
                     sh 'git init'
                     sh 'git config --global user.email "markjameshoward@hotmail.co.uk"'
