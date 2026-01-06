@@ -1,6 +1,4 @@
 FROM  mcr.microsoft.com/dotnet/sdk:9.0-alpine
-WORKDIR /App
-COPY ../ ./ 
 
 RUN apk update
 RUN apk add git
@@ -13,6 +11,6 @@ RUN git add .
 RUN git commit -m "initial commit"
 RUN git branch feature
 
-WORKDIR /App
+WORKDIR /App/VisualGitCmd
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
 ENTRYPOINT ["dotnet", "run", "--no-launch-profile", "--", "-s", "-p", "/App/VisualGitCmd/docker-test-folder", "-j", "/App/VisualGitCmd/Test/ActualJson"]
