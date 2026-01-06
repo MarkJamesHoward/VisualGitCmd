@@ -5,7 +5,7 @@ COPY ../ ./
 RUN apk update
 RUN apk add git
 
-WORKDIR /App/docker-test-folder
+WORKDIR /App/VisualGitCmd/docker-test-folder
 RUN git init
 RUN git config --global user.email "markjameshoward@hotmail.co.uk"
 RUN git config --global user.name "Mark Howard"
