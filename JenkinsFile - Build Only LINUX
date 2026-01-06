@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+    stages {        
+        stage('Pull latest for VisualGit Cli, API, and Website') {
+            steps {
+                dir('/App/VisualGit') {
+                    sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
+                 }
+                dir('/App/VisualGitCmd') {
+                    sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit'
+                }
+                 
+                  dir('/App/VisualGitAPI') {
+                    sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
+                 }
+            }
+        }
+        stage('Build and run Docker Image of VisualGitCMD for integration tests') {
+            steps {
+                dir('/App/VisualGitCmd') {
+                    sh 'docker build -t visualgitcmd:test -f Docker/IntegrationTest .'
+                }
+                 dir('/App/VisualGitCmd/Docker') {
+                    sh 'docker compose up'
+                }
+            }
+        }
+        stage('Run VisuaGitCMD Integration Tests on JSON from Docker') {
+            steps {
+                dir('/App/VisualGitCmd') {
+                    sh 'dotnet test --filter "DockerOutputIntegrationTests"'
+                 }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                dir('/App/VisualGitCmd') {
+                    sh 'dotnet restore'
+                    sh 'dotnet build'
+
+                    sh 'dotnet publish --os linux --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+
+
+                    sh 'cp ./bin/Release/net9.0/win-x64/publish/visual.exe /visualgit/public/application/Windowsx64'
+                    sh 'cp ./bin/Release/net9.0/win-arm64/publish/visual.exe /visualgit/public/application/WindowsARM'
+                    sh 'cp ./bin/Release/net9.0/osx-x64/publish/visual /visualgit/public/application/MacOSx64'
+                    sh 'cp ./bin/Release/net9.0/osx-x64/publish/visual /visualgit/public/application/MacOSx64/visual.bin'
+                    sh 'cp ./bin/Release/net9.0/osx-arm64/publish/visual /visualgit/public/application/MacOSARM'
+                    sh 'cp ./bin/Release/net9.0/osx-arm64/publish/visual /visualgit/public/application/MacOSARM/visual.bin'
+                    sh 'cp ./bin/Release/net9.0/linux-x64/publish/visual /visualgit/public/application/Linux'
+                    sh 'cp ./bin/Release/net9.0/linux-x64/publish/visual /visualgit/public/application/Linux/visual.bin'
+
+                }
+            }
+        }
+        stage('Create Install Wizard') {
+            steps {
+                sh 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"/App/VisualGit/public/application/Outputx64" /F"visualgit_setupx64" "/App/VisualGit/public/application/InnoSetupx64.iss"'
+                sh 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"/App/VisualGit/public/application/OutputARM" /F"visualgit_setupARM" "/App/VisualGit/public/application/InnoSetupARM.iss"'
+            }
+        }
+        stage('Build VisualGit CLI') {
+            steps {
+                dir ('/App/VisualGit') {
+                    sh 'npm run test'
+                    sh 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
+                }
+            }
+        }
+       
+    }
+}

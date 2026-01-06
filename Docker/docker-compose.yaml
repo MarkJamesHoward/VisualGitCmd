@@ -1,6 +1,5 @@
 services:
   visualgit-test:
     image: 'visualgitcmd:test'
-    volumes:
-      - 'd:\dev\output:/App/Test/ActualJson'
+
 

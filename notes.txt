@@ -9,6 +9,21 @@ docker run -it --volume c:\dev\output:/App/docker-test-folder/output visual-git
 This will use the launch.json in the .vscode folder. In particualr this line for the arguments:
   "args": ["-pC:/dev/test", "-d"]
 
+-- Jenkins in Docker build ---------------------------------------
+
+-- Container build to add our repos and Git support
+docker build --build-arg GIT_TOKEN="PAT" -t jenkins -f JenkinsInDocker .
+
+-- Grab the Admin password
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+-- Setup our volume
+docker volume create my-jenkins-home
+
+--running
+docker run -p 8081:8080 -p 50000:50000 --name jenkins -v my-jenkins-home:/var/jenkins_home  -v /var/run/docker.sock:/var/run/docker.sock jenkins
+
+-------------------------------------------------------------------
 
 -- Docker builds
 dotnet publish --os linux --arch x64 /t:PublishContainer
