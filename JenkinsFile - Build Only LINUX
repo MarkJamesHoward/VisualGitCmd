@@ -17,11 +17,16 @@ pipeline {
         }
         stage('Build and run Docker Image of VisualGitCMD for integration tests') {
             steps {
-                dir('/App/VisualGitCmd') {
-                    sh 'docker build -t visualgitcmd:test -f Docker/IntegrationTest .'
+                dir('/App/VisualGitCmd/docker-test-folder') {
+                    sh 'git init'
+                    sh 'git config --global user.email "markjameshoward@hotmail.co.uk"'
+                    sh 'git config --global user.name "Mark Howard"'
+                    sh 'git add .'
+                    sh 'git commit -m "initial commit"'
+                    sh 'git branch feature'
                 }
-                 dir('/App/VisualGitCmd/Docker') {
-                    sh 'docker compose up'
+                dir('/App/VisualGitCmd') {
+                    sh 'dotnet run --no-launch-profile -- -s, -p "/App/VisualGitCmd/docker-test-folder" -j "/App/VisualGitCmd/Test/ActualJson"'
                 }
             }
         }
