@@ -4,6 +4,8 @@ RUN apk update
 RUN apk add git
 
 WORKDIR /App/docker-test-folder
+RUN Touch test.txt
+RUN echo "test" > test.txt
 RUN git init
 RUN git config --global user.email "markjameshoward@hotmail.co.uk"
 RUN git config --global user.name "Mark Howard"

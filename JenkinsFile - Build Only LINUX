@@ -26,6 +26,8 @@ pipeline {
                 
                 dir('/App/docker-test-folder') {
                     
+                    sh 'touch test.txt'
+                    sh 'echo "test" > test.txt'
                     sh 'rm -rf .git'
                     sh 'git init'
                     sh 'git config --global user.email "markjameshoward@hotmail.co.uk"'
