@@ -33,8 +33,7 @@ pipeline {
                     sh 'git config --global user.email "markjameshoward@hotmail.co.uk"'
                     sh 'git config --global user.name "Mark Howard"'
                     sh 'git add .'
-                    sh 'git commit -m "initial commit"'
-                    sh 'git branch feature'
+                    sh 'GIT_COMMITTER_DATE="Sun Aug 4 11:14:08 2024 +0200" git commit -m "initial" --date "Wed Jul 24 19:09:11 2024 +0200"'
                 }
                 dir('/App/VisualGitCmd') {
                     sh 'dotnet run --no-launch-profile -- -s, -p "/App/docker-test-folder" -j "/App/ActualJson"'
