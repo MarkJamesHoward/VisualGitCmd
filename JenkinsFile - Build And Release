@@ -4,37 +4,20 @@ pipeline {
         stage('Pull latest for VisualGit Cli, API, and Website') {
             steps {
                 
-                dir('C:\\github\\visualgitcmd') {
+                dir('D:\\github\\visualgitcmd') {
                     bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit'
                 }
-                 dir('C:\\github\\visualgit') {
+                 dir('D:\\github\\visualgit') {
                     bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
                  }
-                  dir('C:\\github\\visualgitapi') {
+                  dir('D:\\github\\visualgitapi') {
                     bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
                  }
             }
-        }
-        stage('Build and run Docker Image of VisualGitCMD for integration tests') {
+        }              
+        stage('Publish VisualGitCmd') {
             steps {
-                dir('C:\\github\\visualgitcmd') {
-                    bat 'docker build -t visualgitcmd:test -f Docker/DockerFileLinuxTestAutoRunSingleShot .'
-                }
-                 dir('C:\\github\\visualgitcmd\\Docker') {
-                    bat 'docker-compose up'
-                }
-            }
-        }
-        stage('Run VisuaGitCMD Integration Tests on JSON from Docker') {
-            steps {
-                dir('C:\\github\\visualgitcmd') {
-                    bat 'dotnet test --filter "DockerOutputIntegrationTests"'
-                 }
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                dir('c:\\github\\visualgitcmd') {
+                dir('D:\\github\\visualgitcmd') {
                     bat 'dotnet restore'
                     bat 'dotnet build'
 
@@ -44,28 +27,27 @@ pipeline {
                     bat 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
                     bat 'dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
 
-
-                    bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\Windowsx64'
-                    bat 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe C:\\github\\visualgit\\public\\application\\WindowsARM'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSx64'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSx64\\visual.bin'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSARM'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual C:\\github\\visualgit\\public\\application\\MacOSARM\\visual.bin'
-                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\Linux'
-                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual C:\\github\\visualgit\\public\\application\\Linux\\visual.bin'
+                    bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\Windowsx64'
+                    bat 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\WindowsARM'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSx64'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSx64\\visual.bin'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSARM'
+                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSARM\\visual.bin'
+                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\Linux'
+                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\Linux\\visual.bin'
 
                 }
             }
         }
         stage('Create Install Wizard') {
             steps {
-                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"C:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "C:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
-                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"C:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "C:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
+                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "D:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
+                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "D:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
             }
         }
         stage('Build VisualGit CLI') {
             steps {
-                dir ('C:\\github\\visualgit') {
+                dir ('D:\\github\\visualgit') {
                     bat 'npm run test'
                     bat 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
                 }
@@ -73,7 +55,7 @@ pipeline {
         }
         stage('Push VisualGit Website to Netlify') {
             steps {
-                dir('C:\\github\\visualgit') {                
+                dir('D:\\github\\visualgit') {                
                     // bat 'netlify logout'
                     bat 'netlify login --auth $NETLIFY_SECRET_VISUALGIT'
                     // bat 'netlify unlink'

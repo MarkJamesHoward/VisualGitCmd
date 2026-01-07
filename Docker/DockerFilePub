@@ -1,9 +1,0 @@
-FROM  mcr.microsoft.com/dotnet/sdk:9.0-alpine
-
-RUN apk update
-RUN apk add git
-
-RUN mkdir -p /my-app/docker-test-folder
-WORKDIR /my-app/docker-test-folder
-RUN git init
-WORKDIR /

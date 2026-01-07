@@ -1,5 +1,0 @@
-services:
-  visualgit-test:
-    image: 'visualgitcmd:test'
-
-
