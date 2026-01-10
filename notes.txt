@@ -25,6 +25,17 @@ docker run -p 8081:8080 -p 50000:50000 --name jenkins -v my-jenkins-home:/var/je
 
 -------------------------------------------------------------------
 
+-----------Docker for InnoSetup
+docker run --rm -i -v $PWD:/work amake/innosetup:innosetup6-bookworm helloworld.iss
+
+docker run --rm -i -v D:\github\VisualGitCmd:/work inno InnoSetup/InnoSetupx64.iss
+
+
+
+
+
+--------------------------
+
 -- Docker builds
 dotnet publish --os linux --arch x64 /t:PublishContainer
 
@@ -72,7 +83,7 @@ dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true  -c r
 dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true  -c release
 
 -- Installer - Inno
--- Creating InnoSetup package
+-- Creating InnoSetup package (withing the VisualGit website project)
 
 Open the pulbic\applications\innoSetup.iis files
 Run 'Compile'
