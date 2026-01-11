@@ -15,7 +15,7 @@ This will use the launch.json in the .vscode folder. In particualr this line for
 docker build --build-arg GIT_TOKEN="PAT" -t jenkins -f JenkinsInDocker .
 
 -- Grab the Admin password
-docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPasswosrd
 
 -- Setup our volume
 docker volume create my-jenkins-home

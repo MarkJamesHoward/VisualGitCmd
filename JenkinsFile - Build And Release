@@ -1,68 +1,77 @@
 pipeline {
     agent any
     stages {
-        stage('Pull latest for VisualGit Cli, API, and Website') {
+         stage('Pull latest for VisualGit Cli, API, and Website') {
             steps {
-                
-                dir('D:\\github\\visualgitcmd') {
-                    bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit'
-                }
-                 dir('D:\\github\\visualgit') {
-                    bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
+                dir('/VisualGitBuild/VisualGit') {
+                    sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
                  }
-                  dir('D:\\github\\visualgitapi') {
-                    bat 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
+                dir('/VisualGitBuild/VisualGitCmd') {
+                    sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit'
+                }
+                 
+                  dir('/VisualGitBuild/VisualGitAPI') {
+                    sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
                  }
             }
-        }              
+        }  
         stage('Publish VisualGitCmd') {
             steps {
-                dir('D:\\github\\visualgitcmd') {
-                    bat 'dotnet restore'
-                    bat 'dotnet build'
+                dir('/VisualGitBuild/VisualGitCmd') {
+                    sh 'dotnet restore'
+                    sh 'dotnet build'
 
-                    bat 'dotnet publish --os linux --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    bat 'dotnet publish -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    bat 'dotnet publish -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    bat 'dotnet publish -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    bat 'dotnet publish -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -o /VisualGitBuild/linux/ --os linux --self-contained true -p:PublishSingleFile=true -c release  -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -o /VisualGitBuild/osx-arm64/ -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -o /VisualGitBuild/osx-x64/ -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -o /VisualGitBuild/win-x64/ -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    sh 'dotnet publish -o /VisualGitBuild/win-arm64/ -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
 
-                    bat 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\Windowsx64'
-                    bat 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\WindowsARM'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSx64'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSx64\\visual.bin'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSARM'
-                    bat 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSARM\\visual.bin'
-                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\Linux'
-                    bat 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\Linux\\visual.bin'
+                    // sh 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\Windowsx64'
+                    // sh 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\WindowsARM'
+                    // sh 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSx64'
+                    // sh 'copy .\\bin\\Release\\net9.0\\osx-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSx64\\visual.bin'
+                    // sh 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSARM'
+                    // sh 'copy .\\bin\\Release\\net9.0\\osx-arm64\\publish\\visual D:\\github\\visualgit\\public\\application\\MacOSARM\\visual.bin'
+                    // sh 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\Linux'
+                    // sh 'copy .\\bin\\Release\\net9.0\\linux-x64\\publish\\visual D:\\github\\visualgit\\public\\application\\Linux\\visual.bin'
 
                 }
             }
         }
-        stage('Create Install Wizard') {
-            steps {
-                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "D:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
-                bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "D:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
-            }
-        }
-        stage('Build VisualGit CLI') {
-            steps {
-                dir ('D:\\github\\visualgit') {
-                    bat 'npm run test'
-                    bat 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
+         stage('InnoSetup') {
+            agent {
+                // Use the InnoSetup image for this stage
+                docker {
+                    image 'amake/innosetup:innosetup6-bookworm'
+                    args '-v /VisualGitBuild:/work InnoSetup/InnoSetupx64.iss' // Optional: mount volumes
                 }
             }
         }
-        stage('Push VisualGit Website to Netlify') {
-            steps {
-                dir('D:\\github\\visualgit') {                
-                    // bat 'netlify logout'
-                    bat 'netlify login --auth $NETLIFY_SECRET_VISUALGIT'
-                    // bat 'netlify unlink'
-                    // bat 'netlify link --id f9cb3e1c-f0dc-4c23-8815-d178cbf822ae'
-                    bat 'netlify deploy --prod -d dist'
-                }
-            }
-        }
+        // stage('Create Install Wizard') {
+        //     steps {
+        //         bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "D:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
+        //         bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "D:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
+        //     }
+        // }
+        // stage('Build VisualGit CLI') {
+        //     steps {
+        //         dir ('D:\\github\\visualgit') {
+        //             sh 'npm run test'
+        //             sh 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
+        //         }
+        //     }
+        // }
+        // stage('Push VisualGit Website to Netlify') {
+        //     steps {
+        //         dir('D:\\github\\visualgit') {                
+        //             // sh 'netlify logout'
+        //             sh 'netlify login --auth $NETLIFY_SECRET_VISUALGIT'
+        //             // sh 'netlify unlink'
+        //             // sh 'netlify link --id f9cb3e1c-f0dc-4c23-8815-d178cbf822ae'
+        //             sh 'netlify deploy --prod -d dist'
+        //         }
+        //     }
+        // }
     }
 }

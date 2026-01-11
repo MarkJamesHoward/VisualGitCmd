@@ -1,4 +1,5 @@
 bin 
+InnoSetup/Putput/visualgit_setup.iss
 obj
 parcel-cache
 .parcel-cache

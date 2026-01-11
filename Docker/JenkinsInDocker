@@ -31,7 +31,7 @@ RUN apt-get update && \
     apt-get install -y docker-ce-cli && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /App
+WORKDIR /VisualGitBuild
 
 RUN mkdir docker-test-folder
 
@@ -39,7 +39,7 @@ ARG GIT_TOKEN
 
 RUN git clone https://${GIT_TOKEN}@github.com/MarkJamesHoward/VisualGitAPI.git
 RUN git clone https://github.com/MarkJamesHoward/VisualGitCmd.git
-RUN git clone https://${GIT_TOKEN}@github.com/MarkJamesHoward/VisualGit.git
+# RUN git clone https://${GIT_TOKEN}@github.com/MarkJamesHoward/VisualGit.git
 
 
 

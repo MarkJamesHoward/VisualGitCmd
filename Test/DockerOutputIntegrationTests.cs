@@ -9,8 +9,8 @@ namespace VisualGit.Tests;
 /// </summary>
 public class DockerOutputIntegrationTests
 {
-    private const string ActualOutputPath = @"/App/ActualJson";
-    private const string ExpectedOutputPath = @"/App/ExpectedJson";
+    private const string ActualOutputPath = @"/VisualGitBuild/ActualJson";
+    private const string ExpectedOutputPath = @"/VisualGitBuild/ExpectedJson";
 
 
     private readonly string[] _jsonFilesToCompare =

@@ -1,0 +1,9 @@
+services:
+  build:
+  
+  innosetup:
+    image: amake/innosetup:innosetup6-bookworm
+    container_name: innosetup
+    command: InnoSetup/InnoSetupx64.iss
+    volumes:
+      - D:\VisualGitBuild\:/work  

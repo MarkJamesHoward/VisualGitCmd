@@ -3,14 +3,14 @@ pipeline {
     stages {        
         stage('Pull latest for VisualGit Cli, API, and Website') {
             steps {
-                dir('/App/VisualGit') {
+                dir('/VisualGitBuild/VisualGit') {
                     sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
                  }
-                dir('/App/VisualGitCmd') {
+                dir('/VisualGitBuild/VisualGitCmd') {
                     sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit'
                 }
                  
-                  dir('/App/VisualGitAPI') {
+                  dir('/VisualGitBuild/VisualGitAPI') {
                     sh 'git -c core.askpass=true pull --no-edit --ff-only || git pull --no-edit || echo Skipping pull - auth or repo issue'
                  }
             }
@@ -18,13 +18,13 @@ pipeline {
         stage('Build and run Docker Image of VisualGitCMD for integration tests') {
             steps {
                 
-                    dir('/App') {
+                    dir('/VisualGitBuild') {
                         sh 'mkdir -p ActualJson'
                         sh 'mkdir -p ExpectedJson'
-                        sh 'cp -r /App/VisualGitCmd/Test/ExpectedJson/. /App/ExpectedJson/'
+                        sh 'cp -r /VisualGitBuild/VisualGitCmd/Test/ExpectedJson/. /VisualGitBuild/ExpectedJson/'
                     }
                 
-                dir('/App/docker-test-folder') {
+                dir('/VisualGitBuild/docker-test-folder') {
                     
                     sh 'touch test.txt'
                     sh 'echo "test" > test.txt'
@@ -35,14 +35,14 @@ pipeline {
                     sh 'git add .'
                     sh 'GIT_COMMITTER_DATE="Sun Aug 4 11:14:08 2024 +0200" git commit -m "initial" --date "Wed Jul 24 19:09:11 2024 +0200"'
                 }
-                dir('/App/VisualGitCmd') {
-                    sh 'dotnet run --no-launch-profile -- -s -p "/App/docker-test-folder" -j "/App/ActualJson"'
+                dir('/VisualGitBuild/VisualGitCmd') {
+                    sh 'dotnet run --no-launch-profile -- -s -p "/VisualGitBuild/docker-test-folder" -j "/VisualGitBuild/ActualJson"'
                 }
             }
         }
         stage('Run VisuaGitCMD Integration Tests on JSON from Docker') {
             steps {
-                dir('/App/VisualGitCmd') {
+                dir('/VisualGitBuild/VisualGitCmd') {
                     sh 'dotnet test --filter "DockerOutputIntegrationTests"'
                  }
             }
