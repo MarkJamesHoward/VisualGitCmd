@@ -1,6 +1,15 @@
 pipeline {
     agent any
     stages {
+        stage('Clone Repositories') {
+            steps {
+                dir('/VisualGitBuild') {
+                    sh 'rm -rf VisualGitCmd'
+                    //sh 'git clone https://${GIT_TOKEN}@github.com/MarkJamesHoward/VisualGitAPI.git'
+                    sh 'git clone https://github.com/MarkJamesHoward/VisualGitCmd.git'
+                }
+            }
+        }
          stage('Pull latest for VisualGit Cli, API, and Website') {
             steps {
                 dir('/VisualGitBuild/VisualGit') {
@@ -21,11 +30,11 @@ pipeline {
                     sh 'dotnet restore'
                     sh 'dotnet build'
 
-                    sh 'dotnet publish -o /VisualGitBuild/linux/ --os linux --self-contained true -p:PublishSingleFile=true -c release  -p:Version=%BUILD_NUMBER%'
-                    sh 'dotnet publish -o /VisualGitBuild/osx-arm64/ -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    sh 'dotnet publish -o /VisualGitBuild/osx-x64/ -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    sh 'dotnet publish -o /VisualGitBuild/win-x64/ -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
-                    sh 'dotnet publish -o /VisualGitBuild/win-arm64/ -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=%BUILD_NUMBER%'
+                    // sh 'dotnet publish -o /VisualGitBuild/linux/ --os linux --self-contained true -p:PublishSingleFile=true -c release  -p:Version=$BUILD_NUMBER'
+                    // sh 'dotnet publish -o /VisualGitBuild/osx-arm64/ -r osx-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=$BUILD_NUMBER'
+                    // sh 'dotnet publish -o /VisualGitBuild/osx-x64/ -r osx-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=$BUILD_NUMBER'
+                     sh 'dotnet publish -o /VisualGitBuild/win-x64/ -r win-x64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=$BUILD_NUMBER'
+                    //sh 'dotnet publish -o /VisualGitBuild/win-arm64/ -r win-arm64  --self-contained true -p:PublishSingleFile=true -c release -p:Version=$BUILD_NUMBER'
 
                     // sh 'copy .\\bin\\Release\\net9.0\\win-x64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\Windowsx64'
                     // sh 'copy .\\bin\\Release\\net9.0\\win-arm64\\publish\\visual.exe D:\\github\\visualgit\\public\\application\\WindowsARM'
@@ -40,25 +49,26 @@ pipeline {
             }
         }
          stage('InnoSetup') {
-            agent {
-                // Use the InnoSetup image for this stage
-                docker {
-                    image 'amake/innosetup:innosetup6-bookworm'
-                    args '-v /VisualGitBuild:/work InnoSetup/InnoSetupx64.iss' // Optional: mount volumes
+               
+                    steps {
+                         dir('/VisualGitBuild') {
+                        sh 'cp /VisualGitBuild/win-x64/visual.exe /VisualGitBuild/InnoSetup/visual.exe'
+                            
+                        sh 'docker run --rm -i -v D:/VisualGitBuild:/work amake/innosetup:innosetup6-bookworm ./InnoSetup/InnoSetupx64.iss'
+                    }
                 }
-            }
         }
         // stage('Create Install Wizard') {
         //     steps {
-        //         bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "D:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
-        //         bat 'iscc /Qp /DMyAppVersion=1.0.%BUILD_NUMBER% /O"D:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "D:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
+        //         bat 'iscc /Qp /DMyAppVersion=1.0.$BUILD_NUMBER /O"D:\\github\\visualgit\\public\\application\\Outputx64" /F"visualgit_setupx64" "D:\\github\\visualgit\\public\\application\\InnoSetupx64.iss"'
+        //         bat 'iscc /Qp /DMyAppVersion=1.0.$BUILD_NUMBER /O"D:\\github\\visualgit\\public\\application\\OutputARM" /F"visualgit_setupARM" "D:\\github\\visualgit\\public\\application\\InnoSetupARM.iss"'
         //     }
         // }
         // stage('Build VisualGit CLI') {
         //     steps {
         //         dir ('D:\\github\\visualgit') {
         //             sh 'npm run test'
-        //             sh 'set BUILD_NUMBER="%BUILD_NUMBER%"& npm run build'
+        //             sh 'set BUILD_NUMBER="$BUILD_NUMBER"& npm run build'
         //         }
         //     }
         // }
